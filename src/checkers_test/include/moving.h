@@ -21,12 +21,11 @@
 #include <control_msgs/GripperCommandAction.h>
 
 
-struct robotState
-{
-	float p[6];		// cart position
-	float j[6];		// joint position
+struct robotState {
+	double p[6];		// cart position
+	double j[6];		// joint position
 	int errorCode[6];
-	float duration;	// duration for motion; needed for actionServer
+	double duration;	// duration for motion; needed for actionServer
 };
 
 
