@@ -30,6 +30,8 @@ int main(int argc, char** argv) {
     requested.j[2] = 119 * deg2rad;
     requested.j[3] = 10 * deg2rad;
 
+    checkers::Matrix<double> matr(3);
+
     while(ros::ok()) {
         sensor_msgs::JointState pub_vel;
         pub_vel.header.stamp = ros::Time::now();

@@ -1,5 +1,5 @@
-#ifndef moving_H
-#define moving_H
+#ifndef MOVING_H
+#define MOVING_H
 
 // #include <termios.h>
 // #include <csignal>
@@ -8,6 +8,9 @@
 #include <cstdlib>
 #include <iostream>
 #include <list>
+#include <vector>
+#include <algorithm>
+#include "matrix.h"
 
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
@@ -29,5 +32,4 @@ struct robotState {
 };
 
 
-
-#endif
+#endif //MOVING_H
