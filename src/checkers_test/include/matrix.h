@@ -9,15 +9,16 @@ using std::vector;
 template<typename T>  // numerical types
 class Matrix {
 public:
-	Matrix(int n, int m): mat(n, vector<T>(m, *(new T()))) {}
+	Matrix(int n, int m): mat(n, vector<T>(m, 0)) {}
 	Matrix(const vector<vector<T> > &h_mat): mat(h_mat) {}
-	Matrix(int n): mat(n, vector<T>(n, *(new T()))) {}
+	Matrix(int n): mat(n, vector<T>(n, 0)) {}
     Matrix(const Matrix<T> &h_mat): mat(h_mat.mat) {}
     Matrix(Matrix<T> &&h_mat): mat(std::move(h_mat.mat)) {};
 	~Matrix() {}
 
 	int GetNumRows() const { return mat.size(); }
 	int GetNumCols() const { if(GetNumRows()) return mat[0].size(); }
+    bool IsSquare() const { return GetNumRows() == GetNumCols(); }
 
 	T det() const;
 
@@ -36,6 +37,8 @@ public:
 private:
 	vector<vector<T> > mat;
 };
+
+
 
 }
 

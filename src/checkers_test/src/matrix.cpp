@@ -1,7 +1,7 @@
 #include "matrix.h"
 
 namespace checkers {
-
+// TODO test this all
 template<typename T>
 Matrix<T> Matrix<T>::operator- () const {
     Matrix<T> ret(*this);
@@ -76,5 +76,28 @@ Matrix<T>& Matrix<T>::operator*= (const Matrix<T> &mat_2) {
     return *this;
 }
 
+template<typename T>
+Matrix<T>& Matrix<T>::MakeEye () {
+    for(int i = 0; i < mat.size(); i++)
+        for(int j = 0; j < mat[0].size(); j++)
+            mat[i][j] = (i == j) ? 1 : 0;             // number format
+    return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::Transpose () {
+    if(this->IsSquare()) {
+        for(int i = 0; i < mat.size()/2; i++)
+            for(int j = 0; j < mat[0].size()/2; j++)
+                mat[i][j] = mat[j][i];
+        return *this;
+    }
+    Matrix<T> ret(this->GetNumCols(), this->GetNumRows());
+    for(int i = 0; i <= mat.size()/2; i++)
+        for(int j = 0; j <= mat[0].size()/2; j++)
+            ret.mat[j][i] = mat[i][j];
+    mat = std::move(ret.mat);
+    return *this;
+}
 
 }
