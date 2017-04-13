@@ -30,10 +30,10 @@ int main(int argc, char** argv) {
     requested.j[2] = 119 * deg2rad;
     requested.j[3] = 10 * deg2rad;
 
-    checkers::Matrix<double> matr(4);
-    // matr.Transpose();
-    // checkers::HTMatrix<double> matr_2(matr);
-    // matr_2.Inverse();
+    checkers::Matrix matr(4);
+    matr.Transpose();
+    checkers::HTMatrix matr_2(matr);
+    matr_2.Inverse();
 
     while(ros::ok()) {
         sensor_msgs::JointState pub_vel;
