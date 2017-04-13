@@ -2,6 +2,7 @@
 #define MATRIX_H
 
 #include <vector>
+#include <utility>
 
 namespace checkers {
 
@@ -20,8 +21,8 @@ public:
 	int GetNumCols() const { if(GetNumRows()) return mat[0].size(); }
     bool IsSquare() const { return GetNumRows() == GetNumCols(); }
 
-	T det() const;
-
+	// T det() const;
+    int WTF();
     Matrix<T> operator- () const;
 	Matrix<T> operator+ (const Matrix<T> &mat_2) const;
 	Matrix<T> operator- (const Matrix<T> &mat_2) const;
@@ -29,15 +30,32 @@ public:
 	Matrix<T>& operator+= (const Matrix<T> &mat_2);
 	Matrix<T>& operator-= (const Matrix<T> &mat_2);
     Matrix<T>& operator*= (const Matrix<T> &mat_2);
+    vector<T>& operator[] (int x);
+    vector<T> operator[] (int x) const;
     Matrix<T>& MakeEye();
     Matrix<T>& Transpose();
     Matrix<T> GetTranspose() const;
-
 
 private:
 	vector<vector<T> > mat;
 };
 
+template<typename T>
+class HTMatrix: public Matrix<T> {
+public: // more checks needed
+	HTMatrix(const vector<vector<double> > &h_mat): Matrix<T>(h_mat) {
+		if(h_mat.size() != 4 || h_mat[0].size() != 4) throw;  			// no catching
+	}
+    HTMatrix(const Matrix<T> &h_mat): Matrix<T>(h_mat) {
+		if(h_mat.GetNumCols() != 4 || h_mat.GetNumRows() != 4) throw;	// no catching more
+    }
+
+	HTMatrix<T>& Inverse();
+	HTMatrix<T> GetInverse() const;
+    Matrix<T> GetRot() const;
+    vector<T> GetPosVec() const;
+    Matrix<T> GetPosMat() const;
+};
 
 
 }

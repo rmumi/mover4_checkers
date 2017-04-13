@@ -204,5 +204,5 @@ include_directories(
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_executable(checkers_test src/moving.cpp src/matrix.cpp)
+add_executable(checkers_test src/matrix.cpp src/moving.cpp)
 target_link_libraries(checkers_test ${catkin_LIBRARIES})

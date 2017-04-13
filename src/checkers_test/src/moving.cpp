@@ -13,7 +13,7 @@ void joint_states_callback(const sensor_msgs::JointState &msg) {
 }
 
 int main(int argc, char** argv) {
-    
+
     ros::init(argc, argv, "moving");
 
     ros::NodeHandle n;
@@ -30,7 +30,10 @@ int main(int argc, char** argv) {
     requested.j[2] = 119 * deg2rad;
     requested.j[3] = 10 * deg2rad;
 
-    checkers::Matrix<double> matr(3);
+    checkers::Matrix<double> matr(4);
+    // matr.Transpose();
+    // checkers::HTMatrix<double> matr_2(matr);
+    // matr_2.Inverse();
 
     while(ros::ok()) {
         sensor_msgs::JointState pub_vel;
