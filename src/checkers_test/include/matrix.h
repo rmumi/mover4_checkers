@@ -4,7 +4,7 @@
 #include <vector>
 #include <utility>
 
-namespace checkers {
+namespace ch {
 
 using std::vector;
 

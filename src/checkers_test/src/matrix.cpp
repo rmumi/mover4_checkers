@@ -1,6 +1,6 @@
 #include "matrix.h"
 
-namespace checkers {
+namespace ch {
 // TODO test this all
 Matrix Matrix::operator- () const {
     Matrix ret(*this);

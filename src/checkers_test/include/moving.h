@@ -23,6 +23,7 @@
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <control_msgs/GripperCommandAction.h>
 
+using namespace ch;
 
 struct robotState {
 	double p[6];		// cart position
@@ -30,6 +31,34 @@ struct robotState {
 	int errorCode[6];
 	double duration;	// duration for motion; needed for actionServer
 };
+
+const static double PI = 3.14159265359;
+const static double deg2rad = PI / 180.0;
+const static double rad2deg = 180.0 / PI;
+const static double EPS = 1e-6;
+
+// kinematic length of the Mover4 robot arm in mm
+const static double lz0 = 130.0;	// base
+const static double lz1 = 62.5;		// first joint
+const static double lz2 = 190.0;	// upper arm
+const static double lz3 = 220.0;	// lower arm
+const static double lz4 = 48.0;		// hand
+
+const static double EpsilonCenter = 5.0;
+
+const static double a0 = 206;
+const static double a1 = 190;
+const static double a2 = 220;
+const static double a3 = 45 + 95;  // TODO a bit skewed, but OK for now
+
+
+Matrix DH_par ({  // theta d alpha a
+{0.0, a0, -PI/2, 0},
+{-PI/2, 0, 0, a1},
+{0.0, 0, 0, a2},
+{0.0, 0, 0, a3},
+});
+
 
 
 #endif //MOVING_H
