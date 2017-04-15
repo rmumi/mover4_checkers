@@ -10,11 +10,11 @@ void joint_states_callback(const sensor_msgs::JointState &msg) {
 }
 
 robotState fkine(const robotState &rb) {
-    
-}
 
-robotState InvKine(const robotState &rb, int way) {  // way = {0 - ellbow-up, 1 - ellbow-down, 2 - turned ellbow-up, 3 - turned ellbow-down}
-    double phi = rb.p[5];
+}
+// TODO check if the position is reachable
+robotState InvKine(const robotState &rb, int way=0) {  // way = {0 - ellbow-up, 1 - ellbow-down, 2 - turned ellbow-up, 3 - turned ellbow-down}
+    double phi = rb.p[3];
     double xr = rb.p[0], yr = rb.p[1], zr = rb.p[2];
     double xm = zr - a0;
     double ym = ((way&2)?-1:1) * sqrt(xr*xr + yr*yr);
@@ -50,10 +50,16 @@ int main(int argc, char** argv) {
     ros::Rate loop_rate(20);
 
     robotState requested;
-    requested.j[0] = 48 * deg2rad;
-    requested.j[1] = 33 * deg2rad;
-    requested.j[2] = 119 * deg2rad;
-    requested.j[3] = 10 * deg2rad;
+    // requested.j[0] = 48 * deg2rad;
+    // requested.j[1] = 33 * deg2rad;
+    // requested.j[2] = 119 * deg2rad;
+    // requested.j[3] = 10 * deg2rad;
+    requested.p[0] = 200;
+    requested.p[1] = 200;
+    requested.p[2] = 100;
+    requested.p[3] = PI;
+    requested = InvKine(requested, 0);
+    std::cout << "Uglovi:" << requested.j[0] << requested.j[1] << requested.j[2] << requested.j[3] << std::endl;
 
     Matrix matr(4);
     matr.Transpose();
@@ -62,6 +68,8 @@ int main(int argc, char** argv) {
 
     while(ros::ok()) {
         sensor_msgs::JointState pub_vel;
+        std::cout << "Uglovi:\t" << requested.j[0] * rad2deg << "\t" << requested.j[1] * rad2deg << "\t" << requested.j[2] * rad2deg<< "\t" << requested.j[3]* rad2deg << std::endl;
+        std::cout << "Trenut:\t" << robot_current.j[0] * rad2deg << "\t" << robot_current.j[1] * rad2deg << "\t" << robot_current.j[2] * rad2deg<< "\t" << robot_current.j[3] * rad2deg<< std::endl;
         pub_vel.header.stamp = ros::Time::now();
         pub_vel.velocity.resize(4);
         pub_vel.name.resize(4);
