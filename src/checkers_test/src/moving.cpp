@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
     // requested.j[3] = 10 * deg2rad;
     requested.p[0] = 200;
     requested.p[1] = 200;
-    requested.p[2] = 100;
+    requested.p[2] = 200;
     requested.p[3] = PI;
     requested = InvKine(requested, 0);
     std::cout << "Uglovi:" << requested.j[0] << requested.j[1] << requested.j[2] << requested.j[3] << std::endl;
