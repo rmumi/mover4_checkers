@@ -35,6 +35,12 @@ class Board:
                 print "{}\t".format(print_pieces[self.arr[i*8+j]]),
             print ""
 
+    def __str__(self):
+        s = ""
+        for x in self.arr:
+            s += print_pieces[x]
+        return s
+
 
 def nothing(x):
     pass
@@ -64,10 +70,11 @@ def find_pieces(img):  # must be square image
     stop_y = int(670./700*sz)
     move_x = int(77.5/700*sz)
     move_y = int(77.5/700*sz)
-    half_len = int(17./700*sz)
+    half_len = int(15./700*sz)
     move_mid = int(10./700*sz)
     aku_limit = 128
-    var_limit = 600
+    var_limit_w = 900
+    var_limit_b = 700
     new_board = Board()
     count = 0
 
@@ -82,12 +89,12 @@ def find_pieces(img):  # must be square image
             print var
 
             if aku > aku_limit:
-                if var < var_limit:
+                if var < var_limit_w:
                     new_board.arr[count] = pieces['white_b']
                 else:
                     new_board.arr[count] = pieces['white_m']
             else:
-                if var < var_limit:
+                if var < var_limit_b:
                     new_board.arr[count] = pieces['black_b']
                 else:
                     new_board.arr[count] = pieces['black_m']
@@ -109,7 +116,7 @@ def find_pieces(img):  # must be square image
 def main():
     # load the games image
     e1 = cv2.getTickCount()
-    image = cv2.imread("/home/rijad/Pictures/Webcam/image6.jpg")
+    image = cv2.imread("/home/rijad/Pictures/Webcam/image13.jpg")
     # img = cv2.medianBlur(image, 5)
     # img = cv2.bilateralFilter(image, 9, 75, 75)
     image = cv2.resize(image, None, fx=0.7, fy=0.7, interpolation=cv2.INTER_CUBIC)
@@ -189,7 +196,9 @@ def main():
     cv2.imshow('Final', final)
     final = cv2.bilateralFilter(final, 7, 75, 75)
 
-    find_pieces(final).print_board()
+    p = find_pieces(final)
+    p.print_board()
+    print p
 
 
     warp = cv2.cvtColor(zwarp, cv2.COLOR_BGR2GRAY)
