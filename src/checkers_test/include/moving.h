@@ -27,10 +27,12 @@ using namespace ch;
 
 struct robotState {
 	double p[6];		// cart position
-	double j[6];		// joint position
-	int errorCode[6];
-	double duration;	// duration for motion; needed for actionServer
+	double j[4];		// joint position
+	// int errorCode[6];
+	// double duration;	// duration for motion; needed for actionServer
 };
+
+const static int update_f = 20;
 
 const static double PI = 3.14159265359;
 const static double deg2rad = PI / 180.0;
@@ -51,14 +53,17 @@ const static double a1 = 190;
 const static double a2 = 220;
 const static double a3 = 45 + 95;  // TODO a bit skewed, but OK for now
 
-
-Matrix DH_par ({  // theta d alpha a
+static Matrix DH_par ({  // theta d alpha a
 {0.0, a0, -PI/2, 0},
 {-PI/2, 0, 0, a1},
 {0.0, 0, 0, a2},
 {0.0, 0, 0, a3},
 });
 
+robotState InvKine(const robotState&, int);
 
+robotState ForKine(const robotState&);
+
+using std::vector;
 
 #endif //MOVING_H
