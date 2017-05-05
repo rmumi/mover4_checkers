@@ -50,7 +50,9 @@ public:
             for(int j = 0; j < 7; j++, pt *= t)
                 ret[i] += coef[i][j] * pt;  // get trajectory angle
             // make angle to velocity
+            printf("Ugao #%d razlika: curr: %lf new: %lf diff: %lf%%\n", i, robot_current.j[i], ret[i], (ret[i] - robot_current.j[i])/robot_current.j[i] * 100);
             ret[i] = alpha * (ret[i] - robot_current.j[i]) / (1./update_f);
+
         }
         return ret;
     }
