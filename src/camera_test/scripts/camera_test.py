@@ -114,6 +114,14 @@ def find_pieces(img):  # must be square image
 
 
 def main():
+    #
+    # cam = cv2.VideoCapture(0)
+    #
+    # ret, frame = cam.read()
+    # cv2.imshow('frame', frame)
+    #
+    # cam.release()
+
     # load the games image
     e1 = cv2.getTickCount()
     image = cv2.imread("/home/rijad/Pictures/Webcam/image13.jpg")

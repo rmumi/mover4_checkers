@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package>
+  <name>checkers_main</name>
+  <version>1.0.0</version>
+  <description>Allows to operate the CPR Mover robots to play checkers with webcam</description>
+
+  <maintainer email="rijad95@gmail.com">Rijad Muminovic</maintainer>
+
+  <license>BSD</license>
+
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>class_loader</build_depend>
+  <build_depend>message_filters</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <run_depend>class_loader</run_depend>
+  <run_depend>message_filters</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+
+</package>
