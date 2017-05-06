@@ -6,6 +6,8 @@ from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from std_msgs.msg import Float64MultiArray
 from cv_bridge import CvBridge, CvBridgeError
+from math import sqrt
+import numpy as np
 
 import PySide
 import cv2
@@ -16,7 +18,7 @@ import platform
 
 from ui_main import Ui_MainWindow
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 class GUI(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -24,13 +26,15 @@ class GUI(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         # All buttons
-        self.startButton.clicked.connect(self.startButton_callback)
+        self.startWhiteButton.clicked.connect(self.startWhiteButton_callback)
+        self.startBlackButton.clicked.connect(self.startBlackButton_callback)
         self.stopButton.clicked.connect(self.stopButton_callback)
         self.connectButton.clicked.connect(self.connectButton_callback)
         self.resetButton.clicked.connect(self.resetButton_callback)
         self.enableMotorsButton.clicked.connect(self.enableMotorsButton_callback)
         self.disableMotorsButton.clicked.connect(self.disableMotorsButton_callback)
-        self.initButton.clicked.connect(self.initButton_callback)
+        self.initWhiteButton.clicked.connect(self.initWhiteButton_callback)
+        self.initBlackButton.clicked.connect(self.initBlackButton_callback)
 
         # All subscriptions
         self.camera_sig_sub = rospy.Subscriber('/checkers/camera_sig', String, self.camera_sig_sub_callback, queue_size=50)
@@ -50,6 +54,23 @@ class GUI(QMainWindow, Ui_MainWindow):
         self.count = 0
         self.moving = 0
 
+        # Physical board description
+        self.board_h = 20.
+        self.board_w = 195.
+        self.board_x_dr = 250.
+        self.board_y_dr = 250.
+        self.board_x_ul = 250.+195.
+        self.board_y_ul = 250.-195.
+        self.board_v_x = (1 / 14. * (+(self.board_x_ul - self.board_x_dr) - (self.board_y_ul - self.board_y_dr)),
+                          1 / 14. * (+(self.board_x_ul - self.board_x_dr) + (self.board_y_ul - self.board_y_dr)))
+        self.board_v_y = (1 / 14. * (+(self.board_x_ul - self.board_x_dr) + (self.board_y_ul - self.board_y_dr)),
+                          1 / 14. * (-(self.board_x_ul - self.board_x_dr) + (self.board_y_ul - self.board_y_dr)))
+        self.board_xy = [(self.board_x_dr + x * self.board_v_x[0] + y * self.board_v_y[0],
+                          self.board_y_dr + x * self.board_v_x[1] + y * self.board_v_y[1])
+                         for y, x in np.ndindex((8, 8))]
+        print self.board_xy
+
+
 
 
         frame = self.imageGraphics
@@ -60,10 +81,21 @@ class GUI(QMainWindow, Ui_MainWindow):
                                              transformMode=Qt.SmoothTransformation)  # To scale image for example and keep its Aspect Ration
         label_Image.setPixmap(QPixmap.fromImage(image_profile))
 
-    def initButton_callback(self):
+
+    def initWhiteButton_callback(self):
+        self.ai_sig_pub.publish("AI_INIT_WHITE")
         pass
 
-    def startButton_callback(self):
+    def initBlackButton_callback(self):
+        self.ai_sig_pub.publish("AI_INIT_BLACK")
+        pass
+
+    def startWhiteButton_callback(self):
+        self.ai_sig_pub.publish("AI_GO_WHITE")
+        pass
+
+    def startBlackButton_callback(self):
+        self.ai_sig_pub.publish("AI_GO_BLACK")
         pass
 
     def stopButton_callback(self):

@@ -18,41 +18,41 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>40</y>
+      <y>10</y>
       <width>91</width>
-      <height>198</height>
+      <height>261</height>
      </rect>
     </property>
     <layout class="QFormLayout" name="formLayout">
-     <item row="2" column="0">
+     <item row="3" column="0">
       <widget class="QPushButton" name="stopButton">
        <property name="text">
         <string>Stop</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
+     <item row="4" column="0">
       <widget class="QPushButton" name="connectButton">
        <property name="text">
         <string>Connect</string>
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
+     <item row="5" column="0">
       <widget class="QPushButton" name="resetButton">
        <property name="text">
         <string>Reset</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="0">
+     <item row="6" column="0">
       <widget class="QPushButton" name="enableMotorsButton">
        <property name="text">
-        <string>Motors Enb</string>
+        <string>Motors En</string>
        </property>
       </widget>
      </item>
-     <item row="6" column="0">
+     <item row="7" column="0">
       <widget class="QPushButton" name="disableMotorsButton">
        <property name="text">
         <string>Motors Dis</string>
@@ -60,16 +60,30 @@
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QPushButton" name="startButton">
+      <widget class="QPushButton" name="startWhiteButton">
        <property name="text">
-        <string>Start</string>
+        <string>Play White</string>
        </property>
       </widget>
      </item>
-     <item row="7" column="0">
-      <widget class="QPushButton" name="initButton">
+     <item row="8" column="0">
+      <widget class="QPushButton" name="initWhiteButton">
        <property name="text">
-        <string>Init</string>
+        <string>InitWhite</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="0">
+      <widget class="QPushButton" name="initBlackButton">
+       <property name="text">
+        <string>InitBlack</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QPushButton" name="startBlackButton">
+       <property name="text">
+        <string>Play Black</string>
        </property>
       </widget>
      </item>

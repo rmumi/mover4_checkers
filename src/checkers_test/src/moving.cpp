@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
     ros::spinOnce(); // get init angles
 
     robotState requested, req_inter;
-    requested.p[0] = 170;
+    requested.p[0] = 0;
     requested.p[1] = 160;
     requested.p[2] = 20;
     requested.p[3] = PI;
