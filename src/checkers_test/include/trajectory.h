@@ -13,6 +13,7 @@ public:
     Trajectory6(robotState a, robotState b, robotState v, double tf);
     vector<double> GetVel(const robotState &robot_current, int tick=-1);
     bool IsFinished() const;
+    void Finish();
 private:
     Trajectory6();
     vector<vector<double> > coef;
@@ -26,6 +27,7 @@ public:
     Trajectory5(robotState a, robotState b, double tf);
     vector<double> GetVel(const robotState &robot_current, int tick=-1);
     bool IsFinished() const;
+    void Finish();
 private:
     Trajectory5();
     vector<vector<double> > coef;
@@ -33,10 +35,6 @@ private:
     double duration;
     bool finished;
 };
-
-// class Trajectory3 {
-//
-// };
 
 }
 #endif // TRAJECTORY_H

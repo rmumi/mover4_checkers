@@ -20,6 +20,7 @@ from ui_main import Ui_MainWindow
 
 __version__ = '0.0.2'
 
+
 class GUI(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(GUI, self).__init__(parent)
@@ -59,8 +60,8 @@ class GUI(QMainWindow, Ui_MainWindow):
         self.board_w = 195.
         self.board_x_dr = 250.
         self.board_y_dr = 250.
-        self.board_x_ul = 250.+195.
-        self.board_y_ul = 250.-195.
+        self.board_x_ul = 250. + 195.
+        self.board_y_ul = 250. - 195.
         self.board_v_x = (1 / 14. * (+(self.board_x_ul - self.board_x_dr) - (self.board_y_ul - self.board_y_dr)),
                           1 / 14. * (+(self.board_x_ul - self.board_x_dr) + (self.board_y_ul - self.board_y_dr)))
         self.board_v_y = (1 / 14. * (+(self.board_x_ul - self.board_x_dr) + (self.board_y_ul - self.board_y_dr)),

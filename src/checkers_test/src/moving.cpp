@@ -3,6 +3,10 @@
 
 robotState robot_current;
 
+deque<RobotAction> actions;
+Trajectory5 current_trajectory(robot_current, robot_current, 1);
+ros::Publisher cpr_commands_pub, robot_state_msg_pub, robot_sig_pub;
+
 void joint_states_callback(const sensor_msgs::JointState &msg) {
      for(int i = 0; i < 4; i++) {
          robot_current.j[i] = msg.position[i];
@@ -11,12 +15,60 @@ void joint_states_callback(const sensor_msgs::JointState &msg) {
     //  std::cout << std::endl;
 }
 
+void robot_sig_callback(const std_msgs::String &a) {
+    if(a.data == "ROBOT_STOP") {
+        current_trajectory.Finish();
+        actions.clear();
+    }
+}
+
+void robot_point_msg_callback(const std_msgs::Float64MultiArray &msg) {
+    robotState a;
+    for(int i = 0; i < 4; i++) {
+        a.p[i] = msg.data[i];
+    }
+    int flags = static_cast<int>(msg.data[4] + 0.01);
+    int orient = static_cast<int>(msg.data[5] + 0.01);
+    double wait = msg.data[6];
+    a = InvKine(a, orient);
+    actions.emplace_back(flags, a, orient, wait);
+    return;
+}
+
+void NextTrajectory() {
+    if(!actions.size()) return;
+    if(actions.front().gripper_open) {
+        std_msgs::String _z;
+        _z.data = std::string("GripperOpen");
+        cpr_commands_pub.publish(_z);
+        actions.pop_front();
+    } else if(actions.front().gripper_close) {
+        std_msgs::String _z;
+        _z.data = std::string("GripperClose");
+        cpr_commands_pub.publish(_z);
+        actions.pop_front();
+    } else if(actions.front().waiting && actions.front().wait > 1) {
+        actions.front().wait--;
+    } else if(actions.front().waiting && actions.front().wait <= 1) {
+        actions.pop_front();
+    } else if(actions.front().to_point) {
+        current_trajectory = Trajectory5(robot_current,
+            actions.front()._q, actions.front().wait/update_f);
+        actions.pop_front();
+    } else if(actions.front().mid_point) {
+        // TODO mid point trajectory6
+    } else {
+        std::cout << "FAILED ACTION";
+        actions.pop_front();
+    }
+}
+
 robotState ForKine(const robotState &rb) {
 
 }
 
 // TODO check if the position is reachable
-robotState InvKine(const robotState &rb, int way=0) {  // way = {0 - ellbow-up, 1 - ellbow-down, 2 - turned ellbow-up, 3 - turned ellbow-down}
+robotState InvKine(const robotState &rb, int way=0) {  // way = {0 - ellbow-up, 1 - ellbow-down, 2 - turned ellbow-down, 3 - turned ellbow-up}
     double phi = rb.p[3];
     double xr = rb.p[0], yr = rb.p[1], zr = rb.p[2];
     double xm = zr - a0;
@@ -46,18 +98,29 @@ int main(int argc, char** argv) {
 
     ros::NodeHandle n;
 
-    ros::Subscriber sub = n.subscribe("joint_states", 10, joint_states_callback);
+    // cpr_mover communication
+    ros::Subscriber cpr_joint_states_sub = n.subscribe("/joint_states", 10, joint_states_callback);
+    ros::Publisher cpr_vel_pub = n.advertise<sensor_msgs::JointState>("/CPRMoverJointVel", 10);
+    cpr_commands_pub = n.advertise<std_msgs::String>("/CPRMoverCommands", 10);
 
-    ros::Publisher pub = n.advertise<sensor_msgs::JointState>("CPRMoverJointVel", 20);
+    // checkers communication
+    ros::Subscriber point_msg_sub = n.subscribe("/checkers/robot_point_msg", 50, robot_point_msg_callback);
+    ros::Subscriber robot_sig_sub = n.subscribe("/checkers/robot_sig", 50, robot_sig_callback);
+    robot_state_msg_pub = n.advertise<std_msgs::Float64MultiArray>("/checkers/robot_state_msg", 50);
+    robot_sig_pub = n.advertise<std_msgs::String>("/checkers/robot_sig", 50);
 
     ros::Rate loop_rate(update_f);
 
     int looped = 0;
     while(ros::ok && looped < 20) {
-        ros::spinOnce(); // get init angles
+        ros::spinOnce();  // get init angles
         looped++;
         loop_rate.sleep();
     }
+
+    // init no movement
+    actions.clear();
+    current_trajectory.Finish();
 
     robotState requested, req_inter;
     requested.p[0] = 180;
@@ -78,9 +141,10 @@ int main(int argc, char** argv) {
     for(int i = 0; i < 4; i++)
         printf("%lf\t", robot_current.j[i]);
     printf("\n");
-
-    Trajectory6 z(robot_current, requested, req_inter, 7);
-    // Trajectory5 z(robot_current, requested, 10);
+    actions.emplace_back(4, req_inter, 0, 5);
+    actions.emplace_back(1, req_inter, 0, 5);
+    // Trajectory6 z(robot_current, requested, req_inter, 7);
+    current_trajectory = Trajectory5(robot_current, requested, 20);
     // Matrix matr(4);
     // matr.Transpose();
     // HTMatrix matr_2(matr);
@@ -101,13 +165,11 @@ int main(int argc, char** argv) {
         pub_vel.header.stamp = ros::Time::now();
         pub_vel.velocity.resize(4);
         pub_vel.name.resize(4);
-        auto l = z.GetVel(robot_current);
+        if(current_trajectory.IsFinished()) NextTrajectory();
+        auto l = current_trajectory.GetVel(robot_current);
         for(int i = 0; i < 4; i++) pub_vel.velocity[i] = l[i];
-        // for(int i = 0; i < 4; i++) {
-        //     pub_vel.velocity[i] = std::min(180 * (requested.j[i] - robot_current.j[i]), 95.0);
-        //     pub_vel.name[i] = (std::string("Joint") + std::to_string(i+1)).c_str();
-        // }
-        pub.publish(pub_vel);
+        cpr_vel_pub.publish(pub_vel);
+
 
         loop_rate.sleep();
     }

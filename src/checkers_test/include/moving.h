@@ -9,6 +9,7 @@
 #include <iostream>
 #include <list>
 #include <vector>
+#include <deque>
 #include <algorithm>
 #include "matrix.h"
 
@@ -17,6 +18,7 @@
 #include <geometry_msgs/Pose.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/String.h>
+#include <std_msgs/Float64MultiArray.h>
 
 #include <actionlib/server/simple_action_server.h>
 
@@ -65,5 +67,24 @@ robotState InvKine(const robotState&, int);
 robotState ForKine(const robotState&);
 
 using std::vector;
+using std::deque;
+
+namespace ch {
+class RobotAction {
+public:
+    RobotAction(int flags, const robotState &q_joints, int orient=0, double wait=0.) {
+        _q = q_joints;
+        gripper_open = flags&1;
+        gripper_close = flags&2;
+        to_point = flags&4;
+        mid_point = flags&8;
+        waiting = flags&16;
+        this->wait = wait*update_f;
+    }
+    bool gripper_open, gripper_close, to_point, mid_point, waiting;
+    int wait;
+    robotState _q;
+};
+}
 
 #endif //MOVING_H

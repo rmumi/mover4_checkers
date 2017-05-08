@@ -36,7 +36,7 @@ vector<double> Trajectory6::GetVel(const robotState &robot_current, int tick) {
         std::cout << "This shouldn't happen twice" << std::endl;
         finished = 1;
     }
-    double alpha = 200;
+    double alpha = 100;
     for(int i = 0; i < 4; i++, pt = 1) {
         ret[i] = 0;
         for(int j = 0; j < 7; j++, pt *= t)
@@ -53,7 +53,9 @@ bool Trajectory6::IsFinished() const {
     return finished;
 }
 
-
+void Trajectory6::Finish() {
+    finished = 1;
+}
 
 // begin - a, end - b, duration in seconds - tf
 Trajectory5::Trajectory5(robotState a, robotState b, double tf) {
@@ -96,7 +98,7 @@ vector<double> Trajectory5::GetVel(const robotState &robot_current, int tick) {
         std::cout << "This shouldn't happen twice" << std::endl;
         finished = 1;
     }
-    double alpha = 200;
+    double alpha = 100;
     for(int i = 0; i < 4; i++, pt = 1) {
         ret[i] = 0;
         for(int j = 0; j < 6; j++, pt *= t)
@@ -114,7 +116,9 @@ bool Trajectory5::IsFinished() const {
     return finished;
 }
 
-
+void Trajectory5::Finish() {
+    finished = 1;
+}
 
 
 }

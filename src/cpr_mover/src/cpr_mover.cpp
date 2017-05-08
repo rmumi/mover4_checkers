@@ -92,7 +92,7 @@ void printTargetPointList(){
 // Processing and JointTrajectoryAction
 void executeTrajectory(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, TrajectoryServer* as)
 {
-  double pos = 3.0; 
+  double pos = 3.0;
   double rad2deg = 180.0 / 3.141;
   robotState rs;
   float lastDuration = 0.0;
@@ -158,17 +158,17 @@ int main(int argc, char** argv)
 
 	// Start the robot
 	cpr_robots::cpr_mover robot;
-	robot.init();	
-	robot.mainLoop();		//spinning is done inside the main loop			
+	robot.init();
+	robot.mainLoop();		//spinning is done inside the main loop
 
-  	signal(SIGINT,quit);	
+  	signal(SIGINT,quit);
 	return(0);
 }
 
 
 
 namespace cpr_robots{
-	
+
 
 	//*************************************************************************************
 	cpr_mover::cpr_mover(){
@@ -280,7 +280,7 @@ namespace cpr_robots{
 
 		ovrPercent = 50.0;
 		cycleTime = 50.0;
-		
+
 
 		// Publish the current joint states
 		pubJoints = n.advertise<sensor_msgs::JointState>("/joint_states", 1);
@@ -301,7 +301,7 @@ namespace cpr_robots{
 	void cpr_mover::mainLoop()
 	{
   		ROS_INFO("Starting Mover Main Loop");
-  		
+
  	 	for(;;)
   		{
 			MotionGeneration();			// Generate the joint motion and actuate the gripper
@@ -313,7 +313,7 @@ namespace cpr_robots{
 
 			ros::spinOnce();
 			ros::Duration(cycleTime/1000.0).sleep();		// main loop with 20 Hz.
-						
+
   		}
 		ROS_INFO("Closing Mover Main Loop");
 
@@ -325,7 +325,7 @@ namespace cpr_robots{
 	// the commands are forwarded to the interface class
 	void cpr_mover::commandsCallback(const std_msgs::String::ConstPtr& msg){
 
-		ROS_INFO("CMD: %s ", msg->data.c_str());  // This was commented 
+		ROS_INFO("CMD: %s ", msg->data.c_str());  // This was commented
 		std::string rec = msg->data;
 
 		if( rec == "Connect"){
@@ -384,7 +384,7 @@ namespace cpr_robots{
 
 	//*****************************************************************
 	// Joint interplation from current to target position
-	// currently all joints move with max velocity, will be changed 
+	// currently all joints move with max velocity, will be changed
 	// targetState: the position the robot is aproaching
 	// setPointState: the setPointPosition on the way to targetState
 	// currentPosition: the real hardware position, probably with a small delay to setPointState
@@ -513,7 +513,7 @@ namespace cpr_robots{
 		}else{	//Mover6, two more joints
 			msgJointsCurrent.position[4] = deg2rad * setPointState.j[4];
 			msgJointsCurrent.position[5] = deg2rad * setPointState.j[5];
-			msgJointsCurrent.position[6] = gripperJointStatus;					
+			msgJointsCurrent.position[6] = gripperJointStatus;
 			msgJointsCurrent.position[7] = gripperJointStatus;
 		}
 		pubJoints.publish(msgJointsCurrent);								// ROS communication works in Radian
@@ -532,7 +532,3 @@ namespace cpr_robots{
 
 
 }
-
-
-
-
