@@ -6,9 +6,9 @@ robotState robot_current;
 void joint_states_callback(const sensor_msgs::JointState &msg) {
      for(int i = 0; i < 4; i++) {
          robot_current.j[i] = msg.position[i];
-         std::cout << msg.position[i] << "\t";
+        //  std::cout << msg.position[i] << "\t";
      }
-     std::cout << std::endl;
+    //  std::cout << std::endl;
 }
 
 robotState ForKine(const robotState &rb) {
@@ -52,36 +52,52 @@ int main(int argc, char** argv) {
 
     ros::Rate loop_rate(update_f);
 
-    ros::spinOnce(); // get init angles
+    int looped = 0;
+    while(ros::ok && looped < 20) {
+        ros::spinOnce(); // get init angles
+        looped++;
+        loop_rate.sleep();
+    }
 
     robotState requested, req_inter;
-    requested.p[0] = 0;
-    requested.p[1] = 160;
-    requested.p[2] = 20;
+    requested.p[0] = 180;
+    requested.p[1] = 180;
+    requested.p[2] = 200;
     requested.p[3] = PI;
 
     req_inter.p[0] = 170;
     req_inter.p[1] = 160;
-    req_inter.p[2] = 200;
+    req_inter.p[2] = 250;
     req_inter.p[3] = PI;
 
     requested = InvKine(requested, 0);
+    req_inter = InvKine(req_inter, 0);
     std::cout << "Uglovi:" << requested.j[0] << requested.j[1] << requested.j[2] << requested.j[3] << std::endl;
 
-    Trajectory z(robot_current, requested, req_inter, 7);
+    printf("Trn:\t");
+    for(int i = 0; i < 4; i++)
+        printf("%lf\t", robot_current.j[i]);
+    printf("\n");
 
+    Trajectory6 z(robot_current, requested, req_inter, 7);
+    // Trajectory5 z(robot_current, requested, 10);
     // Matrix matr(4);
     // matr.Transpose();
     // HTMatrix matr_2(matr);
     // matr_2.Inverse();
+
+    printf("Req:\t");
+    for(int i = 0; i < 4; i++)
+        printf("%lf\t", requested.j[i]);
+    printf("\n");
 
     while(ros::ok()) {
 
         ros::spinOnce();  // process callbacks, so it's not late
 
         sensor_msgs::JointState pub_vel;
-        std::cout << "Uglovi:\t" << requested.j[0] * rad2deg << "\t" << requested.j[1] * rad2deg << "\t" << requested.j[2] * rad2deg<< "\t" << requested.j[3]* rad2deg << std::endl;
-        std::cout << "Trenut:\t" << robot_current.j[0] * rad2deg << "\t" << robot_current.j[1] * rad2deg << "\t" << robot_current.j[2] * rad2deg<< "\t" << robot_current.j[3] * rad2deg<< std::endl;
+        // std::cout << "Uglovi:\t" << requested.j[0] * rad2deg << "\t" << requested.j[1] * rad2deg << "\t" << requested.j[2] * rad2deg<< "\t" << requested.j[3]* rad2deg << std::endl;
+        // std::cout << "Trenut:\t" << robot_current.j[0] * rad2deg << "\t" << robot_current.j[1] * rad2deg << "\t" << robot_current.j[2] * rad2deg<< "\t" << robot_current.j[3] * rad2deg<< std::endl;
         pub_vel.header.stamp = ros::Time::now();
         pub_vel.velocity.resize(4);
         pub_vel.name.resize(4);
