@@ -124,13 +124,13 @@ int main(int argc, char** argv) {
 
     robotState requested, req_inter;
     requested.p[0] = 180;
-    requested.p[1] = 180;
+    requested.p[1] = -180;
     requested.p[2] = 200;
     requested.p[3] = PI;
 
-    req_inter.p[0] = 170;
-    req_inter.p[1] = 160;
-    req_inter.p[2] = 250;
+    req_inter.p[0] = 180;
+    req_inter.p[1] = -160;
+    req_inter.p[2] = 50;
     req_inter.p[3] = PI;
 
     requested = InvKine(requested, 0);
@@ -141,10 +141,12 @@ int main(int argc, char** argv) {
     for(int i = 0; i < 4; i++)
         printf("%lf\t", robot_current.j[i]);
     printf("\n");
-    actions.emplace_back(4, req_inter, 0, 5);
-    actions.emplace_back(1, req_inter, 0, 5);
+    actions.emplace_back(2, req_inter, 0, 0);
+    actions.emplace_back(16, req_inter, 0, 3);
+    actions.emplace_back(4, req_inter, 0, 7);
+    actions.emplace_back(1, req_inter, 0, 0);
     // Trajectory6 z(robot_current, requested, req_inter, 7);
-    current_trajectory = Trajectory5(robot_current, requested, 20);
+    current_trajectory = Trajectory5(robot_current, requested, 15);
     // Matrix matr(4);
     // matr.Transpose();
     // HTMatrix matr_2(matr);

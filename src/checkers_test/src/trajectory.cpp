@@ -36,7 +36,7 @@ vector<double> Trajectory6::GetVel(const robotState &robot_current, int tick) {
         std::cout << "This shouldn't happen twice" << std::endl;
         finished = 1;
     }
-    double alpha = 100;
+    double alpha = 200;
     for(int i = 0; i < 4; i++, pt = 1) {
         ret[i] = 0;
         for(int j = 0; j < 7; j++, pt *= t)
@@ -98,7 +98,7 @@ vector<double> Trajectory5::GetVel(const robotState &robot_current, int tick) {
         std::cout << "This shouldn't happen twice" << std::endl;
         finished = 1;
     }
-    double alpha = 100;
+    double alpha = 200;
     for(int i = 0; i < 4; i++, pt = 1) {
         ret[i] = 0;
         for(int j = 0; j < 6; j++, pt *= t)

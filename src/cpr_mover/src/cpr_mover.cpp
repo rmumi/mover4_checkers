@@ -72,7 +72,7 @@ double gripperJointMax = 35.0 * PI / 180.0;	// Opening width
 
 double deg2rad = PI / 180.0;
 double rad2deg = 180.0 / PI;
-
+int count_br = 0;
 
 //**************************************************************
 // print the points in the target list
@@ -492,6 +492,13 @@ namespace cpr_robots{
 
 		for(int i=0; i<nrOfJoints; i++){
 			itf.SetJoints( setPointState.j );
+		}
+
+		float ju[6];
+		if(count_br++ % 32 == 0) {
+			itf.GetJoints( ju );
+			// for(int i = 0; i < 4; i++) setPointState.j[i] = ju[i];
+			// itf.GetPID();
 		}
 	}
 
