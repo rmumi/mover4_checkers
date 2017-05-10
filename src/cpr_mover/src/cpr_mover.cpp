@@ -75,62 +75,62 @@ double rad2deg = 180.0 / PI;
 int count_br = 0;
 
 //**************************************************************
-// print the points in the target list
-void printTargetPointList(){
-	ROS_INFO("Current targetPointList with %d points:", (int)(targetPointList.size()));
-	list<robotState>::iterator it;
-	it=targetPointList.begin();
-	int size = targetPointList.size();
-	for(int i=0; i<size; i++){
-		ROS_INFO("P%d: %.2lf %.2lf %.2lf, Duration: %lf s" , i, (*it).j[0], (*it).j[1], (*it).j[2], (*it).duration );
-		it++;
-	}
-}
+// // print the points in the target list
+// void printTargetPointList(){
+// 	ROS_INFO("Current targetPointList with %d points:", (int)(targetPointList.size()));
+// 	list<robotState>::iterator it;
+// 	it=targetPointList.begin();
+// 	int size = targetPointList.size();
+// 	for(int i=0; i<size; i++){
+// 		ROS_INFO("P%d: %.2lf %.2lf %.2lf, Duration: %lf s" , i, (*it).j[0], (*it).j[1], (*it).j[2], (*it).duration );
+// 		it++;
+// 	}
+// }
 
+
+// //***************************************************************************
+// // Processing and JointTrajectoryAction
+// void executeTrajectory(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, TrajectoryServer* as)
+// {
+//   double pos = 3.0;
+//   double rad2deg = 180.0 / PI;
+//   robotState rs;
+//   float lastDuration = 0.0;
+
+//   int nrOfPoints = goal->trajectory.points.size();					// Number of points to add
+//   for(int i=0; i<nrOfPoints; i++){
+// 	  rs.j[0] = goal->trajectory.points[i].positions[0] * rad2deg;	// ros values come in rad, internally we work in degree
+// 	  rs.j[1] = goal->trajectory.points[i].positions[1] * rad2deg;
+// 	  rs.j[2] = goal->trajectory.points[i].positions[2] * rad2deg;
+// 	  rs.j[3] = goal->trajectory.points[i].positions[3] * rad2deg;
+// 	  float dtmp = goal->trajectory.points[i].time_from_start.toSec();
+// 	  rs.duration = dtmp - lastDuration;							// time_from_start is adding up, these values are only for the single motion
+// 	  lastDuration = dtmp;
+
+// 	  targetPointList.push_back(rs);
+//   }
+//   ROS_INFO("Trajectory with %d positions received \n", nrOfPoints);
+//   printTargetPointList();
+
+//   as->setSucceeded();
+// }
 
 //***************************************************************************
-// Processing and JointTrajectoryAction
-void executeTrajectory(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, TrajectoryServer* as)
-{
-  double pos = 3.0;
-  double rad2deg = 180.0 / 3.141;
-  robotState rs;
-  float lastDuration = 0.0;
+// // React on Gripper Commands
+// void executeGripper(const control_msgs::GripperCommandGoalConstPtr & goal, GripperServer* as)
+// {
+// 	float gapSize = goal->command.position;
 
-  int nrOfPoints = goal->trajectory.points.size();					// Number of points to add
-  for(int i=0; i<nrOfPoints; i++){
-	  rs.j[0] = goal->trajectory.points[i].positions[0] * rad2deg;	// ros values come in rad, internally we work in degree
-	  rs.j[1] = goal->trajectory.points[i].positions[1] * rad2deg;
-	  rs.j[2] = goal->trajectory.points[i].positions[2] * rad2deg;
-	  rs.j[3] = goal->trajectory.points[i].positions[3] * rad2deg;
-	  float dtmp = goal->trajectory.points[i].time_from_start.toSec();
-	  rs.duration = dtmp - lastDuration;							// time_from_start is adding up, these values are only for the single motion
-	  lastDuration = dtmp;
-
-	  targetPointList.push_back(rs);
-  }
-  ROS_INFO("Trajectory with %d positions received \n", nrOfPoints);
-  printTargetPointList();
-
-  as->setSucceeded();
-}
-
-//***************************************************************************
-// React on Gripper Commands
-void executeGripper(const control_msgs::GripperCommandGoalConstPtr & goal, GripperServer* as)
-{
-	float gapSize = goal->command.position;
-
-	if(gapSize > 0.0){
-		gripperRequest = 1;
-		  ROS_INFO("GripperAction: open");
-	}
-	else{
-		gripperRequest = 2;
-		  ROS_INFO("GripperAction: close");
-	}
-	as->setSucceeded();
-}
+// 	if(gapSize > 0.0){
+// 		gripperRequest = 1;
+// 		  ROS_INFO("GripperAction: open");
+// 	}
+// 	else{
+// 		gripperRequest = 2;
+// 		  ROS_INFO("GripperAction: close");
+// 	}
+// 	as->setSucceeded();
+// }
 
 
 //****************************************************
@@ -149,12 +149,12 @@ int main(int argc, char** argv)
 	ros::NodeHandle n2;
 
 	//Start the ActionServer for JointTrajectoryActions and GripperCommandActions from MoveIT
-	TrajectoryServer tserver(n2, "cpr_mover/follow_joint_trajectory", boost::bind(&executeTrajectory, _1, &tserver), false);
-  	ROS_INFO("TrajectoryActionServer: Starting");
-  	tserver.start();
-	GripperServer gserver(n2, "cpr_mover/gripper_command", boost::bind(&executeGripper, _1, &gserver), false);
- 	ROS_INFO("GripperActionServer: Starting");
- 	gserver.start();
+	// TrajectoryServer tserver(n2, "cpr_mover/follow_joint_trajectory", boost::bind(&executeTrajectory, _1, &tserver), false);
+  	// ROS_INFO("TrajectoryActionServer: Starting");
+  	// tserver.start();
+	// GripperServer gserver(n2, "cpr_mover/gripper_command", boost::bind(&executeGripper, _1, &gserver), false);
+ 	// ROS_INFO("GripperActionServer: Starting");
+ 	// gserver.start();
 
 	// Start the robot
 	cpr_robots::cpr_mover robot;
@@ -285,10 +285,12 @@ namespace cpr_robots{
 		// Publish the current joint states
 		pubJoints = n.advertise<sensor_msgs::JointState>("/joint_states", 1);
 
-		for(int i=0; i<6; i++)
-			cmdVelocities[i] = 0.0;
+		// for(int i=0; i<6; i++)
+		// 	cmdVelocities[i] = 0.0;
 
-		subJointVel = n.subscribe<sensor_msgs::JointState>("/CPRMoverJointVel", 1, &cpr_mover::jointVelCallback, this);
+		// subJointVel = n.subscribe<sensor_msgs::JointState>("/CPRMoverJointVel", 1, &cpr_mover::jointVelCallback, this);
+
+		subJointPos = n.subscribe<sensor_msgs::JointState>("/CPRMoverJointPos", 1, &cpr_mover::jointPosCallback, this);
 
 		msgErrorStates.data = "error 0x04";
 		pubErrorStates = n.advertise<std_msgs::String>("/CPRMoverErrorCodes", 1);
@@ -304,9 +306,12 @@ namespace cpr_robots{
 
  	 	for(;;)
   		{
-			MotionGeneration();			// Generate the joint motion and actuate the gripper
+			// MotionGeneration();			// Generate the joint motion and actuate the gripper
 			CommunicationHW();			// Forward the new setpoints to the hardware
 			CommunicationROS();			// Publish the joint states and error info
+			// Move();
+			if(!itf.GetConnectionStatus())
+				for(int i = 0; i < 4; i++) currentState.j[i] = setPointState.j[i];
 
 			if(flag_stop_requested)
 				break;
@@ -370,14 +375,23 @@ namespace cpr_robots{
 
 	//*************************************************************************************
 	// receive joint velocity commands. Values in percent of maxVelocity, [-100..100]
-	void cpr_mover::jointVelCallback(const sensor_msgs::JointState::ConstPtr& msg){
+	// void cpr_mover::jointVelCallback(const sensor_msgs::JointState::ConstPtr& msg){
+	// 	double tmp = 0.0;
+	// 	int i=0;
+	// 	for(i=0; i<nrOfJoints; i++){
+	// 		tmp = msg->velocity[i];
+	// 		if(tmp < -100.0) tmp = -100.0;		// verify the limits
+	// 		if(tmp >  100.0) tmp =  100.0;
+	// 		cmdVelocities[i] = tmp;
+	// 	}
+	// }
+
+	void cpr_mover::jointPosCallback(const sensor_msgs::JointState::ConstPtr& msg){
 		double tmp = 0.0;
 		int i=0;
 		for(i=0; i<nrOfJoints; i++){
-			tmp = msg->velocity[i];
-			if(tmp < -100.0) tmp = -100.0;		// verify the limits
-			if(tmp >  100.0) tmp =  100.0;
-			cmdVelocities[i] = tmp;
+			tmp = msg->position[i];
+			setPointState.j[i] = tmp * rad2deg;
 		}
 	}
 
@@ -388,99 +402,100 @@ namespace cpr_robots{
 	// targetState: the position the robot is aproaching
 	// setPointState: the setPointPosition on the way to targetState
 	// currentPosition: the real hardware position, probably with a small delay to setPointState
-	void cpr_mover::MotionGeneration(){
-		int i=0;
-		double dist = 0.0;
-		double maxMove = 0.0;
+// 	void cpr_mover::MotionGeneration(){
+// 		int i=0;
+// 		double dist = 0.0;
+// 		double maxMove = 0.0;
 
-		bool flagDone = true;
+// 		bool flagDone = true;
 
-		double delta = 0.0;
-		for(int i=0; i<nrOfJoints; i++)
-			delta += abs(targetState.j[i] - setPointState.j[i]);
+// 		double delta = 0.0;
+// 		for(int i=0; i<nrOfJoints; i++)
+// 			delta += abs(targetState.j[i] - setPointState.j[i]);
 
 
-		if( delta > 0.001 || targetPointList.size() > 0){		// Jog the robot. Only if there is no replay active
+// 		if( delta > 0.001 || targetPointList.size() > 0){		// Jog the robot. Only if there is no replay active
 
-			if(!flagPointReplayInited)
-				ComputeCurrentJointReplayVel(setPointState, targetState, jointReplayVel);
+// 			if(!flagPointReplayInited)
+// 				ComputeCurrentJointReplayVel(setPointState, targetState, jointReplayVel);
 
-			for(int i=0; i<nrOfJoints; i++){
-				dist = targetState.j[i] - setPointState.j[i];
+// 			for(int i=0; i<nrOfJoints; i++){
+// 				dist = targetState.j[i] - setPointState.j[i];
 
-				maxMove = (ovrPercent/100.0) * jointReplayVel[i] * (cycleTime / 1000.0);
-				if(dist > maxMove) dist = maxMove;
-				if(dist < -maxMove) dist = -maxMove;
-				setPointState.j[i] += dist;
-				if(abs(dist) > 0.001)				// arrival at target position?
-					flagDone = false;
-			}
+// 				maxMove = (ovrPercent/100.0) * jointReplayVel[i] * (cycleTime / 1000.0);
+// 				if(dist > maxMove) dist = maxMove;
+// 				if(dist < -maxMove) dist = -maxMove;
+// 				setPointState.j[i] += dist;
+// 				if(abs(dist) > 0.001)				// arrival at target position?
+// 					flagDone = false;
+// 			}
 
-		    // change to a new target position while the list is not empty
-			if(flagDone){
-				robotState rs;
-				int size = targetPointList.size();
-				if(size > 0){
-					list<robotState>::iterator i;
-					targetState = targetPointList.front();
-					targetPointList.pop_front();
-					flagPointReplayInited = false;
-					ROS_INFO("New Position from List (remaining: %d): %.2lf %.2lf %.2lf %.2lf",(int)(targetPointList.size()), targetState.j[0], targetState.j[1], targetState.j[2], targetState.j[3]);
-				}
-			}
-		}else{
-			for(int i=0; i<nrOfJoints; i++)
-				setPointState.j[i] += (cmdVelocities[i]/100.0) * (ovrPercent/100.0) * (jointMaxVelocity[i] * (cycleTime/1000.0));
+// 		    // change to a new target position while the list is not empty
+// 			if(flagDone){
+// 				robotState rs;
+// 				int size = targetPointList.size();
+// 				if(size > 0){
+// 					list<robotState>::iterator i;
+// 					targetState = targetPointList.front();
+// 					targetPointList.pop_front();
+// 					flagPointReplayInited = false;
+// 					ROS_INFO("New Position from List (remaining: %d): %.2lf %.2lf %.2lf %.2lf",(int)(targetPointList.size()), targetState.j[0], targetState.j[1], targetState.j[2], targetState.j[3]);
+// 				}
+// 			}
+// 		}else{
+// #ifdef THE
+// 			for(int i=0; i<nrOfJoints; i++)
+// 				setPointState.j[i] += (cmdVelocities[i]/100.0) * (ovrPercent/100.0) * (jointMaxVelocity[i] * (cycleTime/1000.0));
+// #endif
+// 			for(int i=0; i<nrOfJoints; i++)
+// 				targetState.j[i] = setPointState.j[i];
+// 		}
 
-			for(int i=0; i<nrOfJoints; i++)
-				targetState.j[i] = setPointState.j[i];
-		}
+// 		kin.CheckJointMinMax(setPointState.j);		// check if the joints are above minmax values
 
-		kin.CheckJointMinMax(setPointState.j);		// check if the joints are above minmax values
-
-		// And then handle the gripper requests from the GripperServer
-		if(gripperRequest == 1){
-			itf.SetIO(3, 1, true);
-			itf.SetIO(3, 0, true);
-			gripperRequest = 0;
-			gripperJointStatus = gripperJointMax;		// Workaround: the gripper should be in this position now, even if it is commanded by digital IO. This value is send to RViz
-		}else if(gripperRequest == 2){
-			itf.SetIO(3, 1, true);
-			itf.SetIO(3, 0, false);
-			gripperRequest = 0;
-			gripperJointStatus = 0.0;
-		}
-		return;
-	}
+// 		// And then handle the gripper requests from the GripperServer
+// 		if(gripperRequest == 1){
+// 			itf.SetIO(3, 1, true);
+// 			itf.SetIO(3, 0, true);
+// 			gripperRequest = 0;
+// 			gripperJointStatus = gripperJointMax;		// Workaround: the gripper should be in this position now, even if it is commanded by digital IO. This value is send to RViz
+// 		}else if(gripperRequest == 2){
+// 			itf.SetIO(3, 1, true);
+// 			itf.SetIO(3, 0, false);
+// 			gripperRequest = 0;
+// 			gripperJointStatus = 0.0;
+// 		}
+// 		return;
+// 	}
 
 
 
 	//***************************************************************************
-	void cpr_mover::ComputeCurrentJointReplayVel(robotState cp, robotState tp, double * vel){
+	// void cpr_mover::ComputeCurrentJointReplayVel(robotState cp, robotState tp, double * vel){
 
-		float dist[6];
-		float duration[6];
-		float maxDist = 0.0;
-		float maxDuration = 0.0;
-		for(int i=0; i<nrOfJoints; i++){
-			dist[i] = abs(tp.j[i] - cp.j[i]);
-			if( dist[i] > maxDist) maxDist = dist[i];
-			duration[i] = abs(dist[i] / jointMaxVelocity[i]);
-			if( duration[i] > maxDuration) maxDuration = duration[i];
-		}
+	// 	float dist[6];
+	// 	float duration[6];
+	// 	float maxDist = 0.0;
+	// 	float maxDuration = 0.0;
+	// 	for(int i=0; i<nrOfJoints; i++){
+	// 		dist[i] = abs(tp.j[i] - cp.j[i]);
+	// 		if( dist[i] > maxDist) maxDist = dist[i];
+	// 		duration[i] = abs(dist[i] / jointMaxVelocity[i]);
+	// 		if( duration[i] > maxDuration) maxDuration = duration[i];
+	// 	}
 
-		float scale = 1.0;
-		if(maxDuration < tp.duration)
-			scale = maxDuration / tp.duration;
+	// 	float scale = 1.0;
+	// 	if(maxDuration < tp.duration)
+	// 		scale = maxDuration / tp.duration;
 
-		for(int i=0; i<nrOfJoints; i++){
-			vel[i] = jointMaxVelocity[i] * (duration[i] / maxDuration ) * scale;
-		}
+	// 	for(int i=0; i<nrOfJoints; i++){
+	// 		vel[i] = jointMaxVelocity[i] * (duration[i] / maxDuration ) * scale;
+	// 	}
 
-		flagPointReplayInited = true;
+	// 	flagPointReplayInited = true;
 
-		ROS_INFO("Scale: %lf (%lf / %lf) -  %lf %lf %lf %lf", scale, maxDuration, tp.duration,  vel[0], vel[1], vel[2], vel[3]);
-	}
+	// 	ROS_INFO("Scale: %lf (%lf / %lf) -  %lf %lf %lf %lf", scale, maxDuration, tp.duration,  vel[0], vel[1], vel[2], vel[3]);
+	// }
 
 
 	//***************************************************************
@@ -490,16 +505,31 @@ namespace cpr_robots{
 		if(!itf.GetConnectionStatus())		// if HW is not connected then skip the rest
 			return;
 
+		static bool first = true;
+		float ju[6];
+
+		itf.GetJoints( ju );
+		for(int i = 0; i < 4; i++) currentState.j[i] = ju[i];
+		if(first) for(int i = 0; i < 4; i++) setPointState.j[0] = currentState.j[0];
+
+		first = false;
+
+		for(int i = 0; i < 4; i++) if(setPointState.j[i] != setPointState.j[i]) {printf("NaN");return;}
+		if(kin.CheckJointMinMax( setPointState.j )) {printf("Over");return;}
+
 		for(int i=0; i<nrOfJoints; i++){
 			itf.SetJoints( setPointState.j );
 		}
 
-		float ju[6];
-		if(count_br++ % 32 == 0) {
-			itf.GetJoints( ju );
-			// for(int i = 0; i < 4; i++) setPointState.j[i] = ju[i];
-			// itf.GetPID();
-		}
+		// if(count_br++ % 32 == 0) {
+		// 	float ju[6];
+		// 	itf.GetJoints( ju );
+		// 	for(int i = 0; i < 4; i++) setPointState.j[i] = ju[i];
+		// 	//itf.GetPID();
+		// }
+
+		// for(int i=0; i<4;i++) setPointState.j[i] = ju[i];
+		
 	}
 
 
@@ -510,16 +540,16 @@ namespace cpr_robots{
 		static int pCnt = 0;
 
 		msgJointsCurrent.header.stamp = ros::Time::now();
-		msgJointsCurrent.position[0] = deg2rad * setPointState.j[0];		// Robot CAN communication works in degree
-		msgJointsCurrent.position[1] = deg2rad * setPointState.j[1];
-		msgJointsCurrent.position[2] = deg2rad * setPointState.j[2];
-		msgJointsCurrent.position[3] = deg2rad * setPointState.j[3];
+		msgJointsCurrent.position[0] = deg2rad * currentState.j[0];		// Robot CAN communication works in degree
+		msgJointsCurrent.position[1] = deg2rad * currentState.j[1];
+		msgJointsCurrent.position[2] = deg2rad * currentState.j[2];
+		msgJointsCurrent.position[3] = deg2rad * currentState.j[3];
 		if(flagMover4){
 			msgJointsCurrent.position[4] = gripperJointStatus;					// The two gripper joints. Workaround, in the Mover robots these are digital IO controlled
 			msgJointsCurrent.position[5] = gripperJointStatus;
 		}else{	//Mover6, two more joints
-			msgJointsCurrent.position[4] = deg2rad * setPointState.j[4];
-			msgJointsCurrent.position[5] = deg2rad * setPointState.j[5];
+			msgJointsCurrent.position[4] = deg2rad * currentState.j[4];
+			msgJointsCurrent.position[5] = deg2rad * currentState.j[5];
 			msgJointsCurrent.position[6] = gripperJointStatus;
 			msgJointsCurrent.position[7] = gripperJointStatus;
 		}

@@ -98,15 +98,41 @@ vector<double> Trajectory5::GetVel(const robotState &robot_current, int tick) {
         std::cout << "This shouldn't happen twice" << std::endl;
         finished = 1;
     }
-    double alpha = 200;
+    double alpha = 5;
     for(int i = 0; i < 4; i++, pt = 1) {
         ret[i] = 0;
         for(int j = 0; j < 6; j++, pt *= t)
             ret[i] += coef[i][j] * pt;  // get trajectory angle
         // make angle to velocity
         if(tick == 0)
-        printf("Ugao #%d razlika: curr: %lf new: %lf diff: %lf%%\n", i, robot_current.j[i], ret[i], (ret[i] - robot_current.j[i])/robot_current.j[i] * 100);
+        printf("Ugao #%d razlika: curr: %lf new: %lf diff: %lf%%\n", i, robot_current.j[i], ret[i], (ret[i] - robot_current.j[i]) * 180 / PI * alpha);
         ret[i] = alpha * (ret[i] - robot_current.j[i]) / (1./update_f);
+
+    }
+    return ret;
+}
+
+vector<double> Trajectory5::GetPos(const robotState &robot_current, int tick) {
+    if(tick == -1)
+        tick = current_iter++;
+    double t = (1./update_f * tick)/duration, pt = 1;  // time is normalised
+    vector<double> ret(4, 0.0);
+    for(int i = 0; i < 4; i++) ret[i] = robot_current.j[i];
+    if(finished) return ret;
+    if(t > 1) {
+        t = 1;
+        std::cout << "This shouldn't happen twice" << std::endl;
+        finished = 1;
+    }
+    // double alpha = 5;
+    for(int i = 0; i < 4; i++, pt = 1) {
+        ret[i] = 0;
+        for(int j = 0; j < 6; j++, pt *= t)
+            ret[i] += coef[i][j] * pt;  // get trajectory angle
+        // make angle to velocity
+        if(tick == 0)
+        printf("Ugao #%d razlika: curr: %lf new: %lf diff: %lf%%\n", i, robot_current.j[i], ret[i], (ret[i] - robot_current.j[i]) * 180 / PI);
+        //ret[i] = alpha * (ret[i] - robot_current.j[i]) / (1./update_f);
 
     }
     return ret;

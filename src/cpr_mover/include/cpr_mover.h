@@ -104,16 +104,17 @@ class cpr_mover{
 		kinematics kin;
 		ProtocolCPRCAN itf;				// The hardware interface
 
-		bool flagPointReplayInited;
-		double jointReplayVel[6];		// degree/sec
+		// bool flagPointReplayInited;
+		// double jointReplayVel[6];		// degree/sec
 
 
-		double cmdVelocities[6];		// the commanded velocities via subJointVel
+		// double cmdVelocities[6];		// the commanded velocities via subJointVel
 
 		ros::NodeHandle n;
 		sensor_msgs::JointState msgJointsCurrent;		/**< the current joints */
 		ros::Publisher  pubJoints;			/**< publishes the current joint positions  */
-		ros::Subscriber subJointVel;		// Subscribes to joint velocity commands e.g. from the RViz plugin
+		// ros::Subscriber subJointVel;		// Subscribes to joint velocity commands e.g. from the RViz plugin
+		ros::Subscriber subJointPos;
 
 		std_msgs::String msgCommands;
 		ros::Subscriber subCommands;
@@ -121,14 +122,15 @@ class cpr_mover{
 		ros::Publisher pubErrorStates;			/**< publishes the modules error codes  */
 
 
-		void jointVelCallback(const sensor_msgs::JointState::ConstPtr& msg);
+		// void jointVelCallback(const sensor_msgs::JointState::ConstPtr& msg);
+		void jointPosCallback(const sensor_msgs::JointState::ConstPtr& msg);
 		void commandsCallback(const std_msgs::String::ConstPtr& msg);
 
-		void MotionGeneration();
+		// void MotionGeneration();
 		void CommunicationHW();
 		void CommunicationROS();
 
-		void ComputeCurrentJointReplayVel(robotState cp, robotState tp, double * vel);
+		// void ComputeCurrentJointReplayVel(robotState cp, robotState tp, double * vel);
 
 	
 

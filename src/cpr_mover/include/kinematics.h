@@ -21,7 +21,7 @@ public:
 	double jointMinMax[6][2];			// Min and max values in degree
 
 	void SetJointMinMax(int robot);			// 0 for Mover4, 1 for Mover6
-	void CheckJointMinMax(float * j);
+	bool CheckJointMinMax(float * j);
 
 };
 

@@ -28,6 +28,7 @@ public:
     vector<double> GetVel(const robotState &robot_current, int tick=-1);
     bool IsFinished() const;
     void Finish();
+    vector<double> GetPos(const robotState &robot_current, int tick=-1);
 private:
     Trajectory5();
     vector<vector<double> > coef;

@@ -89,6 +89,10 @@ robotState InvKine(const robotState &rb, int way=0) {  // way = {0 - ellbow-up, 
     robotState ret(rb);
     ret.j[0] = th0; ret.j[1] = th1;
     ret.j[2] = th2; ret.j[3] = th3;
+    if(ret.j[0] != ret.j[0] || ret.j[1] != ret.j[1] || ret.j[2] != ret.j[2] || ret.j[3] != ret.j[3]) {
+        for(int i = 0; i < 4; i++) printf("%.3lf\t \n", rb.p[i]);
+        std::cout<<"AAAA\n";
+    }
     return ret;
 }
 
@@ -100,7 +104,8 @@ int main(int argc, char** argv) {
 
     // cpr_mover communication
     ros::Subscriber cpr_joint_states_sub = n.subscribe("/joint_states", 10, joint_states_callback);
-    ros::Publisher cpr_vel_pub = n.advertise<sensor_msgs::JointState>("/CPRMoverJointVel", 10);
+    // ros::Publisher cpr_vel_pub = n.advertise<sensor_msgs::JointState>("/CPRMoverJointVel", 10);
+    ros::Publisher cpr_pos_pub = n.advertise<sensor_msgs::JointState>("/CPRMoverJointPos", 10);
     cpr_commands_pub = n.advertise<std_msgs::String>("/CPRMoverCommands", 10);
 
     // checkers communication
@@ -122,31 +127,53 @@ int main(int argc, char** argv) {
     actions.clear();
     current_trajectory.Finish();
 
-    robotState requested, req_inter;
-    requested.p[0] = 180;
-    requested.p[1] = -180;
-    requested.p[2] = 200;
+    // sensor_msgs::JointState pub_vel2;
+    // pub_vel2.velocity.resize(4, 0);
+    // cpr_vel_pub.publish(pub_vel2);
+
+    robotState requested, req_inter, req_inter2, dummy;
+    requested.p[0] = 125;
+    requested.p[1] = -102;// -9.75
+    requested.p[2] = 50;
     requested.p[3] = PI;
 
-    req_inter.p[0] = 180;
-    req_inter.p[1] = -160;
+    req_inter.p[0] = 220+150;
+    req_inter.p[1] = +90;
     req_inter.p[2] = 50;
     req_inter.p[3] = PI;
 
+    std::swap(req_inter, requested);
+    // req_inter2.p[0] = 220;
+    // req_inter2.p[1] = 0;
+    // req_inter2.p[2] = 150;
+    // req_inter2.p[3] = PI;
+
+
+    req_inter2.p[0] = 200;
+    req_inter2.p[1] = 0;
+    req_inter2.p[2] = 150;
+    req_inter2.p[3] = PI;
+
+
     requested = InvKine(requested, 0);
     req_inter = InvKine(req_inter, 0);
+    req_inter2 = InvKine(req_inter2, 0);
     std::cout << "Uglovi:" << requested.j[0] << requested.j[1] << requested.j[2] << requested.j[3] << std::endl;
 
     printf("Trn:\t");
     for(int i = 0; i < 4; i++)
         printf("%lf\t", robot_current.j[i]);
     printf("\n");
-    actions.emplace_back(2, req_inter, 0, 0);
-    actions.emplace_back(16, req_inter, 0, 3);
-    actions.emplace_back(4, req_inter, 0, 7);
-    actions.emplace_back(1, req_inter, 0, 0);
+    // actions.emplace_back(1, dummy, 0, 4);
+    actions.emplace_back(2, dummy, 0, 4);
+    actions.emplace_back(16, dummy, 0, 2);
+    actions.emplace_back(4, req_inter2, 0, 10);
+    actions.emplace_back(4, req_inter, 0, 10);
+    actions.emplace_back(1, dummy, 0, 4);
+    
+    
     // Trajectory6 z(robot_current, requested, req_inter, 7);
-    current_trajectory = Trajectory5(robot_current, requested, 15);
+    current_trajectory = Trajectory5(robot_current, requested, 10);
     // Matrix matr(4);
     // matr.Transpose();
     // HTMatrix matr_2(matr);
@@ -165,12 +192,16 @@ int main(int argc, char** argv) {
         // std::cout << "Uglovi:\t" << requested.j[0] * rad2deg << "\t" << requested.j[1] * rad2deg << "\t" << requested.j[2] * rad2deg<< "\t" << requested.j[3]* rad2deg << std::endl;
         // std::cout << "Trenut:\t" << robot_current.j[0] * rad2deg << "\t" << robot_current.j[1] * rad2deg << "\t" << robot_current.j[2] * rad2deg<< "\t" << robot_current.j[3] * rad2deg<< std::endl;
         pub_vel.header.stamp = ros::Time::now();
-        pub_vel.velocity.resize(4);
+        // pub_vel.velocity.resize(4);
+        pub_vel.position.resize(4);
         pub_vel.name.resize(4);
         if(current_trajectory.IsFinished()) NextTrajectory();
-        auto l = current_trajectory.GetVel(robot_current);
-        for(int i = 0; i < 4; i++) pub_vel.velocity[i] = l[i];
-        cpr_vel_pub.publish(pub_vel);
+        // auto l = current_trajectory.GetVel(robot_current);
+        // for(int i = 0; i < 4; i++) pub_vel.velocity[i] = l[i];
+        // cpr_vel_pub.publish(pub_vel);
+        auto q = current_trajectory.GetPos(robot_current);
+        for(int i = 0; i < 4; i++) pub_vel.position[i] = q[i];
+        cpr_pos_pub.publish(pub_vel);
 
 
         loop_rate.sleep();
