@@ -149,7 +149,7 @@ class GUI(QMainWindow, Ui_MainWindow):
         moves = msg.data.split(';')
         self.moving = 1
         if len(moves) == 1:
-
+            pass
         pass
 
     def image_msg_sub_callback(self, msg):
