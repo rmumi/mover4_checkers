@@ -44,24 +44,12 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#include <list>
-
 #include <ros/ros.h>
-#include <geometry_msgs/Twist.h>
-#include <geometry_msgs/Pose.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/String.h>
 
-#include <actionlib/server/simple_action_server.h>
-
-#include <control_msgs/FollowJointTrajectoryAction.h>
-#include <control_msgs/GripperCommandAction.h>
-
 #include "kinematics.h"
 #include "ProtocolCPRCAN.h"
-
-
 
 struct robotState
 {
@@ -73,78 +61,51 @@ struct robotState
 
 namespace cpr_robots{
 
-
-
-
 // the struct stores information about the current robots state:
 // joint positions, cartesian position and error code
 
-
-
 class cpr_mover{
+private:
 
-	private:
+	robotState setPointState;
+  	robotState currentState;
+	robotState targetState;
 
-		bool flagMover4;				// which robot to use?
-		bool flagMover6;
+	int nrOfJoints;					// 4 or 6
+	double ovrPercent;				// [0..100]
+	double jointMaxVelocity[6];			// degree/sec
+	double cycleTime;				// in ms
 
+	kinematics kin;
+	ProtocolCPRCAN itf;				// The hardware interface
 
-		bool flag_stop_requested;
+	ros::NodeHandle n;
+	sensor_msgs::JointState msgJointsCurrent;		/**< the current joints */
+	ros::Publisher pubJoints;			/**< publishes the current joint positions  */
+	ros::Subscriber subJointPos;
 
-		robotState setPointState;
-	  	robotState currentState;
-		robotState targetState;
-
-
-		int nrOfJoints;					// 4 or 6
-		double ovrPercent;				// [0..100]
-		double jointMaxVelocity[6];			// degree/sec
-		double cycleTime;				// in ms
-
-		kinematics kin;
-		ProtocolCPRCAN itf;				// The hardware interface
-
-		// bool flagPointReplayInited;
-		// double jointReplayVel[6];		// degree/sec
-
-
-		// double cmdVelocities[6];		// the commanded velocities via subJointVel
-
-		ros::NodeHandle n;
-		sensor_msgs::JointState msgJointsCurrent;		/**< the current joints */
-		ros::Publisher  pubJoints;			/**< publishes the current joint positions  */
-		// ros::Subscriber subJointVel;		// Subscribes to joint velocity commands e.g. from the RViz plugin
-		ros::Subscriber subJointPos;
-
-		std_msgs::String msgCommands;
-		ros::Subscriber subCommands;
-		std_msgs::String msgErrorStates;
-		ros::Publisher pubErrorStates;			/**< publishes the modules error codes  */
+	std_msgs::String msgCommands;
+	ros::Subscriber subCommands;
+	std_msgs::String msgErrorStates;
+	ros::Publisher pubErrorStates;			/**< publishes the modules error codes  */
 
 
-		// void jointVelCallback(const sensor_msgs::JointState::ConstPtr& msg);
-		void jointPosCallback(const sensor_msgs::JointState::ConstPtr& msg);
-		void commandsCallback(const std_msgs::String::ConstPtr& msg);
+	// void jointVelCallback(const sensor_msgs::JointState::ConstPtr& msg);
+	void jointPosCallback(const sensor_msgs::JointState::ConstPtr& msg);
+	void commandsCallback(const std_msgs::String::ConstPtr& msg);
 
-		// void MotionGeneration();
-		void CommunicationHW();
-		void CommunicationROS();
+	// void MotionGeneration();
+	void CommunicationHW();
+	void CommunicationROS();
 
-		// void ComputeCurrentJointReplayVel(robotState cp, robotState tp, double * vel);
+	// void ComputeCurrentJointReplayVel(robotState cp, robotState tp, double * vel);
 
-	
-
-	public:
-		cpr_mover();
-		~cpr_mover();
-		void init();
-		void mainLoop();
-
-		
-		
+public:
+	cpr_mover();
+	~cpr_mover();
+	void init();
+	void mainLoop();
 };
-
-
 
 }
 
