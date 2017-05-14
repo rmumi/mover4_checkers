@@ -296,7 +296,7 @@ void cpr_mover::CommunicationROS(){
 	msgJointsCurrent.position[1] = deg2rad * currentState.j[1];
 	msgJointsCurrent.position[2] = deg2rad * currentState.j[2];
 	msgJointsCurrent.position[3] = deg2rad * currentState.j[3];
-    
+
 	msgJointsCurrent.position[4] = gripperJointStatus;					// The two gripper joints. Workaround, in the Mover robots these are digital IO controlled
 	msgJointsCurrent.position[5] = gripperJointStatus;
 	pubJoints.publish(msgJointsCurrent);								// ROS communication works in Radian
