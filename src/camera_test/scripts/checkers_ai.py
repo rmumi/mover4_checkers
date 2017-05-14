@@ -4,9 +4,9 @@ from std_msgs.msg import String
 
 def signal_callback(msg):
     if msg.data == "AI_GO_WHITE":
-        pub.publish("1-10;10-17;14-18")
+        pub.publish("22-18")
     elif msg.data == "AI_GO_BLACK":
-        pub.publish("18-14;17-10;10-1")
+        pub.publish("1x10;10x17")
 
 
 if __name__ == "__main__":

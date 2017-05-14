@@ -6,6 +6,7 @@ robotState robot_current;
 deque<RobotAction> actions;
 Trajectory5 current_trajectory(robot_current, robot_current, 1);
 ros::Publisher cpr_commands_pub, robot_state_msg_pub, robot_sig_pub;
+bool has_actions;
 
 void joint_states_callback(const sensor_msgs::JointState &msg) {
      for(int i = 0; i < 4; i++) {
@@ -36,7 +37,16 @@ void robot_point_msg_callback(const std_msgs::Float64MultiArray &msg) {
 }
 
 void NextTrajectory() {
-    if(!actions.size()) return;
+    if(actions.empty()) {
+        if(has_actions) {
+            has_actions = 0;
+            std_msgs::String _z;
+            _z.data = std::string("ROBOT_FIN");
+            robot_sig_pub.publish(_z);
+        }
+        return;
+    }
+    has_actions = 1;
     if(actions.front().gripper_open) {
         std_msgs::String _z;
         _z.data = std::string("GripperOpen");
@@ -57,8 +67,20 @@ void NextTrajectory() {
         actions.pop_front();
     } else if(actions.front().mid_point) {
         // TODO mid point trajectory6
+        if(actions.size() > 1) {  // TODO a false queue could make an inf loop
+            RobotAction mid = actions.front();
+            actions.pop_front();
+            RobotAction fin = actions.front();
+            actions.pop_front();
+            if(!fin.to_point)
+                ROS_INFO("INVALID SEQUANCE OF ACTIONS!");
+            // TODO not finished
+        } else {
+            ROS_INFO("TOO SLOW OR FALSE QUEUE!");
+        }
     } else {
-        std::cout << "FAILED ACTION";
+        ROS_INFO("INVALID ACTION!");
+        std::cout << "INVALID ACTION";
         actions.pop_front();
     }
 }
@@ -125,6 +147,7 @@ int main(int argc, char** argv) {
 
     // init no movement
     actions.clear();
+    has_actions = 0;
     current_trajectory.Finish();
 
     // sensor_msgs::JointState pub_vel2;
@@ -170,8 +193,8 @@ int main(int argc, char** argv) {
     actions.emplace_back(4, req_inter2, 0, 10);
     actions.emplace_back(4, req_inter, 0, 10);
     actions.emplace_back(1, dummy, 0, 4);
-    
-    
+
+
     // Trajectory6 z(robot_current, requested, req_inter, 7);
     current_trajectory = Trajectory5(robot_current, requested, 10);
     // Matrix matr(4);

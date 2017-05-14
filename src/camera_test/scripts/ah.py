@@ -53,15 +53,16 @@ class GUI(QMainWindow, Ui_MainWindow):
 
         # All helpers
         self.count = 0
-        self.moving = 0
+        self.moving = 0  # if the robot is moving
+        self.white = 1  # if the board is turned to the robot like he is white
 
         # Physical board description
-        self.board_h = 20.
+        self.board_h = 50.
         self.board_w = 195.
-        self.board_x_dr = 250.
-        self.board_y_dr = 250.
-        self.board_x_ul = 250. + 195.
-        self.board_y_ul = 250. - 195.
+        self.board_x_dr = 370.
+        self.board_y_dr = 90.
+        self.board_x_ul = 125.
+        self.board_y_ul = -102.
         self.board_v_x = (1 / 14. * (+(self.board_x_ul - self.board_x_dr) - (self.board_y_ul - self.board_y_dr)),
                           1 / 14. * (+(self.board_x_ul - self.board_x_dr) + (self.board_y_ul - self.board_y_dr)))
         self.board_v_y = (1 / 14. * (+(self.board_x_ul - self.board_x_dr) + (self.board_y_ul - self.board_y_dr)),
@@ -70,8 +71,6 @@ class GUI(QMainWindow, Ui_MainWindow):
                           self.board_y_dr + x * self.board_v_x[1] + y * self.board_v_y[1])
                          for y, x in np.ndindex((8, 8))]
         print self.board_xy
-
-
 
 
         frame = self.imageGraphics
@@ -84,20 +83,22 @@ class GUI(QMainWindow, Ui_MainWindow):
 
 
     def initWhiteButton_callback(self):
+        self.white = 1
         self.ai_sig_pub.publish("AI_INIT_WHITE")
-        pass
+        # todo move to init pos
 
     def initBlackButton_callback(self):
+        self.white = 0
         self.ai_sig_pub.publish("AI_INIT_BLACK")
-        pass
+        # todo move to init pos
 
     def startWhiteButton_callback(self):
         self.ai_sig_pub.publish("AI_GO_WHITE")
-        pass
+        # todo start counter
 
     def startBlackButton_callback(self):
         self.ai_sig_pub.publish("AI_GO_BLACK")
-        pass
+        # todo start counter
 
     def stopButton_callback(self):
         self.robot_sig_pub.publish("ROBOT_STOP")
@@ -138,18 +139,26 @@ class GUI(QMainWindow, Ui_MainWindow):
             pass
         elif msg.data == "ROBOT_FIN":
             self.moving = 0
+            # todo stop robot counter, start human coutner
             # todo myb something more
         else:
             pass
 
     def moves_msg_sub_callback(self, msg):
         # the best part
+        moves = msg.data.split(';')
+        self.moving = 1
+        if len(moves) == 1:
+
         pass
 
     def image_msg_sub_callback(self, msg):
         pass
 
     def robot_state_msg_sub_callback(self, msg):
+        pass
+
+    def from_numbering_to_xy(self, num):
         pass
 
 
