@@ -8,32 +8,19 @@
 using std::vector;
 namespace ch {
 
-class Trajectory6 {
+class Trajectory {
 public:
-    Trajectory6(robotState a, robotState b, robotState v, double tf);
-    vector<double> GetVel(const robotState &robot_current, int tick=-1);
+    Trajectory(robotState a, robotState b, double tf);
+    Trajectory(robotState a, robotState b, robotState v, double tf);
     vector<double> GetPos(const robotState &robot_current, int tick=-1);
     bool IsFinished() const;
     void Finish();
 private:
-    Trajectory6();
+    Trajectory();
     vector<vector<double> > coef;
+    vector<double> GetVel(const robotState &robot_current, int tick=-1);  //deprecated
     int current_iter;
-    double duration;  // time is normalised
-    bool finished;
-};
-
-class Trajectory5 {
-public:
-    Trajectory5(robotState a, robotState b, double tf);
-    vector<double> GetVel(const robotState &robot_current, int tick=-1);
-    vector<double> GetPos(const robotState &robot_current, int tick=-1);
-    bool IsFinished() const;
-    void Finish();
-private:
-    Trajectory5();
-    vector<vector<double> > coef;
-    int current_iter;
+    int num_coef;
     double duration;  // time is normalised
     bool finished;
 };

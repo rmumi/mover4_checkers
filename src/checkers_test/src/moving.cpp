@@ -4,7 +4,7 @@
 robotState robot_current;
 
 deque<RobotAction> actions;
-Trajectory5 current_trajectory(robot_current, robot_current, 1);
+Trajectory current_trajectory(robot_current, robot_current, 1);
 ros::Publisher cpr_commands_pub, robot_state_msg_pub, robot_sig_pub;
 bool has_actions;
 
@@ -62,8 +62,8 @@ void NextTrajectory() {
     } else if(actions.front().waiting && actions.front().wait <= 1) {
         actions.pop_front();
     } else if(actions.front().to_point) {
-        current_trajectory = Trajectory5(robot_current,
-            actions.front()._q, actions.front().wait/update_f);
+        current_trajectory = Trajectory(robot_current,
+            actions.front()._q, (double)actions.front().wait/update_f);
         actions.pop_front();
     } else if(actions.front().mid_point) {
         // TODO mid point trajectory6
@@ -196,7 +196,7 @@ int main(int argc, char** argv) {
 
 
     // Trajectory6 z(robot_current, requested, req_inter, 7);
-    current_trajectory = Trajectory5(robot_current, requested, 10);
+    current_trajectory = Trajectory(robot_current, requested, 10);
     // Matrix matr(4);
     // matr.Transpose();
     // HTMatrix matr_2(matr);
