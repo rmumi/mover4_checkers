@@ -19,6 +19,39 @@ Trajectory::Trajectory(robotState a, robotState b, robotState v,
         coef[i][4] = -3*(64*(th_v-th_s)-27*(th_f-th_s));
         coef[i][5] = 3*(64*(th_v-th_s)-30*(th_f-th_s));
         coef[i][6] = -32*(2*(th_v-th_s)-(th_f-th_s));
+        // printf("Zglob %d:\t", i);
+        // for(int j = 0; j < 7; j++)
+        //     printf("%lf\t", coef[i][j]);
+        // printf("\n");
+    }
+    duration = tf;
+    current_iter = 0;
+    finished = 0;
+    num_coef = 7;
+}
+
+Trajectory::Trajectory(robotState a, robotState b, robotState v,
+           double tf, double tv) {
+    coef.resize(4, vector<double>(7));
+    double th_v, th_s, th_f;
+    tv = tv / tf;
+    // std::cout<<"tv:" << tv<<"\n";
+    for(int i = 0; i < 4; i++) {
+        th_s = a.j[i];
+        th_f = b.j[i];
+        th_v = v.j[i];
+        if(fabs(th_s - th_f) < 1e-3) th_s = th_f;
+        coef[i][0] = th_s;
+        coef[i][1] = 0;
+        coef[i][2] = 0;
+        coef[i][3] = 1/std::pow(1-tv, 3) * ((th_v-th_s)/std::pow(tv, 3)-(th_f-th_s)*(15-24*tv+10*tv*tv)*tv);
+        coef[i][4] = -3/std::pow(1-tv, 3) * ((th_v-th_s)/std::pow(tv, 3)-(th_f-th_s)*(5-9*tv*tv+5*std::pow(tv, 3)));
+        coef[i][5] = 3/std::pow(1-tv, 3) * ((th_v-th_s)/std::pow(tv, 3)-(th_f-th_s)*(8-9*tv+2*std::pow(tv, 3)));
+        coef[i][6] = -1/std::pow(1-tv, 3) * ((th_v-th_s)/std::pow(tv, 3)-(th_f-th_s)*(10-15*tv+6*tv*tv));
+        // printf("Zglob %d:\t", i);
+        // for(int j = 0; j < 7; j++)
+        //     printf("%lf\t", coef[i][j]);
+        // printf("\n");
     }
     duration = tf;
     current_iter = 0;

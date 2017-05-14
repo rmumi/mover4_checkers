@@ -64,15 +64,14 @@ typedef actionlib::SimpleActionServer<control_msgs::GripperCommandAction> Grippe
 
 const double PI = 3.14159265359;
 
-double newJoints[] = {0.0, 0.0, 0.0, 0.0};	// internal joint vlaues are in degree
-std::list<robotState> targetPointList;		// list of points to move to
-int gripperRequest = 0;						// Stores the GripperAction requests. 0: no request, 1: please open, 2: please close. The main loop resets this value to 0 when done.
+// double newJoints[] = {0.0, 0.0, 0.0, 0.0};	// internal joint vlaues are in degree
+// std::list<robotState> targetPointList;		// list of points to move to
+// int gripperRequest = 0;						// Stores the GripperAction requests. 0: no request, 1: please open, 2: please close. The main loop resets this value to 0 when done.
 double gripperJointStatus = 0.0;			// State of the gripper joints. This is a workaround, the real joints are commanded via digital io
 double gripperJointMax = 35.0 * PI / 180.0;	// Opening width
 
 double deg2rad = PI / 180.0;
 double rad2deg = 180.0 / PI;
-int count_br = 0;
 
 //**************************************************************
 // // print the points in the target list
@@ -520,7 +519,7 @@ namespace cpr_robots{
 		for(int i=0; i<nrOfJoints; i++){
 			itf.SetJoints( setPointState.j );
 		}
-
+        // static count_br = 0;
 		// if(count_br++ % 32 == 0) {
 		// 	float ju[6];
 		// 	itf.GetJoints( ju );
@@ -529,7 +528,7 @@ namespace cpr_robots{
 		// }
 
 		// for(int i=0; i<4;i++) setPointState.j[i] = ju[i];
-		
+
 	}
 
 

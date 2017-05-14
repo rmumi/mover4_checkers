@@ -12,6 +12,7 @@ class Trajectory {
 public:
     Trajectory(robotState a, robotState b, double tf);
     Trajectory(robotState a, robotState b, robotState v, double tf);
+    Trajectory(robotState a, robotState b, robotState v, double tf, double tv);
     vector<double> GetPos(const robotState &robot_current, int tick=-1);
     bool IsFinished() const;
     void Finish();

@@ -66,17 +66,21 @@ void NextTrajectory() {
             actions.front()._q, (double)actions.front().wait/update_f);
         actions.pop_front();
     } else if(actions.front().mid_point) {
-        // TODO mid point trajectory6
-        if(actions.size() > 1) {  // TODO a false queue could make an inf loop
+        if(actions.size() > 1) {
             RobotAction mid = actions.front();
             actions.pop_front();
             RobotAction fin = actions.front();
             actions.pop_front();
             if(!fin.to_point)
                 ROS_INFO("INVALID SEQUANCE OF ACTIONS!");
-            // TODO not finished
+            // current_trajectory = Trajectory(robot_current, fin._q, mid._q,
+            //                                 (double)fin.wait/update_f);
+            current_trajectory = Trajectory(robot_current, fin._q, mid._q,
+                                        (double)(fin.wait+mid.wait)/update_f,
+                                        (double)mid.wait/update_f);
         } else {
             ROS_INFO("TOO SLOW OR FALSE QUEUE!");
+            // TODO a false queue could make an inf loop
         }
     } else {
         ROS_INFO("INVALID ACTION!");
@@ -150,10 +154,6 @@ int main(int argc, char** argv) {
     has_actions = 0;
     current_trajectory.Finish();
 
-    // sensor_msgs::JointState pub_vel2;
-    // pub_vel2.velocity.resize(4, 0);
-    // cpr_vel_pub.publish(pub_vel2);
-
     robotState requested, req_inter, req_inter2, dummy;
     requested.p[0] = 125;
     requested.p[1] = -102;// -9.75
@@ -166,11 +166,6 @@ int main(int argc, char** argv) {
     req_inter.p[3] = PI;
 
     std::swap(req_inter, requested);
-    // req_inter2.p[0] = 220;
-    // req_inter2.p[1] = 0;
-    // req_inter2.p[2] = 150;
-    // req_inter2.p[3] = PI;
-
 
     req_inter2.p[0] = 200;
     req_inter2.p[1] = 0;
@@ -190,13 +185,13 @@ int main(int argc, char** argv) {
     // actions.emplace_back(1, dummy, 0, 4);
     actions.emplace_back(2, dummy, 0, 4);
     actions.emplace_back(16, dummy, 0, 2);
-    actions.emplace_back(4, req_inter2, 0, 10);
-    actions.emplace_back(4, req_inter, 0, 10);
+    actions.emplace_back(8, req_inter2, 0, 10);
+    actions.emplace_back(4, req_inter, 0, 5);
     actions.emplace_back(1, dummy, 0, 4);
 
 
     // Trajectory6 z(robot_current, requested, req_inter, 7);
-    current_trajectory = Trajectory(robot_current, requested, 10);
+    current_trajectory = Trajectory(robot_current, requested, 6);
     // Matrix matr(4);
     // matr.Transpose();
     // HTMatrix matr_2(matr);
@@ -215,13 +210,9 @@ int main(int argc, char** argv) {
         // std::cout << "Uglovi:\t" << requested.j[0] * rad2deg << "\t" << requested.j[1] * rad2deg << "\t" << requested.j[2] * rad2deg<< "\t" << requested.j[3]* rad2deg << std::endl;
         // std::cout << "Trenut:\t" << robot_current.j[0] * rad2deg << "\t" << robot_current.j[1] * rad2deg << "\t" << robot_current.j[2] * rad2deg<< "\t" << robot_current.j[3] * rad2deg<< std::endl;
         pub_vel.header.stamp = ros::Time::now();
-        // pub_vel.velocity.resize(4);
         pub_vel.position.resize(4);
         pub_vel.name.resize(4);
         if(current_trajectory.IsFinished()) NextTrajectory();
-        // auto l = current_trajectory.GetVel(robot_current);
-        // for(int i = 0; i < 4; i++) pub_vel.velocity[i] = l[i];
-        // cpr_vel_pub.publish(pub_vel);
         auto q = current_trajectory.GetPos(robot_current);
         for(int i = 0; i < 4; i++) pub_vel.position[i] = q[i];
         cpr_pos_pub.publish(pub_vel);
