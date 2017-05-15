@@ -47,6 +47,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/String.h>
+// #include <checkers_test/floats.h>
 
 #include "kinematics.h"
 #include "ProtocolCPRCAN.h"

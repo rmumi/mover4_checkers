@@ -153,8 +153,8 @@ void cpr_mover::init(){
 	jointMaxVelocity[5] = 40.0;
 
 	// when starting up (or when reading the HW joint values) the target position has to be aligned with the setPoint position
-	for(int i=0; i<nrOfJoints; i++)
-		targetState.j[i] = setPointState.j[i];
+	// for(int i=0; i<nrOfJoints; i++)
+	// 	targetState.j[i] = setPointState.j[i];
 
 	ovrPercent = 50.0;
 	cycleTime = 50.0;
@@ -209,7 +209,7 @@ void cpr_mover::commandsCallback(const std_msgs::String::ConstPtr& msg){
 	else if( rec == "Reset"){
 		itf.GetJoints( setPointState.j );
 		for(int i=0; i<nrOfJoints; i++)
-			targetState.j[i] = setPointState.j[i];
+			currentState.j[i] = setPointState.j[i];
 		itf.ResetError();
 		ROS_INFO("Reset and load joint position");
 	}

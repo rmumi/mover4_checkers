@@ -20,6 +20,22 @@ void robot_sig_callback(const std_msgs::String &a) {
     if(a.data == "ROBOT_STOP") {
         current_trajectory.Finish();
         actions.clear();
+    } else if (a.data == "ROBOT_RESET") {
+        std_msgs::String _z;
+        _z.data = std::string("Reset");
+        cpr_commands_pub.publish(_z);
+    } else if (a.data == "ROBOT_ENABLE") {
+        std_msgs::String _z;
+        _z.data = std::string("Enable");
+        cpr_commands_pub.publish(_z);
+    } else if (a.data == "ROBOT_DISABLE") {
+        std_msgs::String _z;
+        _z.data = std::string("Disable");
+        cpr_commands_pub.publish(_z);
+    } else if (a.data == "ROBOT_CONNECT") {
+        std_msgs::String _z;
+        _z.data = std::string("Connect");
+        cpr_commands_pub.publish(_z);
     }
 }
 
@@ -135,7 +151,7 @@ int main(int argc, char** argv) {
     cpr_commands_pub = n.advertise<std_msgs::String>("/CPRMoverCommands", 10);
 
     // checkers communication
-    ros::Subscriber point_msg_sub = n.subscribe("/checkers/robot_point_msg", 50, robot_point_msg_callback);
+    ros::Subscriber action_msg_sub = n.subscribe("/checkers/robot_action_msg", 50, robot_point_msg_callback);
     ros::Subscriber robot_sig_sub = n.subscribe("/checkers/robot_sig", 50, robot_sig_callback);
     robot_state_msg_pub = n.advertise<std_msgs::Float64MultiArray>("/checkers/robot_state_msg", 50);
     robot_sig_pub = n.advertise<std_msgs::String>("/checkers/robot_sig", 50);

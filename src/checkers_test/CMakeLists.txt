@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   genmsg
+#  message_generation
   actionlib
   actionlib_msgs
 )
@@ -50,11 +51,11 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
+#add_message_files(
+#    FILES
+#    floats.msg
 #   Message2.msg
-# )
+#)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -111,6 +112,7 @@ catkin_package(
 #  CATKIN_DEPENDS actionlib actionslib_msgs roscpp rospy std_msgs
 #  DEPENDS system_lib
    CATKIN_DEPENDS actionlib_msgs
+#   CATKIN_DEPENDS message_runtime
 )
 
 ###########

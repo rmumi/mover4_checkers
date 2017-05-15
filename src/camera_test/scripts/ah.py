@@ -4,7 +4,7 @@ import roslib
 import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
-from std_msgs.msg import Float64MultiArray
+from std_msgs.msg import Float64MultiArray, MultiArrayDimension
 from cv_bridge import CvBridge, CvBridgeError
 from math import sqrt
 import numpy as np
@@ -14,11 +14,14 @@ import cv2
 from PySide.QtCore import *
 from PySide.QtGui import *
 import sys
+import copy
+import time
 import platform
 
 from ui_main import Ui_MainWindow
 
 __version__ = '0.0.2'
+PI = 3.14159265359
 
 
 class GUI(QMainWindow, Ui_MainWindow):
@@ -49,14 +52,25 @@ class GUI(QMainWindow, Ui_MainWindow):
         self.camera_sig_pub = rospy.Publisher('/checkers/camera_sig', String, queue_size=50)
         self.ai_sig_pub = rospy.Publisher('/checkers/ai_sig', String, queue_size=50)
         self.robot_sig_pub = rospy.Publisher('/checkers/robot_sig', String, queue_size=50)
-        self.robot_point_msg_pub = rospy.Publisher('/checkers/robot_point_msg', Float64MultiArray, queue_size=50)
+        self.robot_action_msg_pub = rospy.Publisher('/checkers/robot_action_msg', Float64MultiArray, queue_size=50)
 
         # All helpers
         self.count = 0
         self.moving = 0  # if the robot is moving
         self.white = 1  # if the board is turned to the robot like he is white
+        self.flags = {
+            "gripper_open": 1,
+            "gripper_close": 2,
+            "to_point": 4,
+            "mid_point": 8,
+            "wait": 16,
+        }
+        # Physical board description, and constants
+        self.wait_from_init = 5
+        self.wait_p2mid = 3
+        self.wait_mid2p = 3
+        self.init_pos = (0, 300)
 
-        # Physical board description
         self.board_h = 50.
         self.board_w = 195.
         self.board_x_dr = 370.
@@ -72,6 +86,10 @@ class GUI(QMainWindow, Ui_MainWindow):
                          for y, x in np.ndindex((8, 8))]
         print self.board_xy
 
+        time.sleep(1)  # to start node for publishing
+
+        # print self.from_numbering_to_xy(1), self.from_numbering_to_xy(5)
+        self.moves_msg_sub_callback(String("1-10"))
 
         frame = self.imageGraphics
         label_Image = QLabel(frame)
@@ -132,7 +150,7 @@ class GUI(QMainWindow, Ui_MainWindow):
             # todo approve moves generation
             pass
         else:
-            print "Ilegal AI signal"
+            print "Illegal AI signal"
 
     def robot_sig_sub_callback(self, msg):
         if msg.data == "ROBOT_GO":
@@ -144,13 +162,69 @@ class GUI(QMainWindow, Ui_MainWindow):
         else:
             pass
 
+    # x
+    # y
+    # z
+    # fi
+    # flags
+    #     gripper_open = flags & 1;
+    #     gripper_close = flags & 2;
+    #     to_point = flags & 4;
+    #     mid_point = flags & 8;
+    #     wait = flags & 16;
+    # orient
+    # wait
+
     def moves_msg_sub_callback(self, msg):
         # the best part
         moves = msg.data.split(';')
         self.moving = 1
-        if len(moves) == 1:
+        all_actions = []
+        if moves[0].find('-') != -1:
+            a, b = map(int, moves[0].split('-'))
+            a_xy = self.from_numbering_to_xy(a)
+            b_xy = self.from_numbering_to_xy(b)
+            p = Float64MultiArray()
+            p.layout.dim.append(MultiArrayDimension())
+            p.layout.dim[0].size = 7
+            p.layout.dim[0].stride = 1
+            p.layout.dim[0].label = "AAA"
+            # open the gripper
+            p.data = [0, 0, 0, 0, self.flags['gripper_open'], 0, 0]
+            all_actions.append(copy.copy(p))
+            # go to figure
+            p.data = [a_xy[0], a_xy[1], 100, PI, self.flags['mid_point'], 0, 7]
+            all_actions.append(copy.copy(p))
+            p.data = [a_xy[0], a_xy[1], 50, PI, self.flags['to_point'], 0, 5]
+            all_actions.append(copy.copy(p))
+            # close gripper
+            p.data = [0, 0, 0, 0, self.flags['gripper_close'], 0, 0]
+            all_actions.append(copy.copy(p))
+            p.data = [0, 0, 0, 0, self.flags['wait'], 0, 1]
+            all_actions.append(copy.copy(p))
+            # go to end-location
+            p.data = [(a_xy[0]+b_xy[0])/2, (a_xy[1]+b_xy[1])/2, 70, PI, self.flags['mid_point'], 0, 2]
+            all_actions.append(copy.copy(p))
+            p.data = [b_xy[0], b_xy[1], 50, PI, self.flags['to_point'], 0, 2]
+            all_actions.append(copy.copy(p))
+            # open gripper
+            p.data = [0, 0, 0, 0, self.flags['gripper_open'], 0, 0]
+            all_actions.append(copy.copy(p))
+            p.data = [0, 0, 0, 0, self.flags['wait'], 0, 1]
+            all_actions.append(copy.copy(p))
+            # back to init pos
+            p.data = [b_xy[0], b_xy[1], 100, PI, self.flags['mid_point'], 0, 5]
+            all_actions.append(copy.copy(p))
+            p.data = [self.init_pos[0], self.init_pos[1], 150, PI, self.flags['to_point'], 0, 7]
+            all_actions.append(copy.copy(p))
+            # publish them all
+            for x in all_actions:
+                print str(x)
+                self.robot_action_msg_pub.publish(x)
+                print "AAA"
+        else:
+
             pass
-        pass
 
     def image_msg_sub_callback(self, msg):
         pass
@@ -159,6 +233,10 @@ class GUI(QMainWindow, Ui_MainWindow):
         pass
 
     def from_numbering_to_xy(self, num):
+        if self.white:
+            return self.board_xy[num * 2 - (1 if (num / 4) % 2 == 0 else 2)]
+        else:
+            return self.board_xy[63 - (num * 2 - (1 if (num / 4) % 2 == 0 else 2))]
         pass
 
 
