@@ -66,10 +66,16 @@ class GUI(QMainWindow, Ui_MainWindow):
             "wait": 16,
         }
         # Physical board description, and constants
-        self.wait_from_init = 5
-        self.wait_p2mid = 3
-        self.wait_mid2p = 3
-        self.init_pos = (0, 300)
+        # self.wait_from_init = 5
+        # self.wait_p2mid = 3
+        # self.wait_mid2p = 3  # how long
+        self.init_pos = (0, 300, 150)  # initial position after every move
+        self.grave_pos = (30, 300, 150)  # position to drop dead men
+        self.figure_h = 50  # just about the figure's height
+        self.above_fig_h = 70  # high above figure
+        self.above_fig_mh = 80  # medium high above figure
+        self.above_fig_vh = 100  # very high above figure
+        self.time_scale = 0.9  # scale speed, lower than 1 is faster
 
         self.board_h = 50.
         self.board_w = 195.
@@ -89,7 +95,7 @@ class GUI(QMainWindow, Ui_MainWindow):
         time.sleep(1)  # to start node for publishing
 
         # print self.from_numbering_to_xy(1), self.from_numbering_to_xy(5)
-        self.moves_msg_sub_callback(String("1-10"))
+        self.moves_msg_sub_callback(String("1x10;10x19"))
 
         frame = self.imageGraphics
         label_Image = QLabel(frame)
@@ -157,11 +163,12 @@ class GUI(QMainWindow, Ui_MainWindow):
             pass
         elif msg.data == "ROBOT_FIN":
             self.moving = 0
-            # todo stop robot counter, start human coutner
+            # todo stop robot counter, start human counter
             # todo myb something more
         else:
             pass
 
+    # structure description in Float64MultiArray
     # x
     # y
     # z
@@ -185,27 +192,23 @@ class GUI(QMainWindow, Ui_MainWindow):
             a_xy = self.from_numbering_to_xy(a)
             b_xy = self.from_numbering_to_xy(b)
             p = Float64MultiArray()
-            p.layout.dim.append(MultiArrayDimension())
-            p.layout.dim[0].size = 7
-            p.layout.dim[0].stride = 1
-            p.layout.dim[0].label = "AAA"
             # open the gripper
             p.data = [0, 0, 0, 0, self.flags['gripper_open'], 0, 0]
             all_actions.append(copy.copy(p))
-            # go to figure
-            p.data = [a_xy[0], a_xy[1], 100, PI, self.flags['mid_point'], 0, 7]
+            # go to figure, from init pos
+            p.data = [a_xy[0], a_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 7]  # could be mid_point
             all_actions.append(copy.copy(p))
-            p.data = [a_xy[0], a_xy[1], 50, PI, self.flags['to_point'], 0, 5]
+            p.data = [a_xy[0], a_xy[1], self.figure_h, PI, self.flags['to_point'], 0, 5]
             all_actions.append(copy.copy(p))
             # close gripper
             p.data = [0, 0, 0, 0, self.flags['gripper_close'], 0, 0]
             all_actions.append(copy.copy(p))
             p.data = [0, 0, 0, 0, self.flags['wait'], 0, 1]
             all_actions.append(copy.copy(p))
-            # go to end-location
-            p.data = [(a_xy[0]+b_xy[0])/2, (a_xy[1]+b_xy[1])/2, 70, PI, self.flags['mid_point'], 0, 2]
+            # go to end-location, can be low as there can be no figure in between
+            p.data = [(a_xy[0]+b_xy[0])/2, (a_xy[1]+b_xy[1])/2, self.above_fig_h, PI, self.flags['mid_point'], 0, 2]
             all_actions.append(copy.copy(p))
-            p.data = [b_xy[0], b_xy[1], 50, PI, self.flags['to_point'], 0, 2]
+            p.data = [b_xy[0], b_xy[1], self.figure_h, PI, self.flags['to_point'], 0, 2]
             all_actions.append(copy.copy(p))
             # open gripper
             p.data = [0, 0, 0, 0, self.flags['gripper_open'], 0, 0]
@@ -213,18 +216,80 @@ class GUI(QMainWindow, Ui_MainWindow):
             p.data = [0, 0, 0, 0, self.flags['wait'], 0, 1]
             all_actions.append(copy.copy(p))
             # back to init pos
-            p.data = [b_xy[0], b_xy[1], 100, PI, self.flags['mid_point'], 0, 5]
+            p.data = [b_xy[0], b_xy[1], self.above_fig_vh, PI, self.flags['mid_point'], 0, 5]
             all_actions.append(copy.copy(p))
-            p.data = [self.init_pos[0], self.init_pos[1], 150, PI, self.flags['to_point'], 0, 7]
+            p.data = [self.init_pos[0], self.init_pos[1], self.init_pos[2], PI, self.flags['to_point'], 0, 7]
             all_actions.append(copy.copy(p))
             # publish them all
             for x in all_actions:
                 print str(x)
+                x.data[6] *= self.time_scale
                 self.robot_action_msg_pub.publish(x)
-                print "AAA"
         else:
+            all_actions = []
+            grave_actions = []
+            a, b = map(int, moves[0].split('x'))
+            a_xy = self.from_numbering_to_xy(a)
+            p = Float64MultiArray()
+            # open the gripper
+            p.data = [0, 0, 0, 0, self.flags['gripper_open'], 0, 0]
+            all_actions.append(copy.copy(p))
+            # go to figure, from init pos
+            p.data = [a_xy[0], a_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 7]  # could be mid_point
+            all_actions.append(copy.copy(p))
+            p.data = [a_xy[0], a_xy[1], self.figure_h, PI, self.flags['to_point'], 0, 5]
+            all_actions.append(copy.copy(p))
+            # close gripper
+            p.data = [0, 0, 0, 0, self.flags['gripper_close'], 0, 0]
+            all_actions.append(copy.copy(p))
+            p.data = [0, 0, 0, 0, self.flags['wait'], 0, 1]
+            all_actions.append(copy.copy(p))
+            for move in moves:
+                a, b = map(int, move.split('x'))
+                a_xy = self.from_numbering_to_xy(a)
+                b_xy = self.from_numbering_to_xy(b)
+                # go to end-location, cannot be low as there is a figure in between
+                p.data = [(a_xy[0] + b_xy[0]) / 2, (a_xy[1] + b_xy[1]) / 2, self.above_fig_mh, PI, self.flags['mid_point'], 0, 3]
+                all_actions.append(copy.copy(p))
+                p.data = [b_xy[0], b_xy[1], self.figure_h, PI, self.flags['to_point'], 0, 3]
+                all_actions.append(copy.copy(p))
+                # add grave action
+                x = int((a + b + 1) / 2)
+                x_xy = self.from_numbering_to_xy(x)
+                p.data = [x_xy[0], x_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 5]
+                grave_actions.append(copy.copy(p))
+                p.data = [x_xy[0], x_xy[1], self.figure_h, PI, self.flags['to_point'], 0, 5]
+                grave_actions.append(copy.copy(p))
+                # close gripper
+                p.data = [0, 0, 0, 0, self.flags['gripper_close'], 0, 0]
+                grave_actions.append(copy.copy(p))
+                p.data = [0, 0, 0, 0, self.flags['wait'], 0, 1]
+                grave_actions.append(copy.copy(p))
+                # go to grave
+                p.data = [x_xy[0], x_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 5]
+                grave_actions.append(copy.copy(p))
+                p.data = [self.grave_pos[0], self.grave_pos[1], self.grave_pos[2], PI, self.flags['to_point'], 0, 5]
+                grave_actions.append(copy.copy(p))
+                # drop the figure
+                p.data = [0, 0, 0, 0, self.flags['gripper_open'], 0, 0]
+                grave_actions.append(copy.copy(p))
+                p.data = [0, 0, 0, 0, self.flags['wait'], 0, 0.5]
+                grave_actions.append(copy.copy(p))
+            # add transition move to grave, open gripper
+            p.data = [0, 0, 0, 0, self.flags['gripper_open'], 0, 0]
+            all_actions.append(copy.copy(p))
+            p.data = [0, 0, 0, 0, self.flags['wait'], 0, 0.5]
+            all_actions.append(copy.copy(p))
+            # add ending move
+            p.data = [self.init_pos[0], self.init_pos[1], self.init_pos[2], PI, self.flags['to_point'], 0, 5]
+            grave_actions.append(copy.copy(p))
+            for x in all_actions:
+                x.data[6] *= self.time_scale
+                self.robot_action_msg_pub.publish(x)
+            for x in grave_actions:
+                x.data[6] *= self.time_scale
+                self.robot_action_msg_pub.publish(x)
 
-            pass
 
     def image_msg_sub_callback(self, msg):
         pass

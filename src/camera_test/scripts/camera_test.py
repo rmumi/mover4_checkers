@@ -2,7 +2,13 @@
 
 # import the necessary packages
 import numpy as np
+import sys
+import time
+import platform
 import cv2
+import rospy
+from std_msgs.msg import String
+from sensor_msgs.msg import Image
 from matplotlib import pyplot as plt
 
 pieces = {
@@ -27,7 +33,7 @@ print_pieces = {
 class Board:
 
     def __init__(self):
-        self.arr = [i%2 for i in range(0, 64)]
+        self.arr = [i % 2 for i in range(0, 64)]
 
     def print_board(self):
         for i in range(8):
@@ -113,21 +119,9 @@ def find_pieces(img):  # must be square image
     return new_board
 
 
-def main():
-    #
-    # cam = cv2.VideoCapture(0)
-    #
-    # ret, frame = cam.read()
-    # cv2.imshow('frame', frame)
-    #
-    # cam.release()
-
-    # load the games image
-    e1 = cv2.getTickCount()
-    image = cv2.imread("/home/rijad/Pictures/Webcam/image13.jpg")
+def get_transform(image):
     # img = cv2.medianBlur(image, 5)
     # img = cv2.bilateralFilter(image, 9, 75, 75)
-    image = cv2.resize(image, None, fx=0.7, fy=0.7, interpolation=cv2.INTER_CUBIC)
     cv2.imshow("Image", image)
     # cv2.waitKey(1000)
 
@@ -176,9 +170,36 @@ def main():
     cv2.drawContours(image, [approx], -1, (0, 0, 255), 4)
     cv2.imshow("Im2", image)
 
+    # go crazy
+    if len(approx) > 4:
+        approx = approx[0:4]
+
+    print len(approx)
+
     approx = rectify(approx)
     h = np.array([[0, 0], [699, 0], [699, 699], [0, 699]], np.float32)
     retval = cv2.getPerspectiveTransform(approx, h)
+    return retval
+
+
+def main():
+    cam = cv2.VideoCapture(0)
+    time.sleep(2)
+    ret, frame = cam.read()
+    cv2.imshow('frame', frame)
+    print frame.shape
+
+
+    e1 = cv2.getTickCount()
+    image = cv2.imread("/home/rijad/Pictures/Webcam/image4.jpg")
+    image = cv2.resize(image, None, fx=0.7, fy=0.7, interpolation=cv2.INTER_CUBIC)
+
+    try:
+        retval = get_transform(image)
+    except:
+        print "Did not work"
+        return
+
     warp = cv2.warpPerspective(image, retval, (700, 700))
     cv2.imshow("Nova", warp)
 
@@ -219,21 +240,15 @@ def main():
         for (x, y, r) in circles:
             cv2.circle(zwarp, (x, y), r, (0, 255, 0), 4)
 
-    # cv2.imshow("Slika", zwarp)
-
-    # b, g, r = cv2.split(zwarp)
-    # b.fill(0)
-    # g.fill(0)
-    # zwarp = cv2.merge((b, g, r))
-    # cv2.imshow("SlikaX", zwarp)
-
-
 
     e2 = cv2.getTickCount()
-    time = (e2 - e1) / cv2.getTickFrequency()
-    print time
+    time_past = (e2 - e1) / cv2.getTickFrequency()
+    print time_past
 
     cv2.waitKey(0)  # & 0xFF
+
+    cam.release()
+
     cv2.destroyAllWindows()
 
 
