@@ -199,11 +199,13 @@ int main(int argc, char** argv) {
         printf("%lf\t", robot_current.j[i]);
     printf("\n");
     // actions.emplace_back(1, dummy, 0, 4);
-    actions.emplace_back(2, dummy, 0, 4);
-    actions.emplace_back(16, dummy, 0, 2);
-    actions.emplace_back(8, req_inter2, 0, 10);
-    actions.emplace_back(4, req_inter, 0, 5);
-    actions.emplace_back(1, dummy, 0, 4);
+
+
+    // actions.emplace_back(2, dummy, 0, 4);
+    // actions.emplace_back(16, dummy, 0, 2);
+    // actions.emplace_back(8, req_inter2, 0, 10);
+    // actions.emplace_back(4, req_inter, 0, 5);
+    // actions.emplace_back(1, dummy, 0, 4);
 
 
     // Trajectory6 z(robot_current, requested, req_inter, 7);
