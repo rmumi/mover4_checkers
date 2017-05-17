@@ -171,8 +171,13 @@ int main(int argc, char** argv) {
     current_trajectory.Finish();
 
     robotState requested, req_inter, req_inter2, dummy;
-    requested.p[0] = 125;
-    requested.p[1] = -102;// -9.75
+    // requested.p[0] = 105;
+    // requested.p[1] = -295;// -9.75
+    // requested.p[2] = 30;
+    // requested.p[3] = PI;
+
+    requested.p[0] = 105+230;
+    requested.p[1] = -295+230;// -9.75
     requested.p[2] = 50;
     requested.p[3] = PI;
 
@@ -181,7 +186,7 @@ int main(int argc, char** argv) {
     req_inter.p[2] = 50;
     req_inter.p[3] = PI;
 
-    std::swap(req_inter, requested);
+    //std::swap(req_inter, requested);
 
     req_inter2.p[0] = 200;
     req_inter2.p[1] = 0;
@@ -190,6 +195,7 @@ int main(int argc, char** argv) {
 
 
     requested = InvKine(requested, 0);
+    // for(int i = 0; i < 4; i++) requested.j[i] = 0;
     req_inter = InvKine(req_inter, 0);
     req_inter2 = InvKine(req_inter2, 0);
     std::cout << "Uglovi:" << requested.j[0] << requested.j[1] << requested.j[2] << requested.j[3] << std::endl;
@@ -209,7 +215,7 @@ int main(int argc, char** argv) {
 
 
     // Trajectory6 z(robot_current, requested, req_inter, 7);
-    current_trajectory = Trajectory(robot_current, requested, 6);
+    current_trajectory = Trajectory(robot_current, requested, 10);
     // Matrix matr(4);
     // matr.Transpose();
     // HTMatrix matr_2(matr);

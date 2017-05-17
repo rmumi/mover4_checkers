@@ -72,7 +72,7 @@ Trajectory::Trajectory(robotState a, robotState b, double tf) {
     for(int i = 0; i < 4; i++) {  // time is normalised
         double th_s = a.j[i];
         double th_f = b.j[i];
-        if(fabs(th_s - th_f) < 1e-3) th_s = th_f;
+        if(fabs(th_s - th_f) < 1e-4) th_s = th_f;
         coef[i][0] = th_s;
         coef[i][1] = 0;
         coef[i][2] = 0;
@@ -120,7 +120,8 @@ vector<double> Trajectory::GetPos(const robotState &robot_current, int tick) {
     double t = (1./update_f * tick)/duration, pt = 1;  // time is normalised
     vector<double> ret(4, 0.0);
     for(int i = 0; i < 4; i++) ret[i] = robot_current.j[i];
-    if(finished) return ret;
+    if(finished) {t=1;//return ret;
+    }
     if(t > 1) {
         t = 1;
         std::cout << "This shouldn't happen twice" << std::endl;
