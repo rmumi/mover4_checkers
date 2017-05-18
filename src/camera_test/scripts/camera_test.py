@@ -29,6 +29,15 @@ print_pieces = {
     5: 'B',
 }
 
+pieces_color = {
+    0: (255, 0, 0),
+    1: (0, 255, 255),
+    2: (255, 0, 255),
+    3: (255, 255, 0),
+    4: (0, 0, 255),
+    5: (0, 255, 0),
+}
+
 
 class Board:
 
@@ -70,17 +79,17 @@ def rectify(h):
 def find_pieces(img):  # must be square image
     #img = cv2.resize(img, (0, 0), fx=0.7, fy=0.7)
     sz = img.shape[0]
-    start_x = int(79./700*sz)
+    start_x = int((700/16.)/700*sz)
     stop_x = int(670./700*sz)
-    start_y = int(79./700*sz)
+    start_y = int((700/16.)/700*sz)
     stop_y = int(670./700*sz)
-    move_x = int(77.5/700*sz)
-    move_y = int(77.5/700*sz)
+    move_x = int((700/8.)/700*sz)
+    move_y = int((700/8.)/700*sz)
     half_len = int(15./700*sz)
-    move_mid = int(10./700*sz)
+    move_mid = 0#int(10./700*sz)
     aku_limit = 100
-    var_limit_w = 700
-    var_limit_b = 100
+    var_limit_w = 200
+    var_limit_b = 40
     new_board = Board()
     count = 0
 
@@ -89,29 +98,35 @@ def find_pieces(img):  # must be square image
             z = img[i-half_len:i+half_len,
                     j + (move_mid, 0)[j < stop_y / 2] - half_len:j + (move_mid, 0)[j < stop_y / 2] + half_len]
             aku = np.mean(z, axis=(0, 1))
-            aku = aku[0] * 0.0722 + aku[1] * 0.7152 + aku[2] * 0.2126
+            aku_gray = aku[0] * 0.0722 + aku[1] * 0.7152 + aku[2] * 0.2126
             var = np.var(z, axis=(0, 1))
             var = sum(var)
-            print var
-
-            if aku > aku_limit:
-                if var < var_limit_w:
+            print var,
+            b, g, r = aku
+            if aku_gray > aku_limit:
+                if r/b < 1.2 and b/g < 1.2:
                     new_board.arr[count] = pieces['white_b']
+                elif var < var_limit_w:
+                    new_board.arr[count] = pieces['white_k']
                 else:
                     new_board.arr[count] = pieces['white_m']
             else:
-                if var < var_limit_b:
+                if r / b > 1.5 and r / g > 1.5:
                     new_board.arr[count] = pieces['black_b']
+                elif var < var_limit_b:
+                    new_board.arr[count] = pieces['black_k']
                 else:
                     new_board.arr[count] = pieces['black_m']
 
             count += 1
+        print ""
 
     count = 0
     for i in range(start_x, stop_x, move_x):
         for j in range(start_y, stop_y, move_y):
+            img = cv2.putText(img, print_pieces[new_board.arr[count]], (j, i), cv2.FONT_HERSHEY_COMPLEX, 2, (0, 0, 255))
             cv2.circle(img, (j + (move_mid, 0)[j < stop_x / 2], i), half_len,
-                       (0 if new_board.arr[count] < 2 else 255, 255 if new_board.arr[count]&1 else 0, 255), -1)
+                       pieces_color[new_board.arr[count]], -1)
             count += 1
 
     cv2.imshow("WATY", img)
@@ -120,160 +135,114 @@ def find_pieces(img):  # must be square image
 
 
 def get_transform(image):
-    # img = cv2.medianBlur(image, 5)
-    # img = cv2.bilateralFilter(image, 9, 75, 75)
-    cv2.imshow("Image", image)
-    # cv2.waitKey(1000)
 
-    # plt.imshow(edges, cmap='gray', interpolation='bicubic')  # cv2.merge([r, g, b]) # img2 = img[:,:,::-1]
-    # plt.show()
-    # cv2.namedWindow('Image')
-    # cv2.createTrackbar('Min', 'Image', 0, 255, nothing)
-    # cv2.createTrackbar('Max', 'Image', 0, 255, nothing)
-    # while 1:
-    #     k = cv2.waitKey(2) & 0xFF
-    #     if k == 27:
-    #         break
-    #     x = cv2.getTrackbarPos('Min', 'Image')
-    #     y = cv2.getTrackbarPos('Max', 'Image')
-    #     upper = np.array([y, y, y])
-    #     lower = np.array([x, x, x])
-    #     mask = cv2.inRange(image, lower, upper)
-    #     cv2.imshow("Image", mask)
-    # cv2.waitKey(13000)
-    # cv2.namedWindow('Image4')
-    # cv2.createTrackbar('Min', 'Image4', 0, 255, nothing)
-    # cv2.createTrackbar('Max', 'Image4', 0, 255, nothing)
+    DRAW_CONTOURS = False
 
-    kernel_sharpen_2 = np.array([[1, 1, 1], [1, -7, 1], [1, 1, 1]])
-    output_2 = cv2.bilateralFilter(image, 9, 75, 75)
-    # output_2 = cv2.filter2D(image, -1, kernel_sharpen_2)
+    cv2.imshow("Image to find board", image)
 
-    edges = cv2.Canny(output_2, 42, 150)
-    cv2.imshow("Im2221", edges)
-    kernel = np.ones((5, 5), np.uint8)
-    # edgesD = cv2.erode(edges, kernel, iterations=1)
-    edgesD = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel, iterations=3)
-    cv2.imshow("Im2242", edgesD)
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    lower_blue = np.array([100, 100, 70])
+    upper_blue = np.array([140, 255, 255])
+    filtered_blue = cv2.inRange(hsv_image, lower_blue, upper_blue)
 
-    # edgesD = cv2.dilate(edgesD, kernel, iterations=3)
+    kernel = np.ones((3, 3), np.uint8)
+    expanded_fblue = cv2.morphologyEx(filtered_blue, cv2.MORPH_DILATE, kernel, iterations=9)
+    expanded_fblue = cv2.morphologyEx(expanded_fblue, cv2.MORPH_ERODE, kernel, iterations=11)
+    expanded_fblue = cv2.morphologyEx(expanded_fblue, cv2.MORPH_DILATE, kernel, iterations=2)
 
+    cv2.imshow("Cleaned blue", expanded_fblue)
 
-    # gradient = cv2.morphologyEx(edges, cv2.MORPH_GRADIENT, kernel)
-    cv2.imshow("Im222", edges)
-    cv2.imshow("Im2223", edgesD)
+    im2, contours, hierarchy = cv2.findContours(expanded_fblue, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 
-    # cv2.waitKey(0)  # & 0xFF
-    #
-    # # cam.release()
-    #
-    # cv2.destroyAllWindows()
-
-
-
-    edges = edgesD
-    im2, contours, hierarchy = cv2.findContours(edges, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
-
-    # print(len(contours))
-    # for c in contours:
-    #     peri = cv2.arcLength(c, True)
-    #     approx = cv2.approxPolyDP(c, 0.05 * peri, True)
-    #     cv2.drawContours(image, [approx], -1, (0, 255, 0), 4)
+    if DRAW_CONTOURS:
+        print(len(contours))
+        for c in contours:
+            peri = cv2.arcLength(c, True)
+            approx = cv2.approxPolyDP(c, 0.05 * peri, True)
+            cv2.drawContours(image, [approx], -1, (0, 255, 0), 4)
 
     c = max(contours, key=cv2.contourArea)
+
+    contours.remove(c)
+
+    c2 = max(contours, key=cv2.contourArea)
+
     peri = cv2.arcLength(c, True)
     approx = cv2.approxPolyDP(c, 0.05 * peri, True)
-    cv2.drawContours(image, [approx], -1, (0, 0, 255), 4)
+    if DRAW_CONTOURS:
+        cv2.drawContours(image, [approx], -1, (0, 0, 255), 4)
+
+    peri2 = cv2.arcLength(c2, True)
+    approx2 = cv2.approxPolyDP(c2, 0.05 * peri, True)
+    if DRAW_CONTOURS:
+        cv2.drawContours(image, [approx2], -1, (0, 0, 255), 4)
     cv2.imshow("Im2", image)
 
     # go crazy
     if len(approx) > 4:
         approx = approx[0:4]
+        print "PROBABLY A BAD PICTURE"
 
     print len(approx)
 
     approx = rectify(approx)
+    approx2 = rectify(approx2)
     h = np.array([[0, 0], [699, 0], [699, 699], [0, 699]], np.float32)
     retval = cv2.getPerspectiveTransform(approx, h)
-    return retval
+    retval2 = cv2.getPerspectiveTransform(approx2, h)
+    return (retval, retval2)
 
 
 def main():
-    cam = cv2.VideoCapture(0)
-    cam.set(3, 1000)
-    cam.set(4, 1000)
-    time.sleep(0.2)
-    ret, frame = cam.read()
-    cv2.imshow('frame', frame)
-
 
     e1 = cv2.getTickCount()
-    image = cv2.imread("/home/rijad/Pictures/Webcam/image3.jpg")
+
+    cam_connected = False
+    if sys.argv[1] == 'cam':
+        cam_connected = True
+        cam = cv2.VideoCapture(0)
+        cam.set(3, 1000)
+        cam.set(4, 1000)
+        time.sleep(0.2)
+        ret, frame = cam.read()
+        cv2.imshow('Camera frame', frame)
+
+    image = cv2.imread("/home/rijad/Pictures/Boards/" + sys.argv[1])
     image = cv2.resize(image, None, fx=0.7, fy=0.7, interpolation=cv2.INTER_CUBIC)
 
-    image = frame
+    if cam_connected:
+        image = frame
 
     # try:
-    retval = get_transform(image)
+    bigger, smaller = get_transform(image)
     # except:
     #     print "Did not work"
     #     return
 
-    warp = cv2.warpPerspective(image, retval, (700, 700))
+    warp = cv2.warpPerspective(image, smaller, (700, 700))
     cv2.imshow("Nova", warp)
 
     DO = True
 
     if DO:
 
-        zwarp = warp
-        warp = cv2.cvtColor(warp, cv2.COLOR_BGR2GRAY)
-        cv2.imshow("Nesto", warp)
-        mask = cv2.cvtColor(zwarp, cv2.COLOR_BGR2GRAY)
-        x = 230 * 2 + 3  # 230 cv2.getTrackbarPos('Min', 'Image4')
-        y = 35  # 58 cv2.getTrackbarPos('Max', 'Image4')
-        maska = cv2.adaptiveThreshold(mask, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, x, y)
-        cv2.imshow("Image4", maska)
-
-        lab = cv2.cvtColor(zwarp, cv2.COLOR_BGR2LAB)
-        l, a, b = cv2.split(lab)
-        # cv2.imshow('l_chh', l)
-        # cv2.imshow('a_chh', a)
-        # cv2.imshow('b_chh', b)
-        clahe = cv2.createCLAHE(clipLimit=2, tileGridSize=(8, 8))
-        cl = clahe.apply(l)
-        cv2.imshow('CLAHE, output', cl)
-        limg = cv2.merge((cl, a, b))
-        final = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
-        cv2.imshow('Final', final)
-        final = cv2.bilateralFilter(final, 7, 75, 75)
-
-        p = find_pieces(final)
+        p = find_pieces(warp)
         p.print_board()
         print p
 
-
-        warp = cv2.cvtColor(zwarp, cv2.COLOR_BGR2GRAY)
-        # ewarp = cv2.Canny(warp, 42, 170)
-        circles = cv2.HoughCircles(warp, method=cv2.HOUGH_GRADIENT, dp=2.1, minDist=30, minRadius=20, maxRadius=60)
-
-        if circles is not None:
-            circles = np.round(circles[0, :]).astype("int")
-
-            for (x, y, r) in circles:
-                cv2.circle(zwarp, (x, y), r, (0, 255, 0), 4)
-
-
+    # check time elapsed
     e2 = cv2.getTickCount()
     time_past = (e2 - e1) / cv2.getTickFrequency()
     print time_past
 
+    # wait for key
     cv2.waitKey(0)  # & 0xFF
 
-    cam.release()
+    if cam_connected:
+        cam.release()
 
     cv2.destroyAllWindows()
-
+    return
 
 if __name__ == "__main__":
     main()
