@@ -8,9 +8,12 @@ import platform
 import cv2
 import rospy
 from std_msgs.msg import String
+from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 from matplotlib import pyplot as plt
+import threading
 
+# helper dicts and variables
 pieces = {
     'white_b': 0,
     'black_b': 1,
@@ -38,6 +41,11 @@ pieces_color = {
     5: (0, 255, 0),
 }
 
+do_spin = False
+cam_connected = False
+cam = None
+pub_board = None
+pub_image = None
 
 class Board:
 
@@ -129,7 +137,7 @@ def find_pieces(img):  # must be square image
                        pieces_color[new_board.arr[count]], -1)
             count += 1
 
-    cv2.imshow("WATY", img)
+    cv2.imshow("Figures found", img)
 
     return new_board
 
@@ -193,42 +201,82 @@ def get_transform(image):
     return (retval, retval2)
 
 
+def get_image():
+    global cam_connected, cam
+
+    if cam_connected:
+        image = []
+    else:
+        image = cv2.imread("../examples/Boards/" + sys.argv[1])
+        image = cv2.resize(image, None, fx=0.7, fy=0.7, interpolation=cv2.INTER_CUBIC)
+
+    if sys.argv[1] == 'cam':
+        ret, frame = cam.read()
+        cv2.imshow('Camera frame', frame)
+        image = frame
+        image = cv2.resize(image, None, fx=0.7, fy=0.7, interpolation=cv2.INTER_CUBIC)
+
+    return image
+
+
+def spinner():
+    global pub_board, pub_image, do_spin
+    rate = rospy.Rate(20)
+
+    image = get_image()
+    bigger, smaller = get_transform(image)
+
+    br = CvBridge()
+
+    while True:
+        image = get_image()
+        warp = cv2.warpPerspective(image, smaller, (700, 700))
+
+        frame_msg = br.cv2_to_imgmsg(warp, "rgb8")
+        pub_image.publish(frame_msg)
+
+        cv2.imshow("Nova", warp)
+
+        # identify pieces
+        p = find_pieces(warp)
+        p.print_board()
+        pub_board.publish(String(str(p)))
+        print p
+        if not do_spin:
+            break
+        # spin with 20 Hz
+        rate.sleep()
+
+
+def camera_sig_callback(msg):
+    if msg.data == "CAMERA_GO":
+        do_spin = True
+    elif msg.data == "CAMERA_STOP":
+        do_spin = False
+
+
 def main():
+    global cam, cam_connected, pub_board, pub_image
+
+    rospy.init_node('checkers_camera')
+
+    rospy.Subscriber('/checkers/camera_sig', String, camera_sig_callback, queue_size=50)
+    pub_board = rospy.Publisher('/checkers/board_msg', String, queue_size=50)
+    pub_image = rospy.Publisher('/checkers/image_mss', Image, queue_size=50)
 
     e1 = cv2.getTickCount()
 
-    cam_connected = False
     if sys.argv[1] == 'cam':
         cam_connected = True
         cam = cv2.VideoCapture(0)
         cam.set(3, 1000)
         cam.set(4, 1000)
-        time.sleep(0.2)
-        ret, frame = cam.read()
-        cv2.imshow('Camera frame', frame)
 
-    image = cv2.imread("/home/rijad/Pictures/Boards/" + sys.argv[1])
-    image = cv2.resize(image, None, fx=0.7, fy=0.7, interpolation=cv2.INTER_CUBIC)
+    time.sleep(0.02)  # wait for node and camera to stabilise
 
-    if cam_connected:
-        image = frame
-
-    # try:
-    bigger, smaller = get_transform(image)
-    # except:
-    #     print "Did not work"
-    #     return
-
-    warp = cv2.warpPerspective(image, smaller, (700, 700))
-    cv2.imshow("Nova", warp)
-
-    DO = True
-
-    if DO:
-
-        p = find_pieces(warp)
-        p.print_board()
-        print p
+    # t = threading.Thread(target=spinner)
+    # t.start()
+    spinner()
 
     # check time elapsed
     e2 = cv2.getTickCount()

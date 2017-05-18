@@ -92,14 +92,13 @@ class GUI(QMainWindow, Ui_MainWindow):
                          for y, x in np.ndindex((8, 8))]
         print self.board_xy
 
-        time.sleep(1)  # to start node for publishing
 
         # print self.from_numbering_to_xy(1), self.from_numbering_to_xy(5)
         self.moves_msg_sub_callback(String("1x10;10x19"))
 
         frame = self.imageGraphics
         label_Image = QLabel(frame)
-        image_path = '/home/rijad/Pictures/Webcam/image1.jpg'  # path to your image file
+        image_path = '../examples/Boards/board4.jpg'  # path to your image file
         image_profile = QImage(image_path)  # QImage object
         image_profile = image_profile.scaled(400, 400, aspectRatioMode=Qt.KeepAspectRatio,
                                              transformMode=Qt.SmoothTransformation)  # To scale image for example and keep its Aspect Ration
@@ -292,6 +291,8 @@ class GUI(QMainWindow, Ui_MainWindow):
 
 
     def image_msg_sub_callback(self, msg):
+        CvBridge().imgmsg_to_cv2(msg)
+
         pass
 
     def robot_state_msg_sub_callback(self, msg):
@@ -305,10 +306,10 @@ class GUI(QMainWindow, Ui_MainWindow):
         pass
 
 
-
 if __name__ == '__main__':
     # Initialize the node
     rospy.init_node('checkers_main')
+    time.sleep(0.2)  # to start node for publishing
 
     # Initialize Qt
     app = QApplication(sys.argv)

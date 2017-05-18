@@ -67,6 +67,6 @@ if __name__ == "__main__":
 
     sub = rospy.Subscriber("/checkers/ai_sig", String, signal_callback, queue_size=50)
 
-    sub_board = rospy.Subscriber("/checkers/board", String, board_callback, queue_size=50)
+    sub_board = rospy.Subscriber("/checkers/board_msg", String, board_callback, queue_size=50)
 
     rospy.spin()
