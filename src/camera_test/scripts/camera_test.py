@@ -184,7 +184,7 @@ def get_transform(image):
     approx2 = cv2.approxPolyDP(c2, 0.05 * peri, True)
     if DRAW_CONTOURS:
         cv2.drawContours(image, [approx2], -1, (0, 0, 255), 4)
-    cv2.imshow("Im2", image)
+    #cv2.imshow("Im2", image)
 
     # go crazy
     if len(approx) > 4:
@@ -235,7 +235,7 @@ def spinner():
         frame_msg = br.cv2_to_imgmsg(warp, "rgb8")
         pub_image.publish(frame_msg)
 
-        cv2.imshow("Nova", warp)
+        # cv2.imshow("Nova", warp)
 
         # identify pieces
         p = find_pieces(warp)

@@ -53,7 +53,7 @@ const static double EpsilonCenter = 5.0;
 const static double a0 = 220;//206;
 const static double a1 = 190;
 const static double a2 = 220;
-const static double a3 = 45 + 95;  // TODO a bit skewed, but OK for now
+const static double a3 = 155;  // TODO a bit skewed, but OK for now
 
 static Matrix DH_par ({  // theta d alpha a
 {0.0, a0, -PI/2, 0},

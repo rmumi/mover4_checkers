@@ -176,26 +176,27 @@ int main(int argc, char** argv) {
     // requested.p[2] = 30;
     // requested.p[3] = PI;
 
-    requested.p[0] = 105+230;
-    requested.p[1] = -295+230;// -9.75
-    requested.p[2] = 50;
+    requested.p[0] = 120;
+    requested.p[1] = -300;// -9.75
+    requested.p[2] = 60;
     requested.p[3] = PI;
 
-    req_inter.p[0] = 220+150;
-    req_inter.p[1] = +90;
-    req_inter.p[2] = 50;
+    req_inter.p[0] = 120+250;
+    req_inter.p[1] = -60;
+    req_inter.p[2] = 60;
     req_inter.p[3] = PI;
 
     //std::swap(req_inter, requested);
 
-    req_inter2.p[0] = 200;
-    req_inter2.p[1] = 0;
-    req_inter2.p[2] = 150;
+    req_inter2.p[0] = 220;
+    req_inter2.p[1] = -255;
+    req_inter2.p[2] = 60;
     req_inter2.p[3] = PI;
 
 
     requested = InvKine(requested, 0);
     // for(int i = 0; i < 4; i++) requested.j[i] = 0;
+    //     requested.j[0] = PI/2;
     req_inter = InvKine(req_inter, 0);
     req_inter2 = InvKine(req_inter2, 0);
     std::cout << "Uglovi:" << requested.j[0] << requested.j[1] << requested.j[2] << requested.j[3] << std::endl;
@@ -206,16 +207,18 @@ int main(int argc, char** argv) {
     printf("\n");
     // actions.emplace_back(1, dummy, 0, 4);
 
-
-    // actions.emplace_back(2, dummy, 0, 4);
-    // actions.emplace_back(16, dummy, 0, 2);
-    // actions.emplace_back(8, req_inter2, 0, 10);
-    // actions.emplace_back(4, req_inter, 0, 5);
-    // actions.emplace_back(1, dummy, 0, 4);
+    actions.emplace_back(4, requested, 0, 5);
+    actions.emplace_back(2, dummy, 0, 4);
+    actions.emplace_back(16, dummy, 0, 2);
+    actions.emplace_back(4, req_inter2, 0, 5);
+    actions.emplace_back(4, req_inter, 0, 5);
+    actions.emplace_back(16, dummy, 0, 5);
+    actions.emplace_back(1, dummy, 0, 4);
+    actions.emplace_back(4, req_inter2, 0, 7);
 
 
     // Trajectory6 z(robot_current, requested, req_inter, 7);
-    current_trajectory = Trajectory(robot_current, requested, 10);
+    current_trajectory = Trajectory(robot_current, req_inter2, 5);
     // Matrix matr(4);
     // matr.Transpose();
     // HTMatrix matr_2(matr);
