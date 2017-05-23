@@ -66,7 +66,7 @@ TeleopPanel::TeleopPanel( QWidget* parent )
 {
 
 	ROS_INFO("CPR RViz Panel V01.5 Nov. 11th, 2016");
-
+    entered = false;
     flagMover4 = true;      // default choice
     flagMover6 = false;
     override_value = 40;    // Value in percent
@@ -100,13 +100,16 @@ TeleopPanel::TeleopPanel( QWidget* parent )
 }
 
 
-
+#define PUB_POS
 
 //********************************************************
 void TeleopPanel::initROS()
 {
 #ifdef PUB_VEL
     velocity_publisher_ = nh_.advertise<sensor_msgs::JointState>( "CPRMoverJointVel", 1 );
+#endif
+#ifdef PUB_POS
+    position_publisher_ = nh_.advertise<sensor_msgs::JointState>( "/CPRMoverJointPos", 1 );
 #endif
     velMsg.name.resize(6);      // prepare the Message, both usable for Mover4 and Mover6
     velMsg.velocity.resize(6);
@@ -123,11 +126,13 @@ void TeleopPanel::initROS()
 //*************************************************************************************
 // receive joint state messages
 void TeleopPanel::jointStateCallback(const sensor_msgs::JointState::ConstPtr& msg){
-    float r2d = 180.0 / 3.141;
-    labelJ0->setText(QString::number( (int)(r2d * msg->position[0]) ));
-    labelJ1->setText(QString::number( (int)(r2d * msg->position[1]) ));
-    labelJ2->setText(QString::number( (int)(r2d * msg->position[2]) ));
-    labelJ3->setText(QString::number( (int)(r2d * msg->position[3]) ));
+    float r2d = 180.0 / 3.14159263;
+    entered = true;
+    std::cout<<"YAY";
+    labelJ0->setText(QString::number( (int)(r2d * (jointPositions[0]=msg->position[0])) ));
+    labelJ1->setText(QString::number( (int)(r2d * (jointPositions[1]=msg->position[1])) ));
+    labelJ2->setText(QString::number( (int)(r2d * (jointPositions[2]=msg->position[2])) ));
+    labelJ3->setText(QString::number( (int)(r2d * (jointPositions[3]=msg->position[3])) ));
 
     if(flagMover6){
         labelJ4->setText(QString::number( (int)(r2d * msg->position[4]) ));
@@ -267,6 +272,44 @@ void TeleopPanel::sendVel()
         for(int i=0; i<6; i++)
             velMsg.velocity[i] = jointVelocities[i];
         velocity_publisher_.publish( velMsg );
+    }
+
+    if( ros::ok() && position_publisher_ && entered)
+    {
+        velMsg.header.stamp = ros::Time::now();
+
+        if(buttonJog0Plus->isDown()) jointVelocities[0] = 50.0;
+        else if(buttonJog0Minus->isDown()) jointVelocities[0] = -50.0;
+        else jointVelocities[0] = 0.0;
+        if(buttonJog1Plus->isDown()) jointVelocities[1] = 50.0;
+        else if(buttonJog1Minus->isDown()) jointVelocities[1] = -50.0;
+        else jointVelocities[1] = 0.0;
+        if(buttonJog2Plus->isDown()) jointVelocities[2] = 50.0;
+        else if(buttonJog2Minus->isDown()) jointVelocities[2] = -50.0;
+        else jointVelocities[2] = 0.0;
+        if(buttonJog3Plus->isDown()) jointVelocities[3] = 50.0;
+        else if(buttonJog3Minus->isDown()) jointVelocities[3] = -50.0;
+        else jointVelocities[3] = 0.0;
+
+        if(flagMover6){
+            if(buttonJog4Plus->isDown()) jointVelocities[4] = 50.0;
+            else if(buttonJog4Minus->isDown()) jointVelocities[4] = -50.0;
+            else jointVelocities[4] = 0.0;
+            if(buttonJog5Plus->isDown()) jointVelocities[5] = 50.0;
+            else if(buttonJog5Minus->isDown()) jointVelocities[5] = -50.0;
+            else jointVelocities[5] = 0.0;
+
+        }
+
+        double alpha = 1/600.;
+        for(int i=0; i<4; i++) {
+            if(i<3 && i>0) alpha = 1/500.;
+            else alpha = 1/600.;
+            velMsg.position[i] = jointPositions[i] + alpha*jointVelocities[i];
+            //std::cerr<<alpha<<std::endl;
+        }
+        position_publisher_.publish( velMsg );
+        
     }
 }
 

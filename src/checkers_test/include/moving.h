@@ -49,11 +49,18 @@ const static double lz3 = 220.0;	// lower arm
 const static double lz4 = 48.0;		// hand
 
 const static double EpsilonCenter = 5.0;
-
+#define DEFAULT
+#ifdef DEFAULT
 const static double a0 = 220;//206;
-const static double a1 = 190;
-const static double a2 = 220;
-const static double a3 = 155;  // TODO a bit skewed, but OK for now
+const static double a1 = 190;//190
+const static double a2 = 220;//225
+const static double a3 = 48 + 95;  // TODO a bit skewed, but OK for now // skewed for 12 mm to the left <- 15 to the back ^
+#else
+const static double a0 = 220;//206;
+const static double a1 = 200;//190
+const static double a2 = 230;//225
+const static double a3 = 150;  // TODO a bit skewed, but OK for now // skewed for 12 mm to the left <- 15 to the back ^
+#endif
 
 static Matrix DH_par ({  // theta d alpha a
 {0.0, a0, -PI/2, 0},

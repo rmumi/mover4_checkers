@@ -114,6 +114,7 @@ protected:
 
     // The ROS publisher/subscriber
     ros::Publisher velocity_publisher_;
+    ros::Publisher position_publisher_;
     ros::Publisher commands_publisher_;
     sensor_msgs::JointState velMsg;
     ros::Subscriber subErrorState_;
@@ -124,8 +125,9 @@ protected:
     // The ROS node handle.
     ros::NodeHandle nh_;
 	
-
+    bool entered;
     float jointVelocities[6];
+    float jointPositions[6];
     QString lastError;
 
 	

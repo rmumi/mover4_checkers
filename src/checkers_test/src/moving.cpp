@@ -113,9 +113,15 @@ robotState ForKine(const robotState &rb) {
 robotState InvKine(const robotState &rb, int way=0) {  // way = {0 - ellbow-up, 1 - ellbow-down, 2 - turned ellbow-down, 3 - turned ellbow-up}
     double phi = rb.p[3];
     double xr = rb.p[0], yr = rb.p[1], zr = rb.p[2];
+    double th0 = atan2(yr, xr);
+    // compensate the gripper offsets, suppose the angle is the almost the same
+    double d = sqrt(15*15 + 12*12);
+    double th_s = atan2(15, 12);
+    xr = xr + d * cos(th_s + th0);
+    yr = yr + d * sin(th_s + th0);
+    th0 = atan2(yr, xr);
     double xm = zr - a0;
     double ym = ((way&2)?-1:1) * sqrt(xr*xr + yr*yr);
-    double th0 = atan2(yr, xr);
     if(way&2) {
         th0 = PI + th0;
         if(th0 > 2*PI - EPS) th0 -= 2*PI;
@@ -176,26 +182,44 @@ int main(int argc, char** argv) {
     // requested.p[2] = 30;
     // requested.p[3] = PI;
 
-    requested.p[0] = 120;
-    requested.p[1] = -300;// -9.75
-    requested.p[2] = 60;
+    // requested.p[0] = 120;
+    // requested.p[1] = -300;// -9.75
+    // requested.p[2] = 70;
+    // requested.p[3] = PI;
+
+    requested.p[0] = 200;
+    requested.p[1] = 0;// -9.75
+    requested.p[2] = 100;
     requested.p[3] = PI;
 
     req_inter.p[0] = 120+250;
     req_inter.p[1] = -60;
-    req_inter.p[2] = 60;
+    req_inter.p[2] = 100;
     req_inter.p[3] = PI;
 
     //std::swap(req_inter, requested);
 
-    req_inter2.p[0] = 220;
-    req_inter2.p[1] = -255;
-    req_inter2.p[2] = 60;
+    // req_inter2.p[0] = 220;
+    // req_inter2.p[1] = -255;
+    // req_inter2.p[2] = 70;
+    // req_inter2.p[3] = PI;
+
+// lower-left
+    // req_inter2.p[0] = 360;
+    // req_inter2.p[1] = -125;
+    // req_inter2.p[2] = 50;
+    // req_inter2.p[3] = PI;
+
+    req_inter2.p[0] = 360;
+    req_inter2.p[1] = 0;
+    req_inter2.p[2] = 66;
     req_inter2.p[3] = PI;
 
 
+
+
     requested = InvKine(requested, 0);
-    // for(int i = 0; i < 4; i++) requested.j[i] = 0;
+   // for(int i = 0; i < 4; i++) requested.j[i] = 0;
     //     requested.j[0] = PI/2;
     req_inter = InvKine(req_inter, 0);
     req_inter2 = InvKine(req_inter2, 0);
@@ -206,19 +230,21 @@ int main(int argc, char** argv) {
         printf("%lf\t", robot_current.j[i]);
     printf("\n");
     // actions.emplace_back(1, dummy, 0, 4);
-
-    actions.emplace_back(4, requested, 0, 5);
-    actions.emplace_back(2, dummy, 0, 4);
-    actions.emplace_back(16, dummy, 0, 2);
-    actions.emplace_back(4, req_inter2, 0, 5);
-    actions.emplace_back(4, req_inter, 0, 5);
-    actions.emplace_back(16, dummy, 0, 5);
-    actions.emplace_back(1, dummy, 0, 4);
+  //  actions.emplace_back(4, requested, 0, 7);
     actions.emplace_back(4, req_inter2, 0, 7);
+   
+//     actions.emplace_back(2, dummy, 0, 4);
+//     actions.emplace_back(16, dummy, 0, 2);
+    
+//     actions.emplace_back(4, req_inter, 0, 5);
+//    // actions.emplace_back(16, dummy, 0, 5);
+//    // actions.emplace_back(1, dummy, 0, 4);
+//     actions.emplace_back(4, req_inter2, 0, 7);
 
 
     // Trajectory6 z(robot_current, requested, req_inter, 7);
     current_trajectory = Trajectory(robot_current, req_inter2, 5);
+    current_trajectory.Finish();
     // Matrix matr(4);
     // matr.Transpose();
     // HTMatrix matr_2(matr);

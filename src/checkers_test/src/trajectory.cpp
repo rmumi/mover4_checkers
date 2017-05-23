@@ -120,7 +120,7 @@ vector<double> Trajectory::GetPos(const robotState &robot_current, int tick) {
     double t = (1./update_f * tick)/duration, pt = 1;  // time is normalised
     vector<double> ret(4, 0.0);
     for(int i = 0; i < 4; i++) ret[i] = robot_current.j[i];
-    if(finished) {t = 1; /*return ret;*/}
+    if(finished) {return ret;}
     if(t > 1) {
         t = 1;
         std::cout << "This shouldn't happen twice" << std::endl;
