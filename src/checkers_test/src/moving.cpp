@@ -219,7 +219,7 @@ int main(int argc, char** argv) {
 
 
     requested = InvKine(requested, 0);
-   // for(int i = 0; i < 4; i++) requested.j[i] = 0;
+    for(int i = 0; i < 4; i++) requested.j[i] = 0;
     //     requested.j[0] = PI/2;
     req_inter = InvKine(req_inter, 0);
     req_inter2 = InvKine(req_inter2, 0);
@@ -231,7 +231,7 @@ int main(int argc, char** argv) {
     printf("\n");
     // actions.emplace_back(1, dummy, 0, 4);
   //  actions.emplace_back(4, requested, 0, 7);
-    actions.emplace_back(4, req_inter2, 0, 7);
+    actions.emplace_back(4, requested, 0, 7);
    
 //     actions.emplace_back(2, dummy, 0, 4);
 //     actions.emplace_back(16, dummy, 0, 2);

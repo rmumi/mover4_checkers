@@ -303,8 +303,9 @@ void TeleopPanel::sendVel()
 
         double alpha = 1/600.;
         for(int i=0; i<4; i++) {
-            if(i<3 && i>0) alpha = 1/500.;
+            if(i<3 && i>0) alpha = 1/470.;
             else alpha = 1/600.;
+            if (i == 2) alpha = 1/400.;
             velMsg.position[i] = jointPositions[i] + alpha*jointVelocities[i];
             //std::cerr<<alpha<<std::endl;
         }

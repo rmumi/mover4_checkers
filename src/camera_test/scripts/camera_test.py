@@ -96,8 +96,8 @@ def find_pieces(img):  # must be square image
     half_len = int(15./700*sz)
     move_mid = 0#int(10./700*sz)
     aku_limit = 100
-    var_limit_w = 200
-    var_limit_b = 40
+    var_limit_w = 150
+    var_limit_b = 21
     new_board = Board()
     count = 0
 
@@ -119,7 +119,7 @@ def find_pieces(img):  # must be square image
                 else:
                     new_board.arr[count] = pieces['white_m']
             else:
-                if r / b > 1.5 and r / g > 1.5:
+                if r / b > 1.2 and r / g > 1.2:
                     new_board.arr[count] = pieces['black_b']
                 elif var < var_limit_b:
                     new_board.arr[count] = pieces['black_k']
@@ -144,19 +144,23 @@ def find_pieces(img):  # must be square image
 
 def get_transform(image):
 
-    DRAW_CONTOURS = False
+    DRAW_CONTOURS = True
 
+    image = cv2.GaussianBlur(image, (5, 5), 0)
     cv2.imshow("Image to find board", image)
 
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    lower_blue = np.array([100, 100, 70])
+    lower_blue = np.array([89, 65, 29])
     upper_blue = np.array([140, 255, 255])
     filtered_blue = cv2.inRange(hsv_image, lower_blue, upper_blue)
 
+    cv2.imshow("filtered blue 22", hsv_image)
+    cv2.imshow("filtered blue", filtered_blue)
+
     kernel = np.ones((3, 3), np.uint8)
-    expanded_fblue = cv2.morphologyEx(filtered_blue, cv2.MORPH_DILATE, kernel, iterations=9)
-    expanded_fblue = cv2.morphologyEx(expanded_fblue, cv2.MORPH_ERODE, kernel, iterations=11)
-    expanded_fblue = cv2.morphologyEx(expanded_fblue, cv2.MORPH_DILATE, kernel, iterations=2)
+    expanded_fblue = cv2.morphologyEx(filtered_blue, cv2.MORPH_DILATE, kernel, iterations=3)
+    expanded_fblue = cv2.morphologyEx(expanded_fblue, cv2.MORPH_ERODE, kernel, iterations=3)
+    # expanded_fblue = cv2.morphologyEx(expanded_fblue, cv2.MORPH_DILATE, kernel, iterations=2)
 
     cv2.imshow("Cleaned blue", expanded_fblue)
 
@@ -171,7 +175,8 @@ def get_transform(image):
 
     c = max(contours, key=cv2.contourArea)
 
-    contours.remove(c)
+    print (contours.index(c))
+    contours.pop(contours.index(c))
 
     c2 = max(contours, key=cv2.contourArea)
 
@@ -184,9 +189,17 @@ def get_transform(image):
     approx2 = cv2.approxPolyDP(c2, 0.05 * peri, True)
     if DRAW_CONTOURS:
         cv2.drawContours(image, [approx2], -1, (0, 0, 255), 4)
-    #cv2.imshow("Im2", image)
+    cv2.imshow("Im32", image)
+
+    # cv2.waitKey(0)  # & 0xFF
+    #
+    # if cam_connected:
+    #     cam.release()
+    #
+    # cv2.destroyAllWindows()
 
     # go crazy
+    print (approx)
     if len(approx) > 4:
         approx = approx[0:4]
         print "PROBABLY A BAD PICTURE"
@@ -224,12 +237,21 @@ def spinner():
     rate = rospy.Rate(20)
 
     image = get_image()
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    l, a, b = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2Lab))
+    l_ch = clahe.apply(l)
+    cv2.merge([l_ch, a, b], image)
+    image = cv2.cvtColor(image, cv2.COLOR_Lab2BGR)
     bigger, smaller = get_transform(image)
 
     br = CvBridge()
 
     while True:
         image = get_image()
+        # l, a, b = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2Lab))
+        # l_ch = clahe.apply(l)
+        # cv2.merge([l_ch, a, b], image)
+        # image = cv2.cvtColor(image, cv2.COLOR_Lab2BGR)
         warp = cv2.warpPerspective(image, smaller, (700, 700))
 
         frame_msg = br.cv2_to_imgmsg(warp, "rgb8")
@@ -269,8 +291,8 @@ def main():
     if sys.argv[1] == 'cam':
         cam_connected = True
         cam = cv2.VideoCapture(0)
-        cam.set(3, 1000)
-        cam.set(4, 1000)
+        cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1000)
+        cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 1000)
 
     time.sleep(0.02)  # wait for node and camera to stabilise
 
