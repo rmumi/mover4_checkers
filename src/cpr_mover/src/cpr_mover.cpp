@@ -270,7 +270,10 @@ void cpr_mover::CommunicationHW(){
 
 	for(int i = 0; i < 4; i++) if(setPointState.j[i] != setPointState.j[i]) {printf("NaN");return;}
 	if(kin.CheckJointMinMax( setPointState.j )) {printf("Over");return;}
-
+	// setPointState.j[0] = 0;
+	// setPointState.j[1] = 13;
+	// setPointState.j[2] = 153;
+	// setPointState.j[3] = 8;
 	for(int i=0; i<nrOfJoints; i++) {
 		itf.SetJoints( setPointState.j );
 	}

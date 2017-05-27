@@ -119,7 +119,7 @@ def find_pieces(img):  # must be square image
                 else:
                     new_board.arr[count] = pieces['white_m']
             else:
-                if r / b > 1.2 and r / g > 1.2:
+                if r / b > 1.4 and r / g > 1.4:
                     new_board.arr[count] = pieces['black_b']
                 elif var < var_limit_b:
                     new_board.arr[count] = pieces['black_k']

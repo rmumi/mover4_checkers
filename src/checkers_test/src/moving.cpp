@@ -154,11 +154,17 @@ void AddActions() {
     a = InvKine(a);
     actions.emplace_back(4, a, 0, 5);
 
+    a.j[0] = 0 * deg2rad;
+    a.j[1] = 0 * deg2rad;
+    a.j[2] = 0 * deg2rad;
+    a.j[3] = 0 * deg2rad;
+    actions.emplace_back(4, a, 0, 10);
+
     a.j[0] = -20 * deg2rad;
     a.j[1] = 30 * deg2rad;
     a.j[2] = 120 * deg2rad;
     a.j[3] = 23 * deg2rad;
-    actions.emplace_back(4, a, 0, 5);
+    actions.emplace_back(4, a, 0, 10);
 
     a.j[0] = -20 * deg2rad;
     a.j[1] = 32 * deg2rad;

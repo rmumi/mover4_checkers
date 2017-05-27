@@ -32,7 +32,7 @@ max_depth = 1
 
 init_board = "bbbbbbbbbbbb________wwwwwwwwwwww"
 last_board = init_board
-current_board = "bbbbbbbb_bbb_b_______www_wwbwww_"
+current_board = init_board#"bbbbbbbb_bbb_b_______www_wwbwww_"
 
 b_moves = {}
 w_moves = {}
@@ -327,7 +327,7 @@ if __name__ == "__main__":
     print (gif(13, 21))
     print (convert_to_full_board(current_board))
     for _ in range(77):
-        x, y = alpha_beta_search(current_board, white=yes, max_depth_s=4)
+        x, y = alpha_beta_search(current_board, white=yes, max_depth_s=7)
         if y == "WON":
             print ("YAY!! ", ("WHITE" if yes else "BLACK") + " WON")
             break

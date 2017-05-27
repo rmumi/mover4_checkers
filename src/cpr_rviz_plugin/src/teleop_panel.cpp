@@ -100,7 +100,7 @@ TeleopPanel::TeleopPanel( QWidget* parent )
 }
 
 
-#define PUB_POS
+//#define PUB_POS
 
 //********************************************************
 void TeleopPanel::initROS()
