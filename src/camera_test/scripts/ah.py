@@ -289,10 +289,16 @@ class GUI(QMainWindow, Ui_MainWindow):
                 x.data[6] *= self.time_scale
                 self.robot_action_msg_pub.publish(x)
 
-
     def image_msg_sub_callback(self, msg):
-        CvBridge().imgmsg_to_cv2(msg)
-
+        image = CvBridge().imgmsg_to_cv2(msg, "bgr8")
+        height, width, channel = image.shape
+        bytes = 3 * width
+        image_profile = QImage(image.data, width, height, bytes, QImage.Format_RGB888)
+        image_profile.scaled(400, 400, aspectRatioMode=Qt.KeepAspectRatio,
+                             transformMode=Qt.SmoothTransformation)  # To scale image for example and keep its Aspect Ration
+        frame = self.imageGraphics
+        label = QLabel(frame)
+        label.setPixmap(QPixmap.fromImage(image_profile))
         pass
 
     def robot_state_msg_sub_callback(self, msg):

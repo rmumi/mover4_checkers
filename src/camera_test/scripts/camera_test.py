@@ -175,10 +175,16 @@ def get_transform(image):
 
     c = max(contours, key=cv2.contourArea)
 
-    print (contours.index(c))
-    contours.pop(contours.index(c))
-
-    c2 = max(contours, key=cv2.contourArea)
+    # print (contours.index(c))
+    # contours.pop(contours.index(c))
+    curr_max = 0
+    real_max = cv2.contourArea(c)
+    c2 = c
+    for x in contours:
+        ar = cv2.contourArea(x)
+        if ar < real_max - 0.001 and curr_max < ar:
+            curr_max = ar
+            c2 = x
 
     peri = cv2.arcLength(c, True)
     approx = cv2.approxPolyDP(c, 0.05 * peri, True)
@@ -186,7 +192,7 @@ def get_transform(image):
         cv2.drawContours(image, [approx], -1, (0, 0, 255), 4)
 
     peri2 = cv2.arcLength(c2, True)
-    approx2 = cv2.approxPolyDP(c2, 0.05 * peri, True)
+    approx2 = cv2.approxPolyDP(c2, 0.05 * peri2, True)
     if DRAW_CONTOURS:
         cv2.drawContours(image, [approx2], -1, (0, 0, 255), 4)
     cv2.imshow("Im32", image)
@@ -254,7 +260,7 @@ def spinner():
         # image = cv2.cvtColor(image, cv2.COLOR_Lab2BGR)
         warp = cv2.warpPerspective(image, smaller, (700, 700))
 
-        frame_msg = br.cv2_to_imgmsg(warp, "rgb8")
+        frame_msg = br.cv2_to_imgmsg(warp, "bgr8")
         pub_image.publish(frame_msg)
 
         # cv2.imshow("Nova", warp)
@@ -284,7 +290,7 @@ def main():
 
     rospy.Subscriber('/checkers/camera_sig', String, camera_sig_callback, queue_size=50)
     pub_board = rospy.Publisher('/checkers/board_msg', String, queue_size=50)
-    pub_image = rospy.Publisher('/checkers/image_mss', Image, queue_size=50)
+    pub_image = rospy.Publisher('/checkers/image_msg', Image, queue_size=50)
 
     e1 = cv2.getTickCount()
 

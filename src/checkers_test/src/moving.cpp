@@ -144,6 +144,125 @@ robotState InvKine(const robotState &rb, int way=0) {  // way = {0 - ellbow-up, 
     return ret;
 }
 
+void AddActions() {
+    robotState a, dummy;
+    actions.emplace_back(1, dummy, 0, 1);
+    a.p[0] = 200;
+    a.p[1] = 0;// -9.75
+    a.p[2] = 100;
+    a.p[3] = PI;
+    a = InvKine(a);
+    actions.emplace_back(4, a, 0, 5);
+
+    a.j[0] = -20 * deg2rad;
+    a.j[1] = 30 * deg2rad;
+    a.j[2] = 120 * deg2rad;
+    a.j[3] = 23 * deg2rad;
+    actions.emplace_back(4, a, 0, 5);
+
+    a.j[0] = -20 * deg2rad;
+    a.j[1] = 32 * deg2rad;
+    a.j[2] = 125 * deg2rad;
+    a.j[3] = 23 * deg2rad;
+    actions.emplace_back(4, a, 0, 1);
+
+    actions.emplace_back(16, dummy, 0, 1);
+    actions.emplace_back(2, dummy, 0, 1);
+
+    actions.emplace_back(4, a, 0, 1);
+    a.j[0] = -20 * deg2rad;
+    a.j[1] = 30 * deg2rad;
+    a.j[2] = 120 * deg2rad;
+    a.j[3] = 23 * deg2rad;
+
+    a.p[0] = 200;
+    a.p[1] = 0;// -9.75
+    a.p[2] = 100;
+    a.p[3] = PI;
+    a = InvKine(a);
+    actions.emplace_back(4, a, 0, 5);
+
+    a.j[0] = 15 * deg2rad;
+    a.j[1] = 45 * deg2rad;
+    a.j[2] = 89 * deg2rad;
+    a.j[3] = 39 * deg2rad;
+    actions.emplace_back(4, a, 0, 5);
+
+    a.j[0] = 15 * deg2rad;
+    a.j[1] = 47 * deg2rad;
+    a.j[2] = 93 * deg2rad;
+    a.j[3] = 39 * deg2rad;
+    actions.emplace_back(4, a, 0, 1);
+    actions.emplace_back(16, dummy, 0, 1);
+
+    a.j[0] = 15 * deg2rad;
+    a.j[1] = 45 * deg2rad;
+    a.j[2] = 89 * deg2rad;
+    a.j[3] = 39 * deg2rad;
+    actions.emplace_back(4, a, 0, 1);
+
+    a.p[0] = 200;
+    a.p[1] = 0;// -9.75
+    a.p[2] = 100;
+    a.p[3] = PI;
+    a = InvKine(a);
+    actions.emplace_back(4, a, 0, 5);
+
+    a.j[0] = 27 * deg2rad;
+    a.j[1] = 29 * deg2rad;
+    a.j[2] = 124 * deg2rad;
+    a.j[3] = 24 * deg2rad;
+    actions.emplace_back(4, a, 0, 5);
+
+    a.j[0] = 27 * deg2rad;
+    a.j[1] = 31 * deg2rad;
+    a.j[2] = 128 * deg2rad;
+    a.j[3] = 24 * deg2rad;
+    actions.emplace_back(4, a, 0, 1);
+    actions.emplace_back(16, dummy, 0, 1);
+
+    a.j[0] = 27 * deg2rad;
+    a.j[1] = 29 * deg2rad;
+    a.j[2] = 124 * deg2rad;
+    a.j[3] = 24 * deg2rad;
+    actions.emplace_back(4, a, 0, 1);
+
+    a.p[0] = 200;
+    a.p[1] = 0;// -9.75
+    a.p[2] = 100;
+    a.p[3] = PI;
+    a = InvKine(a);
+    actions.emplace_back(4, a, 0, 5);
+
+    a.j[0] = -20 * deg2rad;
+    a.j[1] = 30 * deg2rad;
+    a.j[2] = 120 * deg2rad;
+    a.j[3] = 23 * deg2rad;
+    actions.emplace_back(4, a, 0, 5);
+
+    a.j[0] = -20 * deg2rad;
+    a.j[1] = 32 * deg2rad;
+    a.j[2] = 125 * deg2rad;
+    a.j[3] = 23 * deg2rad;
+    actions.emplace_back(4, a, 0, 1);
+
+    actions.emplace_back(16, dummy, 0, 1);
+    actions.emplace_back(1, dummy, 0, 1);
+
+    a.j[0] = -20 * deg2rad;
+    a.j[1] = 30 * deg2rad;
+    a.j[2] = 120 * deg2rad;
+    a.j[3] = 23 * deg2rad;
+    actions.emplace_back(4, a, 0, 1);
+
+    a.p[0] = 200;
+    a.p[1] = 0;// -9.75
+    a.p[2] = 100;
+    a.p[3] = PI;
+    a = InvKine(a);
+    actions.emplace_back(4, a, 0, 5);
+}
+
 int main(int argc, char** argv) {
 
     ros::init(argc, argv, "moving");
@@ -177,15 +296,6 @@ int main(int argc, char** argv) {
     current_trajectory.Finish();
 
     robotState requested, req_inter, req_inter2, dummy;
-    // requested.p[0] = 105;
-    // requested.p[1] = -295;// -9.75
-    // requested.p[2] = 30;
-    // requested.p[3] = PI;
-
-    // requested.p[0] = 120;
-    // requested.p[1] = -300;// -9.75
-    // requested.p[2] = 70;
-    // requested.p[3] = PI;
 
     requested.p[0] = 200;
     requested.p[1] = 0;// -9.75
@@ -196,19 +306,6 @@ int main(int argc, char** argv) {
     req_inter.p[1] = -60;
     req_inter.p[2] = 100;
     req_inter.p[3] = PI;
-
-    //std::swap(req_inter, requested);
-
-    // req_inter2.p[0] = 220;
-    // req_inter2.p[1] = -255;
-    // req_inter2.p[2] = 70;
-    // req_inter2.p[3] = PI;
-
-// lower-left
-    // req_inter2.p[0] = 360;
-    // req_inter2.p[1] = -125;
-    // req_inter2.p[2] = 50;
-    // req_inter2.p[3] = PI;
 
     req_inter2.p[0] = 360;
     req_inter2.p[1] = 0;
@@ -229,13 +326,15 @@ int main(int argc, char** argv) {
     for(int i = 0; i < 4; i++)
         printf("%lf\t", robot_current.j[i]);
     printf("\n");
+
+    AddActions();
     // actions.emplace_back(1, dummy, 0, 4);
   //  actions.emplace_back(4, requested, 0, 7);
-    actions.emplace_back(4, requested, 0, 7);
-   
+    // actions.emplace_back(4, requested, 0, 7);
+
 //     actions.emplace_back(2, dummy, 0, 4);
 //     actions.emplace_back(16, dummy, 0, 2);
-    
+
 //     actions.emplace_back(4, req_inter, 0, 5);
 //    // actions.emplace_back(16, dummy, 0, 5);
 //    // actions.emplace_back(1, dummy, 0, 4);
