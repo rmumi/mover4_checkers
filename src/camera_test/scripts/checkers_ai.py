@@ -3,8 +3,9 @@ import rospy
 from std_msgs.msg import String
 import copy
 from collections import deque
-import cv2
 import sys
+from time import sleep
+
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -28,12 +29,12 @@ print_pieces = {
 }
 
 INF = 100000000
-max_depth = 1
-
+max_depth = 7
+pub_moves = None
+pub_sig = None
 init_board = "bbbbbbbbbbbb________wwwwwwwwwwww"
 last_board = init_board
 current_board = "bbbbbbbb_bbb_b_______www_wwbwww_"
-
 b_moves = {}
 w_moves = {}
 b_jumps = {}
@@ -107,50 +108,6 @@ def from_numbering_to_xy(num):
             (num * 2 - (1 if (num / 4) % 2 == 0 else 2)) % 8 + 1)
 
 
-def signal_callback(msg):
-    global current_board, last_board, init_board
-    if msg.data == "AI_INIT_WHITE":
-        last_board = current_board = str(reversed(init_board))
-    elif msg.data == "AI_INIT_BLACK":
-        last_board = current_board = init_board
-    elif msg.data == "AI_GO_WHITE":
-        pub.publish("22-18")
-    elif msg.data == "AI_GO_BLACK":
-        pub.publish("1x10;10x17")
-
-
-def convert_board(full_board):
-    # TODO checks, rotations, etd.
-    t = ""
-    for x in full_board:
-        if x != '.':
-            t += x
-    return t
-
-
-def convert_to_full_board(board):
-    z = ""
-    flip = False
-    for i in range(32):
-        if not flip:
-            z += '/'
-        z += board[i]
-        if flip:
-            z += '\\'
-        if i % 4 == 3:
-            z += "\n"
-            flip = not flip
-    return z
-
-
-def board_callback(msg):
-    global last_board, current_board
-    tmp = convert_board(msg.data)
-    if tmp and tmp != last_board:
-        last_board = current_board
-        current_board = tmp
-
-
 def gif(z, jump):
     if (z/4) % 2 == 0:
         return int(((z + 1) + jump + 1) / 2) - 1
@@ -181,8 +138,23 @@ def make_move(s_state, move, jump=0):  # makes new state board from the move
     return str(''.join(state))
 
 
+def make_move_str(s_state, s_move):
+    if s_move == 'WON' or s_move == 'LOST':
+        return s_state
+    if '-' in s_move:
+        move = s_move.split(';')[0]
+        print ([int(x) for x in move.split('-')])
+        table = make_move(s_state, [(int(x)-1) for x in move.split('-')], jump=False)
+        return table
+    else:
+        table = s_state
+        for move in s_move.split(';'):
+            if len(move) > 2:
+                table = make_move(table, [(int(x)-1) for x in move.split('x')], jump=True)
+        return table
+
+
 def next_state(s_state, white=0):
-    valid_moves = []
     if len(s_state) != 32:
         raise ValueError('State is not correct')
     states = []
@@ -232,7 +204,6 @@ def next_state(s_state, white=0):
             if not white and (state[i] == 'b' or state[i] == 'B'):
                 if i + 1 in b_moves:
                     for jump in b_moves[i + 1]:
-                        # print jump, gif(i, jump) + 1, i + 1
                         if state[jump - 1] == '_':
                             states.append((make_kings(make_move(state, (i, jump - 1), jump=0)),
                                            prev_moves + str(i + 1) + '-' + str(jump) + ';'))
@@ -255,11 +226,8 @@ def next_state(s_state, white=0):
                             states.append((make_kings(make_move(state, (i, jump - 1), jump=0)),
                                            prev_moves + str(i + 1) + '-' + str(jump) + ';'))
 
-    # for x in states:
-    #     print x, eval_board(x[0])
-
     for _x in states:
-        yield _x  # main thingy
+        yield _x
 
 
 def alpha_beta_search(state, max_depth_s=2, white=False):
@@ -270,7 +238,7 @@ def alpha_beta_search(state, max_depth_s=2, white=False):
         ret_moves = (state, "LOST")
     if v == INF+1:
         ret_moves = (state, "WON")
-    print (v, ret_moves)
+    # print (v, ret_moves)
     return ret_moves
 
 
@@ -312,44 +280,92 @@ def min_search(state, alpha, beta, white, depth):
     return (v, best_moves)
 
 
+def convert_board(full_board):
+    # TODO checks, rotations, etd.
+    t = ""
+    for x in full_board:
+        if x != '.':
+            t += x
+    return t
+
+
+def signal_callback(msg):
+    global current_board, last_board, init_board, pub_sig, pub_moves, max_depth
+    if msg.data == "AI_INIT_WHITE":
+        last_board = current_board = str(reversed(init_board))
+    elif msg.data == "AI_INIT_BLACK":
+        last_board = current_board = init_board
+    elif msg.data == "AI_GO_WHITE":
+        print ("usao sa " + current_board)
+        v, moves = alpha_beta_search(current_board, max_depth_s=max_depth, white=True)
+        pub_moves.publish(moves)
+        current_board = make_move_str(current_board, moves)
+        print("izas sa " + current_board)
+        pub_sig.publish("AI_FINISHED")
+    elif msg.data == "AI_GO_BLACK":
+        v, moves = alpha_beta_search(current_board, max_depth_s=max_depth, white=False)
+        pub_moves.publish(moves)
+        current_board = make_move_str(current_board, moves)
+        pub_sig.publish("AI_FINISHED")
+    elif '=' in msg.data:
+        a = msg.data.split('=')
+        if a[0] == 'MAX_DEPTH':
+            max_depth = int(a[1])
+
+
+def convert_to_full_board(board):
+    z = ""
+    flip = False
+    for i in range(32):
+        if not flip:
+            z += '/'
+        z += board[i]
+        if flip:
+            z += '\\'
+        if i % 4 == 3:
+            z += "\n"
+            flip = not flip
+    return z
+
+
+def board_callback(msg):
+    global last_board, current_board
+    tmp = convert_board(msg.data)
+    if tmp and tmp != last_board:
+        last_board = current_board
+        current_board = tmp
+
+
 if __name__ == "__main__":
-
-    # print convert_board("._._.w._W.w._._.._.w._.bB._._.b.._._._.__.W.b._.._._.b.Bb._._._.")
-    # exit(0)
-    e1 = cv2.getTickCount()
+    global pub_moves, pub_sig, current_board
     calculate_all_moves()
-    # next_state(current_board, white=0)
-    # print from_numbering_to_xy(10)
-    # z = next_state("bbbb_bbbbbbb_b_______wwwwwwbw_w_", white=True)
-    # for l in [convert_to_full_board(x[0]) for x in z]:
-    #     print l
-    yes = True
-    print (gif(13, 21))
-    print (convert_to_full_board(current_board))
-    for _ in range(77):
-        x, y = alpha_beta_search(current_board, white=yes, max_depth_s=4)
-        if y == "WON":
-            print ("YAY!! ", ("WHITE" if yes else "BLACK") + " WON")
-            break
-        current_board = x
-        print ("THIS IS CURR", current_board, yes)
-        yes = not yes
-        print ("Move:", _)
+
+    PLAY_SELF = False
+
+    if PLAY_SELF:
+        yes = True
+        print (gif(13, 21))
         print (convert_to_full_board(current_board))
+        for _ in range(77):
+            x, y = alpha_beta_search(current_board, white=yes, max_depth_s=4)
+            if y == "WON":
+                print ("YAY!! ", ("WHITE" if yes else "BLACK") + " WON")
+                break
+            current_board = x
+            print ("THIS IS CURR", current_board, yes)
+            yes = not yes
+            print ("Move:", _)
+            print (convert_to_full_board(current_board))
 
-    eprint("DONE")
-    e2 = cv2.getTickCount()
-    eprint((e2 - e1) / cv2.getTickFrequency())
-
-
-    # print make_kings(make_move(current_board, (9, 16), jump=1))
-    # print current_board
+        eprint("DONE")
 
     rospy.init_node("checkers_ai")
 
-    pub = rospy.Publisher("/checkers/moves_msg", String, queue_size=50)
+    pub_moves = rospy.Publisher("/checkers/moves_msg", String, queue_size=50)
 
-    sub = rospy.Subscriber("/checkers/ai_sig", String, signal_callback, queue_size=50)
+    pub_sig = rospy.Publisher("/checkers/ai_sig", String, queue_size=50)
+
+    sub_sig = rospy.Subscriber("/checkers/ai_sig", String, signal_callback, queue_size=50)
 
     sub_board = rospy.Subscriber("/checkers/board_msg", String, board_callback, queue_size=50)
 
