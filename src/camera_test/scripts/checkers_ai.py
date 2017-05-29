@@ -34,7 +34,8 @@ pub_moves = None
 pub_sig = None
 init_board = "bbbbbbbbbbbb________wwwwwwwwwwww"
 last_board = init_board
-current_board = "bbbbbbbb_bbb_b_______www_wwbwww_"
+current_board = init_board
+
 b_moves = {}
 w_moves = {}
 b_jumps = {}
