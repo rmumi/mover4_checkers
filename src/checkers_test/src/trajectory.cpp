@@ -120,7 +120,9 @@ vector<double> Trajectory::GetPos(const robotState &robot_current, int tick) {
     double t = (1./update_f * tick)/duration, pt = 1;  // time is normalised
     vector<double> ret(4, 0.0);
     for(int i = 0; i < 4; i++) ret[i] = robot_current.j[i];
-    if(finished) {return ret;}
+    if(finished) { t = 1;
+        //return ret;
+    }
     if(t > 1) {
         t = 1;
         std::cout << "This shouldn't happen twice" << std::endl;
@@ -130,8 +132,8 @@ vector<double> Trajectory::GetPos(const robotState &robot_current, int tick) {
         ret[i] = 0;
         for(int j = 0; j < num_coef; j++, pt *= t)
             ret[i] += coef[i][j] * pt;  // get trajectory angle
-        if(tick == 0)
-        printf("Ugao #%d razlika: curr: %lf new: %lf diff: %lf%%\n", i, robot_current.j[i], ret[i], (ret[i] - robot_current.j[i]) * 180 / PI);
+        if(t >= 0.999)
+        printf("Ugao #%d razlika: curr: %lf new: %lf diff: %lf%%\n", i, robot_current.j[i] * rad2deg, ret[i] * rad2deg, (ret[i] - robot_current.j[i])*100);
     }
     return ret;
 }

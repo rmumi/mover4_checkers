@@ -154,11 +154,11 @@ void AddActions() {
     a = InvKine(a);
     actions.emplace_back(4, a, 0, 5);
 
-    a.j[0] = 0 * deg2rad;
-    a.j[1] = 0 * deg2rad;
-    a.j[2] = 0 * deg2rad;
-    a.j[3] = 0 * deg2rad;
-    actions.emplace_back(4, a, 0, 10);
+    // a.j[0] = 0 * deg2rad;
+    // a.j[1] = 0 * deg2rad;
+    // a.j[2] = 0 * deg2rad;
+    // a.j[3] = 0 * deg2rad;
+    // actions.emplace_back(4, a, 0, 10);
 
     a.j[0] = -20 * deg2rad;
     a.j[1] = 30 * deg2rad;
@@ -348,7 +348,7 @@ int main(int argc, char** argv) {
 
 
     // Trajectory6 z(robot_current, requested, req_inter, 7);
-    current_trajectory = Trajectory(robot_current, req_inter2, 5);
+    current_trajectory = Trajectory(robot_current, robot_current, 5);
     current_trajectory.Finish();
     // Matrix matr(4);
     // matr.Transpose();

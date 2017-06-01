@@ -100,7 +100,7 @@ TeleopPanel::TeleopPanel( QWidget* parent )
 }
 
 
-//#define PUB_POS
+#define PUB_POS
 
 //********************************************************
 void TeleopPanel::initROS()
@@ -274,7 +274,12 @@ void TeleopPanel::sendVel()
         velocity_publisher_.publish( velMsg );
     }
 
-    if( ros::ok() && position_publisher_ && entered)
+    if( ros::ok() && position_publisher_ && entered &&
+        (buttonJog0Plus->isDown() || buttonJog0Minus->isDown() ||
+         buttonJog2Plus->isDown() || buttonJog2Minus->isDown() ||
+         buttonJog3Plus->isDown() || buttonJog3Minus->isDown() ||
+         buttonJog1Plus->isDown() || buttonJog1Minus->isDown())
+        )
     {
         velMsg.header.stamp = ros::Time::now();
 
