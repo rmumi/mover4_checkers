@@ -146,7 +146,7 @@ robotState InvKine(const robotState &rb, int way=0) {  // way = {0 - ellbow-up, 
 
 void AddActions() {
     robotState a, dummy;
-    actions.emplace_back(1, dummy, 0, 1);
+    // actions.emplace_back(1, dummy, 0, 1);
     a.p[0] = 200;
     a.p[1] = 0;// -9.75
     a.p[2] = 100;
@@ -160,113 +160,126 @@ void AddActions() {
     // a.j[3] = 0 * deg2rad;
     // actions.emplace_back(4, a, 0, 10);
 
-    a.j[0] = -20 * deg2rad;
-    a.j[1] = 30 * deg2rad;
-    a.j[2] = 120 * deg2rad;
-    a.j[3] = 23 * deg2rad;
-    actions.emplace_back(4, a, 0, 10);
+    // a.j[0] = -20 * deg2rad;
+    // a.j[1] = 30 * deg2rad;
+    // a.j[2] = 120 * deg2rad;
+    // a.j[3] = 23 * deg2rad;
+    // actions.emplace_back(4, a, 0, 10);
 
-    a.j[0] = -20 * deg2rad;
-    a.j[1] = 32 * deg2rad;
-    a.j[2] = 125 * deg2rad;
-    a.j[3] = 23 * deg2rad;
-    actions.emplace_back(4, a, 0, 1);
+    // a.j[0] = -20 * deg2rad;
+    // a.j[1] = 32 * deg2rad;
+    // a.j[2] = 125 * deg2rad;
+    // a.j[3] = 23 * deg2rad;
+    // actions.emplace_back(4, a, 0, 1);
 
-    actions.emplace_back(16, dummy, 0, 1);
-    actions.emplace_back(2, dummy, 0, 1);
+    // actions.emplace_back(16, dummy, 0, 1);
+    // actions.emplace_back(2, dummy, 0, 1);
 
-    actions.emplace_back(4, a, 0, 1);
-    a.j[0] = -20 * deg2rad;
-    a.j[1] = 30 * deg2rad;
-    a.j[2] = 120 * deg2rad;
-    a.j[3] = 23 * deg2rad;
+    // actions.emplace_back(4, a, 0, 1);
+    // a.j[0] = -20 * deg2rad;
+    // a.j[1] = 30 * deg2rad;
+    // a.j[2] = 120 * deg2rad;
+    // a.j[3] = 23 * deg2rad;
 
-    a.p[0] = 200;
-    a.p[1] = 0;// -9.75
-    a.p[2] = 100;
-    a.p[3] = PI;
-    a = InvKine(a);
+    // a.p[0] = 200;
+    // a.p[1] = 0;// -9.75
+    // a.p[2] = 100;
+    // a.p[3] = PI;
+    // a = InvKine(a);
+    // actions.emplace_back(4, a, 0, 5);
+
+    // a.j[0] = 15 * deg2rad;
+    // a.j[1] = 45 * deg2rad;
+    // a.j[2] = 89 * deg2rad;
+    // a.j[3] = 39 * deg2rad;
+    // actions.emplace_back(4, a, 0, 5);
+
+    // a.j[0] = 15 * deg2rad;
+    // a.j[1] = 47 * deg2rad;
+    // a.j[2] = 93 * deg2rad;
+    // a.j[3] = 39 * deg2rad;
+    // actions.emplace_back(4, a, 0, 1);
+    // actions.emplace_back(16, dummy, 0, 1);
+
+    // a.j[0] = 15 * deg2rad;
+    // a.j[1] = 45 * deg2rad;
+    // a.j[2] = 89 * deg2rad;
+    // a.j[3] = 39 * deg2rad;
+    // actions.emplace_back(4, a, 0, 1);
+
+    // a.p[0] = 200;
+    // a.p[1] = 0;// -9.75
+    // a.p[2] = 100;
+    // a.p[3] = PI;
+    // a = InvKine(a);
+    // actions.emplace_back(4, a, 0, 5);
+
+    // a.j[0] = 27 * deg2rad;
+    // a.j[1] = 29 * deg2rad;
+    // a.j[2] = 124 * deg2rad;
+    // a.j[3] = 24 * deg2rad;
+    // actions.emplace_back(4, a, 0, 5);
+
+    a.j[0] = 27 * deg2rad;
+    a.j[1] = 40 * deg2rad;
+    a.j[2] = 100 * deg2rad;
+    a.j[3] = 24 * deg2rad;
     actions.emplace_back(4, a, 0, 5);
+    // actions.emplace_back(16, dummy, 0, 1);
 
-    a.j[0] = 15 * deg2rad;
-    a.j[1] = 45 * deg2rad;
-    a.j[2] = 89 * deg2rad;
-    a.j[3] = 39 * deg2rad;
-    actions.emplace_back(4, a, 0, 5);
-
-    a.j[0] = 15 * deg2rad;
-    a.j[1] = 47 * deg2rad;
-    a.j[2] = 93 * deg2rad;
-    a.j[3] = 39 * deg2rad;
-    actions.emplace_back(4, a, 0, 1);
-    actions.emplace_back(16, dummy, 0, 1);
-
-    a.j[0] = 15 * deg2rad;
-    a.j[1] = 45 * deg2rad;
-    a.j[2] = 89 * deg2rad;
-    a.j[3] = 39 * deg2rad;
-    actions.emplace_back(4, a, 0, 1);
-
-    a.p[0] = 200;
-    a.p[1] = 0;// -9.75
-    a.p[2] = 100;
-    a.p[3] = PI;
-    a = InvKine(a);
+    a.j[0] = -14 * deg2rad;
+    a.j[1] = 25 * deg2rad;
+    a.j[2] = 132 * deg2rad;
+    a.j[3] = 20 * deg2rad;
     actions.emplace_back(4, a, 0, 5);
 
     a.j[0] = 27 * deg2rad;
-    a.j[1] = 29 * deg2rad;
-    a.j[2] = 124 * deg2rad;
-    a.j[3] = 24 * deg2rad;
-    actions.emplace_back(4, a, 0, 5);
-
-    a.j[0] = 27 * deg2rad;
-    a.j[1] = 31 * deg2rad;
-    a.j[2] = 128 * deg2rad;
-    a.j[3] = 24 * deg2rad;
-    actions.emplace_back(4, a, 0, 1);
-    actions.emplace_back(16, dummy, 0, 1);
-
-    a.j[0] = 27 * deg2rad;
-    a.j[1] = 29 * deg2rad;
-    a.j[2] = 124 * deg2rad;
-    a.j[3] = 24 * deg2rad;
-    actions.emplace_back(4, a, 0, 1);
-
-    a.p[0] = 200;
-    a.p[1] = 0;// -9.75
-    a.p[2] = 100;
-    a.p[3] = PI;
-    a = InvKine(a);
-    actions.emplace_back(4, a, 0, 5);
-
-    a.j[0] = -20 * deg2rad;
     a.j[1] = 30 * deg2rad;
-    a.j[2] = 120 * deg2rad;
-    a.j[3] = 23 * deg2rad;
+    a.j[2] = 90 * deg2rad;
+    a.j[3] = 24 * deg2rad;
     actions.emplace_back(4, a, 0, 5);
 
-    a.j[0] = -20 * deg2rad;
-    a.j[1] = 32 * deg2rad;
-    a.j[2] = 125 * deg2rad;
-    a.j[3] = 23 * deg2rad;
-    actions.emplace_back(4, a, 0, 1);
+    // ovo
+    // a.j[0] = 27 * deg2rad;
+    // a.j[1] = 20 * deg2rad;
+    // a.j[2] = 100 * deg2rad;
+    // a.j[3] = 90 * deg2rad;
+    // actions.emplace_back(4, a, 0, 5);
+
+    // a.p[0] = 200;
+    // a.p[1] = 0;// -9.75
+    // a.p[2] = 100;
+    // a.p[3] = PI;
+    // a = InvKine(a);
+    // actions.emplace_back(4, a, 0, 5);
+
+    // a.j[0] = -20 * deg2rad;
+    // a.j[1] = 30 * deg2rad;
+    // a.j[2] = 120 * deg2rad;
+    // a.j[3] = 23 * deg2rad;
+    // actions.emplace_back(4, a, 0, 5);
+
+    // a.j[0] = -20 * deg2rad;
+    // a.j[1] = 32 * deg2rad;
+    // a.j[2] = 125 * deg2rad;
+    // a.j[3] = 23 * deg2rad;
+    // actions.emplace_back(4, a, 0, 1);
 
     actions.emplace_back(16, dummy, 0, 1);
-    actions.emplace_back(1, dummy, 0, 1);
+    // actions.emplace_back(1, dummy, 0, 1);
+    // ovo
+    // a.j[0] = -20 * deg2rad;
+    // a.j[1] = 30 * deg2rad;
+    // a.j[2] = 120 * deg2rad;
+    // a.j[3] = 23 * deg2rad;
+    // actions.emplace_back(4, a, 0, 5);
 
-    a.j[0] = -20 * deg2rad;
-    a.j[1] = 30 * deg2rad;
-    a.j[2] = 120 * deg2rad;
-    a.j[3] = 23 * deg2rad;
-    actions.emplace_back(4, a, 0, 1);
-
-    a.p[0] = 200;
-    a.p[1] = 0;// -9.75
-    a.p[2] = 100;
-    a.p[3] = PI;
-    a = InvKine(a);
-    actions.emplace_back(4, a, 0, 5);
+    // a.p[0] = 200;
+    // a.p[1] = 0;// -9.75
+    // a.p[2] = 100;
+    // a.p[3] = PI;
+    // a = InvKine(a);
+    // actions.emplace_back(4, a, 0, 5);
 }
 
 int main(int argc, char** argv) {

@@ -175,7 +175,6 @@ void cpr_mover::init(){
 void cpr_mover::mainLoop()
 {
 		ROS_INFO("Starting Mover Main Loop");
-
 	 	for(;;)
 		{
 		// MotionGeneration();			// Generate the joint motion and actuate the gripper
@@ -198,13 +197,24 @@ void cpr_mover::mainLoop()
 // Here we receive the discrete commands like Connect, Reset, Enable
 // the commands are forwarded to the interface class
 void cpr_mover::commandsCallback(const std_msgs::String::ConstPtr& msg){
-
+	static int setovao = 0;
 	ROS_INFO("CMD: %s ", msg->data.c_str());  // This was commented
 	std::string rec = msg->data;
 
 	if( rec == "Connect"){
 		itf.Connect();
 		ROS_INFO("Connect");
+		if(setovao == 0) {
+			setovao = 1;
+			// 2 joint overcur ~10000
+			// 3 joint > 15000 ZN
+			// 4 joint 2800 ZN
+			int P[4] = {	2000,	3000,  3000,    1000};
+			int I[4] = {	 500,    500,	750,    750};
+			int D[4] = {	 200,      300,   300,     500};
+			itf.SetPID(P, I, D);
+			itf.GetPID();
+		}
 	}
 	else if( rec == "Reset"){
 		itf.GetJoints( setPointState.j );
@@ -274,6 +284,8 @@ void cpr_mover::CommunicationHW(){
 	// setPointState.j[1] = 13;
 	// setPointState.j[2] = 153;
 	// setPointState.j[3] = 8;
+	// itf.GetPID();
+
 	for(int i=0; i<nrOfJoints; i++) {
 		itf.SetJoints( setPointState.j );
 	}
@@ -282,7 +294,7 @@ void cpr_mover::CommunicationHW(){
 	// 	float ju[6];
 	// 	itf.GetJoints( ju );
 	// 	for(int i = 0; i < 4; i++) setPointState.j[i] = ju[i];
-	// 	//itf.GetPID();
+	
 	// }
 
 	// for(int i=0; i<4;i++) setPointState.j[i] = ju[i];

@@ -35,6 +35,8 @@ public:
 
 	void SetJoints(float * j);
 	void GetJoints(float * j);
+	void GetPID();
+	void SetPID(int*, int*, int*);
 	std::string GetErrorMsg();
 
 	void ResetJointsToZero();

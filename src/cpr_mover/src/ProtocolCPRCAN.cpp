@@ -142,7 +142,7 @@ void ProtocolCPRCAN::SetJoints(float * j){
 }
 
 //*****************************************************
-void ProtocolCPRCAN::GetJoints(float * j){
+void ProtocolCPRCAN::GetJoints(float * j) {
 
 	int l = 0;
 	unsigned char data[8];
@@ -152,6 +152,88 @@ void ProtocolCPRCAN::GetJoints(float * j){
 		j[i] =  ((((float)((256*((unsigned int)data[2]))+((unsigned int)data[3]))) - ticsZero[i]) / ticsPerDegree[i]);
 	}
 }
+
+
+//*****************************************************
+void ProtocolCPRCAN::GetPID() {
+	int id = 16;
+	int l = 2;				// length for position commands: 5 byte. for velocity commands 4 bytes
+	unsigned char data[8] = {0x03, 0x51};
+	unsigned char r_data[9] = {};
+	wait3(5);
+	for(int i = 0; i < nrOfJoints; i++) {
+		l = 2;
+		itf.WriteMessage(jointIDs[i], l, data);
+		wait3(5);
+		itf.GetLastMessage(jointIDs[i]+1, &l, r_data);
+		wait3(5);
+		printf("R_data for joint %d:\t", i);
+		for(int x = 0; x < 8; x++) {
+			printf("\t%d", r_data[x]);
+		}
+		printf("\n");
+	}
+
+}
+
+void ProtocolCPRCAN::SetPID(int* P, int* I, int* D) {
+	int id = 16;
+	int l = 4;				// length for position commands: 5 byte. for velocity commands 4 bytes
+	unsigned char data[8] = {0x02, 0x41};
+	unsigned char r_data[9] = {};
+	wait3(5);
+	// for I component
+	for(int i = 0; i < nrOfJoints; i++) {
+		l = 4;
+		data[2] = (I[i]>>8)&(0xFF);
+		data[3] = I[i]&(0xFF);
+		itf.WriteMessage(jointIDs[i], l, data);
+		wait3(5);
+		//itf.GetLastMessage(jointIDs[i]+1, &l, r_data);
+		wait3(5);
+		printf("I for joint %d:\t", i);
+		for(int x = 0; x < 8; x++) {
+			printf("\t%d", data[x]);
+		}
+		printf("\n");
+	}
+	// for P component
+	data[1] = 0x40;
+	wait3(5);
+	for(int i = 0; i < nrOfJoints; i++) {
+		l = 4;
+		data[2] = (P[i]>>8)&(0xFF);
+		data[3] = P[i]&(0xFF);
+		itf.WriteMessage(jointIDs[i], l, data);
+		wait3(5);
+		//itf.GetLastMessage(jointIDs[i]+1, &l, r_data);
+		wait3(5);
+		printf("P for joint %d:\t", i);
+		for(int x = 0; x < 8; x++) {
+			printf("\t%d", data[x]);
+		}
+		printf("\n");
+	}
+
+	// for D component
+	data[1] = 0x42;
+	wait3(5);
+	for(int i = 0; i < nrOfJoints; i++) {
+		l = 4;
+		data[2] = (D[i]>>8)&(0xFF);
+		data[3] = D[i]&(0xFF);
+		itf.WriteMessage(jointIDs[i], l, data);
+		wait3(5);
+		//itf.GetLastMessage(jointIDs[i]+1, &l, r_data);
+		wait3(5);
+		printf("D for joint %d:\t", i);
+		for(int x = 0; x < 8; x++) {
+			printf("\t%d", data[x]);
+		}
+		printf("\n");
+	}
+}
+
 
 //******************************************************
 std::string ProtocolCPRCAN::GetErrorMsg(){
