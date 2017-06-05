@@ -147,12 +147,21 @@ robotState InvKine(const robotState &rb, int way=0) {  // way = {0 - ellbow-up, 
 void AddActions() {
     robotState a, dummy;
     // actions.emplace_back(1, dummy, 0, 1);
-    a.p[0] = 200;
-    a.p[1] = 0;// -9.75
-    a.p[2] = 100;
-    a.p[3] = PI;
-    a = InvKine(a);
-    actions.emplace_back(4, a, 0, 5);
+    // a.p[0] = 130;
+    // a.p[1] = 0;// -9.75
+    // a.p[2] = 50;
+    // a.p[3] = PI;
+    // a = InvKine(a);
+    // actions.emplace_back(4, a, 0, 7);
+
+    // actions.emplace_back(16, dummy, 0, 2);
+
+    // a.p[0] = 350;
+    // a.p[1] = -120;// -9.75
+    // a.p[2] = 50;
+    // a.p[3] = PI;
+    // a = InvKine(a);
+    // actions.emplace_back(4, a, 0, 7);
 
     // a.j[0] = 0 * deg2rad;
     // a.j[1] = 0 * deg2rad;
@@ -220,24 +229,24 @@ void AddActions() {
     // a.j[3] = 24 * deg2rad;
     // actions.emplace_back(4, a, 0, 5);
 
-    a.j[0] = 27 * deg2rad;
-    a.j[1] = 40 * deg2rad;
-    a.j[2] = 100 * deg2rad;
-    a.j[3] = 24 * deg2rad;
+    a.j[0] = 19 * deg2rad;
+    a.j[1] = 54 * deg2rad;
+    a.j[2] = 78 * deg2rad;
+    a.j[3] = 47 * deg2rad;
     actions.emplace_back(4, a, 0, 5);
     // actions.emplace_back(16, dummy, 0, 1);
 
-    a.j[0] = -14 * deg2rad;
-    a.j[1] = 25 * deg2rad;
-    a.j[2] = 132 * deg2rad;
-    a.j[3] = 20 * deg2rad;
+    a.j[0] = 12 * deg2rad;
+    a.j[1] = 57 * deg2rad;
+    a.j[2] = 71 * deg2rad;
+    a.j[3] = 48 * deg2rad;
     actions.emplace_back(4, a, 0, 5);
 
-    a.j[0] = 27 * deg2rad;
-    a.j[1] = 30 * deg2rad;
-    a.j[2] = 90 * deg2rad;
-    a.j[3] = 24 * deg2rad;
-    actions.emplace_back(4, a, 0, 5);
+    // a.j[0] = 27 * deg2rad;
+    // a.j[1] = 30 * deg2rad;
+    // a.j[2] = 90 * deg2rad;
+    // a.j[3] = 24 * deg2rad;
+    // actions.emplace_back(4, a, 0, 5);
 
     // ovo
     // a.j[0] = 27 * deg2rad;
