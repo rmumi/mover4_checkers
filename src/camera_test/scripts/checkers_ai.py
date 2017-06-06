@@ -366,8 +366,8 @@ if __name__ == "__main__":
 
     pub_sig = rospy.Publisher("/checkers/ai_sig", String, queue_size=50)
 
-    sub_sig = rospy.Subscriber("/checkers/ai_sig", String, signal_callback, queue_size=50)
+    rospy.Subscriber("/checkers/ai_sig", String, signal_callback, queue_size=50)
 
-    sub_board = rospy.Subscriber("/checkers/board_msg", String, board_callback, queue_size=50)
+    rospy.Subscriber("/checkers/board_msg", String, board_callback, queue_size=50)
 
     rospy.spin()

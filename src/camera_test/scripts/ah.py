@@ -6,7 +6,9 @@ from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from std_msgs.msg import Float64MultiArray, MultiArrayDimension
 from cv_bridge import CvBridge, CvBridgeError
+import threading
 from math import sqrt
+from PySide.QtCore import QObject, Signal, Slot
 import numpy as np
 
 import PySide
@@ -90,19 +92,23 @@ class GUI(QMainWindow, Ui_MainWindow):
         self.board_xy = [(self.board_x_dr + x * self.board_v_x[0] + y * self.board_v_y[0],
                           self.board_y_dr + x * self.board_v_x[1] + y * self.board_v_y[1])
                          for y, x in np.ndindex((8, 8))]
-        print self.board_xy
+        # print self.board_xy
 
 
         # print self.from_numbering_to_xy(1), self.from_numbering_to_xy(5)
         self.moves_msg_sub_callback(String("1x10;10x19"))
 
         frame = self.imageGraphics
-        label_Image = QLabel(frame)
-        image_path = '../examples/Boards/board4.jpg'  # path to your image file
-        image_profile = QImage(image_path)  # QImage object
-        image_profile = image_profile.scaled(400, 400, aspectRatioMode=Qt.KeepAspectRatio,
-                                             transformMode=Qt.SmoothTransformation)  # To scale image for example and keep its Aspect Ration
-        label_Image.setPixmap(QPixmap.fromImage(image_profile))
+        # label_Image = QLabel(frame)
+        # image_path = '../examples/Boards/board4.jpg'  # path to your image file
+        # image_profile = QImage(image_path)  # QImage object
+        # image_profile = image_profile.scaled(400, 400, aspectRatioMode=Qt.KeepAspectRatio,
+        #                                      transformMode=Qt.SmoothTransformation)  # To scale image for example and keep its Aspect Ration
+        # label_Image.setPixmap(QPixmap.fromImage(image_profile))
+        print(threading.current_thread())
+
+        self.signal_image_update = ImageSignal()
+        self.signal_image_update.signaler.connect(self.new_image_set)
 
 
     def initWhiteButton_callback(self):
@@ -289,16 +295,27 @@ class GUI(QMainWindow, Ui_MainWindow):
                 x.data[6] *= self.time_scale
                 self.robot_action_msg_pub.publish(x)
 
-    def image_msg_sub_callback(self, msg):
-        image = CvBridge().imgmsg_to_cv2(msg, "bgr8")
-        height, width, channel = image.shape
-        bytes = 3 * width
-        image_profile = QImage(image.data, width, height, bytes, QImage.Format_RGB888)
+    @Slot(QImage)
+    def new_image_set(self, image_profile):
+
         image_profile.scaled(400, 400, aspectRatioMode=Qt.KeepAspectRatio,
                              transformMode=Qt.SmoothTransformation)  # To scale image for example and keep its Aspect Ration
+        print image_profile.height(), image_profile.width()
         frame = self.imageGraphics
         label = QLabel(frame)
         label.setPixmap(QPixmap.fromImage(image_profile))
+        label.show()
+        print("We were called" + str(threading.current_thread()))
+
+    def image_msg_sub_callback(self, msg):
+        image = CvBridge().imgmsg_to_cv2(msg, "rgb8")
+        image = cv2.resize(image, (400, 400))
+        height, width, channel = image.shape
+        bytes = 3 * width
+        image_profile = QImage(image.data, width, height, bytes, QImage.Format_RGB888)
+
+        print("It has come to this" + str(threading.current_thread()))
+        self.signal_image_update.signaler.emit(image_profile)
         pass
 
     def robot_state_msg_sub_callback(self, msg):
@@ -311,6 +328,13 @@ class GUI(QMainWindow, Ui_MainWindow):
             return self.board_xy[63 - (num * 2 - (1 if (num / 4) % 2 == 0 else 2))]
         pass
 
+
+class ImageSignal(QObject):
+
+    signaler = Signal(QImage)
+
+    def __init__(self):
+        super(ImageSignal, self).__init__()
 
 if __name__ == '__main__':
     # Initialize the node

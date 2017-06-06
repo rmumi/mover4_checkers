@@ -10,6 +10,7 @@ import rospy
 from std_msgs.msg import String
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
+import copy
 from matplotlib import pyplot as plt
 import threading
 
@@ -46,9 +47,10 @@ cam_connected = False
 cam = None
 pub_board = None
 pub_image = None
+rot = 1  # camera is 0 ( 1 2 ..), 1 (-90 clockwise), 2 (+180), 3 (+90 clockwise)
+
 
 class Board:
-
     def __init__(self):
         self.arr = [i % 2 for i in range(0, 64)]
 
@@ -60,32 +62,37 @@ class Board:
 
     def __str__(self):
         s = ""
+        # if self.rot == 0:
         for x in self.arr:
             s += print_pieces[x]
+        # elif self.rot == 1:
+        #     for x in range()
+        # elif self.rot == 2:
+        #     for x in range(63, -1, -1):
+        #         s += print_pieces[x]
+        # elif self.rot == 3:
+        #     pass
         return s
 
 
-def nothing(x):
-    pass
-
-
 def rectify(h):
-    h = h.reshape((4, 2))
-    hnew = np.zeros((4, 2), dtype=np.float32)
+    try:
+        h = h.reshape((4, 2))
+    except:
+        return None
+    h_new = np.zeros((4, 2), dtype=np.float32)
 
     add = h.sum(1)
-    hnew[0] = h[np.argmin(add)]
-    hnew[2] = h[np.argmax(add)]
+    h_new[0] = h[np.argmin(add)]
+    h_new[2] = h[np.argmax(add)]
 
     diff = np.diff(h, axis=1)
-    hnew[1] = h[np.argmin(diff)]
-    hnew[3] = h[np.argmax(diff)]
-
-    return hnew
+    h_new[1] = h[np.argmin(diff)]
+    h_new[3] = h[np.argmax(diff)]
+    return np.roll(h_new, 2)
 
 
 def find_pieces(img):  # must be square image
-    #img = cv2.resize(img, (0, 0), fx=0.7, fy=0.7)
     sz = img.shape[0]
     start_x = int((700/16.)/700*sz)
     stop_x = int(670./700*sz)
@@ -94,7 +101,7 @@ def find_pieces(img):  # must be square image
     move_x = int((700/8.)/700*sz)
     move_y = int((700/8.)/700*sz)
     half_len = int(15./700*sz)
-    move_mid = 0#int(10./700*sz)
+    move_mid = 0  # int(10./700*sz)
     aku_limit = 100
     var_limit_w = 150
     var_limit_b = 21
@@ -139,7 +146,8 @@ def find_pieces(img):  # must be square image
 
     cv2.imshow("Figures found", img)
 
-    return new_board
+    return (new_board, img)
+        # {'board': new_board, 'image': img}
 
 
 def get_transform(image):
@@ -254,19 +262,19 @@ def spinner():
 
     while True:
         image = get_image()
-        # l, a, b = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2Lab))
-        # l_ch = clahe.apply(l)
-        # cv2.merge([l_ch, a, b], image)
-        # image = cv2.cvtColor(image, cv2.COLOR_Lab2BGR)
         warp = cv2.warpPerspective(image, smaller, (700, 700))
 
         frame_msg = br.cv2_to_imgmsg(warp, "bgr8")
-        pub_image.publish(frame_msg)
+
 
         # cv2.imshow("Nova", warp)
 
         # identify pieces
-        p = find_pieces(warp)
+        # z = find_pieces(warp)
+        # p = z['board']
+        # img = z['image']
+        p, img = find_pieces(warp)
+        pub_image.publish(br.cv2_to_imgmsg(img, "bgr8"))
         p.print_board()
         pub_board.publish(String(str(p)))
         print p
