@@ -4,6 +4,8 @@
         "iostream": "cpp",
         "*.ipp": "cpp",
         "array": "cpp",
-        "chrono": "cpp"
+        "chrono": "cpp",
+        "cmath": "cpp",
+        "complex": "cpp"
     }
 }

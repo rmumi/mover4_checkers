@@ -239,7 +239,7 @@ def alpha_beta_search(state, max_depth_s=2, white=False):
         ret_moves = (state, "LOST")
     if v == INF+1:
         ret_moves = (state, "WON")
-    # print (v, ret_moves)
+    print (v, ret_moves)
     return ret_moves
 
 
@@ -334,7 +334,9 @@ def board_callback(msg):
     tmp = convert_board(msg.data)
     if tmp and tmp != last_board:
         last_board = current_board
+		
         current_board = tmp
+        print (current_board)
 
 
 if __name__ == "__main__":

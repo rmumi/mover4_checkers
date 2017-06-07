@@ -115,8 +115,13 @@ robotState InvKine(const robotState &rb, int way=0) {  // way = {0 - ellbow-up, 
     double xr = rb.p[0], yr = rb.p[1], zr = rb.p[2];
     double th0 = atan2(yr, xr);
     // compensate the gripper offsets, suppose the angle is the almost the same
-    double d = sqrt(15*15 + 12*12);
-    double th_s = atan2(15, 12);
+    // double d = sqrt(15*15 + 12*12);
+    // double th_s = atan2(15, 12);
+    // xr = xr + d * cos(th_s + th0);
+    // yr = yr + d * sin(th_s + th0);
+    // th0 = atan2(yr, xr);
+    double d = sqrt(10*10);
+    double th_s = atan2(0, 10);
     xr = xr + d * cos(th_s + th0);
     yr = yr + d * sin(th_s + th0);
     th0 = atan2(yr, xr);
@@ -147,13 +152,29 @@ robotState InvKine(const robotState &rb, int way=0) {  // way = {0 - ellbow-up, 
 void AddActions() {
     robotState a, dummy;
     // actions.emplace_back(1, dummy, 0, 1);
-    // a.p[0] = 130;
+
+    // a.p[0] = 200;
     // a.p[1] = 0;// -9.75
-    // a.p[2] = 50;
+    // a.p[2] = 150;
     // a.p[3] = PI;
     // a = InvKine(a);
     // actions.emplace_back(4, a, 0, 7);
 
+    // a.p[0] = 125;
+    // a.p[1] = -105;// -9.75
+    // a.p[2] = 70;
+    // a.p[3] = PI;
+    // a = InvKine(a);
+    // actions.emplace_back(4, a, 0, 5);
+    // // 125.0, -105.0
+    // // 335.0, 105.0
+
+    // a.p[0] = 125;//335;
+    // a.p[1] = 105;// -9.75
+    // a.p[2] = 70;
+    // a.p[3] = PI;
+    // a = InvKine(a);
+    // actions.emplace_back(4, a, 0, 5);
     // actions.emplace_back(16, dummy, 0, 2);
 
     // a.p[0] = 350;
@@ -229,18 +250,18 @@ void AddActions() {
     // a.j[3] = 24 * deg2rad;
     // actions.emplace_back(4, a, 0, 5);
 
-    a.j[0] = 19 * deg2rad;
-    a.j[1] = 54 * deg2rad;
-    a.j[2] = 78 * deg2rad;
-    a.j[3] = 47 * deg2rad;
-    actions.emplace_back(4, a, 0, 5);
+    // a.j[0] = 19 * deg2rad;
+    // a.j[1] = 54 * deg2rad;
+    // a.j[2] = 78 * deg2rad;
+    // a.j[3] = 47 * deg2rad;
+    // actions.emplace_back(4, a, 0, 5);
     // actions.emplace_back(16, dummy, 0, 1);
 
-    a.j[0] = 12 * deg2rad;
-    a.j[1] = 57 * deg2rad;
-    a.j[2] = 71 * deg2rad;
-    a.j[3] = 48 * deg2rad;
-    actions.emplace_back(4, a, 0, 5);
+    // a.j[0] = 12 * deg2rad;
+    // a.j[1] = 57 * deg2rad;
+    // a.j[2] = 71 * deg2rad;
+    // a.j[3] = 48 * deg2rad;
+    // actions.emplace_back(4, a, 0, 5);
 
     // a.j[0] = 27 * deg2rad;
     // a.j[1] = 30 * deg2rad;

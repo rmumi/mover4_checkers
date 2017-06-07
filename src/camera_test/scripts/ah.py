@@ -73,7 +73,7 @@ class GUI(QMainWindow, Ui_MainWindow):
         # self.wait_mid2p = 3  # how long
         self.init_pos = (0, 300, 150)  # initial position after every move
         self.grave_pos = (30, 300, 150)  # position to drop dead men
-        self.figure_h = 50  # just about the figure's height
+        # self.figure_h = 50  # just about the figure's height
         self.above_fig_h = 70  # high above figure
         self.above_fig_mh = 80  # medium high above figure
         self.above_fig_vh = 100  # very high above figure
@@ -81,10 +81,10 @@ class GUI(QMainWindow, Ui_MainWindow):
 
         # self.board_h = 50.
         # self.board_w = 195.
-        self.board_x_dr = 370.
-        self.board_y_dr = 125.
-        self.board_x_ul = 125.
-        self.board_y_ul = -125.
+        self.board_x_dr = 335.
+        self.board_y_dr = 105.
+        self.board_x_ul = 126.
+        self.board_y_ul = -105.
         self.board_v_x = (1 / 14. * (+(self.board_x_ul - self.board_x_dr) - (self.board_y_ul - self.board_y_dr)),
                           1 / 14. * (+(self.board_x_ul - self.board_x_dr) + (self.board_y_ul - self.board_y_dr)))
         self.board_v_y = (1 / 14. * (+(self.board_x_ul - self.board_x_dr) + (self.board_y_ul - self.board_y_dr)),
@@ -92,11 +92,11 @@ class GUI(QMainWindow, Ui_MainWindow):
         self.board_xy = [(self.board_x_dr + x * self.board_v_x[0] + y * self.board_v_y[0],
                           self.board_y_dr + x * self.board_v_x[1] + y * self.board_v_y[1])
                          for y, x in np.ndindex((8, 8))]
-        # print self.board_xy
+        print self.board_xy
 
 
         # print self.from_numbering_to_xy(1), self.from_numbering_to_xy(5)
-        self.moves_msg_sub_callback(String("1x10;10x19"))
+        # self.moves_msg_sub_callback(String("1x10;10x19"))
 
         frame = self.imageGraphics
         # label_Image = QLabel(frame)
@@ -203,7 +203,7 @@ class GUI(QMainWindow, Ui_MainWindow):
             # go to figure, from init pos
             p.data = [a_xy[0], a_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 7]  # could be mid_point
             all_actions.append(copy.copy(p))
-            p.data = [a_xy[0], a_xy[1], self.figure_h, PI, self.flags['to_point'], 0, 5]
+            p.data = [a_xy[0], a_xy[1], self.figure_h(a), PI, self.flags['to_point'], 0, 5]
             all_actions.append(copy.copy(p))
             # close gripper
             p.data = [0, 0, 0, 0, self.flags['gripper_close'], 0, 0]
@@ -213,7 +213,7 @@ class GUI(QMainWindow, Ui_MainWindow):
             # go to end-location, can be low as there can be no figure in between
             p.data = [(a_xy[0]+b_xy[0])/2, (a_xy[1]+b_xy[1])/2, self.above_fig_h, PI, self.flags['mid_point'], 0, 2]
             all_actions.append(copy.copy(p))
-            p.data = [b_xy[0], b_xy[1], self.figure_h, PI, self.flags['to_point'], 0, 2]
+            p.data = [b_xy[0], b_xy[1], self.figure_h(b), PI, self.flags['to_point'], 0, 2]
             all_actions.append(copy.copy(p))
             # open gripper
             p.data = [0, 0, 0, 0, self.flags['gripper_open'], 0, 0]
@@ -221,7 +221,7 @@ class GUI(QMainWindow, Ui_MainWindow):
             p.data = [0, 0, 0, 0, self.flags['wait'], 0, 1]
             all_actions.append(copy.copy(p))
             # back to init pos
-            p.data = [b_xy[0], b_xy[1], self.above_fig_vh, PI, self.flags['mid_point'], 0, 5]
+            p.data = [b_xy[0], b_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 5]
             all_actions.append(copy.copy(p))
             p.data = [self.init_pos[0], self.init_pos[1], self.init_pos[2], PI, self.flags['to_point'], 0, 7]
             all_actions.append(copy.copy(p))
@@ -242,7 +242,7 @@ class GUI(QMainWindow, Ui_MainWindow):
             # go to figure, from init pos
             p.data = [a_xy[0], a_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 7]  # could be mid_point
             all_actions.append(copy.copy(p))
-            p.data = [a_xy[0], a_xy[1], self.figure_h, PI, self.flags['to_point'], 0, 5]
+            p.data = [a_xy[0], a_xy[1], self.figure_h(a), PI, self.flags['to_point'], 0, 5]
             all_actions.append(copy.copy(p))
             # close gripper
             p.data = [0, 0, 0, 0, self.flags['gripper_close'], 0, 0]
@@ -256,14 +256,14 @@ class GUI(QMainWindow, Ui_MainWindow):
                 # go to end-location, cannot be low as there is a figure in between
                 p.data = [(a_xy[0] + b_xy[0]) / 2, (a_xy[1] + b_xy[1]) / 2, self.above_fig_mh, PI, self.flags['mid_point'], 0, 3]
                 all_actions.append(copy.copy(p))
-                p.data = [b_xy[0], b_xy[1], self.figure_h, PI, self.flags['to_point'], 0, 3]
+                p.data = [b_xy[0], b_xy[1], self.figure_h(b), PI, self.flags['to_point'], 0, 3]
                 all_actions.append(copy.copy(p))
                 # add grave action
-                x = int((a + b + 1) / 2)
+                x = int((a + b) / 2)  # todo this doesn't work
                 x_xy = self.from_numbering_to_xy(x)
                 p.data = [x_xy[0], x_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 5]
                 grave_actions.append(copy.copy(p))
-                p.data = [x_xy[0], x_xy[1], self.figure_h, PI, self.flags['to_point'], 0, 5]
+                p.data = [x_xy[0], x_xy[1], self.figure_h(x), PI, self.flags['to_point'], 0, 5]
                 grave_actions.append(copy.copy(p))
                 # close gripper
                 p.data = [0, 0, 0, 0, self.flags['gripper_close'], 0, 0]
@@ -323,10 +323,13 @@ class GUI(QMainWindow, Ui_MainWindow):
 
     def from_numbering_to_xy(self, num):
         if self.white:
-            return self.board_xy[num * 2 - (1 if (num / 4) % 2 == 0 else 2)]
+            return self.board_xy[num * 2 - (1 if ((num-1) / 4) % 2 == 0 else 2)]
         else:
-            return self.board_xy[63 - (num * 2 - (1 if (num / 4) % 2 == 0 else 2))]
+            return self.board_xy[63 - (num * 2 - (1 if ((num-1) / 4) % 2 == 0 else 2))]
         pass
+
+    def figure_h(self, num):
+        return 50 - ((num-1) / 4) * 1.5
 
 
 class ImageSignal(QObject):
