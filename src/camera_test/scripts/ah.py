@@ -79,12 +79,12 @@ class GUI(QMainWindow, Ui_MainWindow):
         self.above_fig_vh = 100  # very high above figure
         self.time_scale = 0.9  # scale speed, lower than 1 is faster
 
-        self.board_h = 50.
-        self.board_w = 195.
+        # self.board_h = 50.
+        # self.board_w = 195.
         self.board_x_dr = 370.
-        self.board_y_dr = 90.
+        self.board_y_dr = 125.
         self.board_x_ul = 125.
-        self.board_y_ul = -102.
+        self.board_y_ul = -125.
         self.board_v_x = (1 / 14. * (+(self.board_x_ul - self.board_x_dr) - (self.board_y_ul - self.board_y_dr)),
                           1 / 14. * (+(self.board_x_ul - self.board_x_dr) + (self.board_y_ul - self.board_y_dr)))
         self.board_v_y = (1 / 14. * (+(self.board_x_ul - self.board_x_dr) + (self.board_y_ul - self.board_y_dr)),
@@ -155,7 +155,7 @@ class GUI(QMainWindow, Ui_MainWindow):
             print "Ilegal CAMERA signal"
 
     def ai_sig_sub_callback(self, msg):
-        if msg.data == "AI_GO":
+        if msg.data == "AI_GO_WHITE" or msg.data == "AI_GO_BLACK":
             pass
         elif msg.data == "AI_FIN":
             # todo approve moves generation

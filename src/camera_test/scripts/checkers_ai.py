@@ -144,7 +144,7 @@ def make_move_str(s_state, s_move):
         return s_state
     if '-' in s_move:
         move = s_move.split(';')[0]
-        print ([int(x) for x in move.split('-')])
+        # print ([int(x) for x in move.split('-')])
         table = make_move(s_state, [(int(x)-1) for x in move.split('-')], jump=False)
         return table
     else:
@@ -297,11 +297,11 @@ def signal_callback(msg):
     elif msg.data == "AI_INIT_BLACK":
         last_board = current_board = init_board
     elif msg.data == "AI_GO_WHITE":
-        print ("usao sa " + current_board)
+        # print ("usao sa " + current_board)
         v, moves = alpha_beta_search(current_board, max_depth_s=max_depth, white=True)
         pub_moves.publish(moves)
         current_board = make_move_str(current_board, moves)
-        print("izas sa " + current_board)
+        # print("izas sa " + current_board)
         pub_sig.publish("AI_FINISHED")
     elif msg.data == "AI_GO_BLACK":
         v, moves = alpha_beta_search(current_board, max_depth_s=max_depth, white=False)
@@ -348,7 +348,7 @@ if __name__ == "__main__":
         print (gif(13, 21))
         print (convert_to_full_board(current_board))
         for _ in range(77):
-            x, y = alpha_beta_search(current_board, white=yes, max_depth_s=4)
+            x, y = alpha_beta_search(current_board, white=yes, max_depth_s=9)
             if y == "WON":
                 print ("YAY!! ", ("WHITE" if yes else "BLACK") + " WON")
                 break
