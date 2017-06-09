@@ -120,11 +120,11 @@ robotState InvKine(const robotState &rb, int way=0) {  // way = {0 - ellbow-up, 
     // xr = xr + d * cos(th_s + th0);
     // yr = yr + d * sin(th_s + th0);
     // th0 = atan2(yr, xr);
-    double d = sqrt(10*10);
-    double th_s = atan2(0, 10);
+    double d = sqrt(14*14 + 11*11);
+    double th_s = 0;atan2(11, 14);
     xr = xr + d * cos(th_s + th0);
     yr = yr + d * sin(th_s + th0);
-    th0 = atan2(yr, xr);
+    th0 = atan2(yr, xr);// + 20./sqrt(xr*xr + yr*yr);
     double xm = zr - a0;
     double ym = ((way&2)?-1:1) * sqrt(xr*xr + yr*yr);
     if(way&2) {

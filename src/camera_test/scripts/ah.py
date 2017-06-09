@@ -41,6 +41,10 @@ class GUI(QMainWindow, Ui_MainWindow):
         self.disableMotorsButton.clicked.connect(self.disableMotorsButton_callback)
         self.initWhiteButton.clicked.connect(self.initWhiteButton_callback)
         self.initBlackButton.clicked.connect(self.initBlackButton_callback)
+        self.gotoXYZButton.clicked.connect(self.gotoXYZButton_callback)
+        self.gotoSqButton.clicked.connect(self.gotoSqButton_callback)
+        self.gripperCloseButton.clicked.connect(self.gripperCloseButton_callback)
+        self.gripperOpenButton.clicked.connect(self.gripperOpenButton_callback)
 
         # All subscriptions
         self.camera_sig_sub = rospy.Subscriber('/checkers/camera_sig', String, self.camera_sig_sub_callback, queue_size=50)
@@ -81,10 +85,10 @@ class GUI(QMainWindow, Ui_MainWindow):
 
         # self.board_h = 50.
         # self.board_w = 195.
-        self.board_x_dr = 335.
-        self.board_y_dr = 105.
+        self.board_x_dr = 126+208.
+        self.board_y_dr = 104.
         self.board_x_ul = 126.
-        self.board_y_ul = -105.
+        self.board_y_ul = -104.
         self.board_v_x = (1 / 14. * (+(self.board_x_ul - self.board_x_dr) - (self.board_y_ul - self.board_y_dr)),
                           1 / 14. * (+(self.board_x_ul - self.board_x_dr) + (self.board_y_ul - self.board_y_dr)))
         self.board_v_y = (1 / 14. * (+(self.board_x_ul - self.board_x_dr) + (self.board_y_ul - self.board_y_dr)),
@@ -98,7 +102,7 @@ class GUI(QMainWindow, Ui_MainWindow):
         # print self.from_numbering_to_xy(1), self.from_numbering_to_xy(5)
         # self.moves_msg_sub_callback(String("1x10;10x19"))
 
-        frame = self.imageGraphics
+        # frame = self.imageGraphics
         # label_Image = QLabel(frame)
         # image_path = '../examples/Boards/board4.jpg'  # path to your image file
         # image_profile = QImage(image_path)  # QImage object
@@ -106,9 +110,19 @@ class GUI(QMainWindow, Ui_MainWindow):
         #                                      transformMode=Qt.SmoothTransformation)  # To scale image for example and keep its Aspect Ration
         # label_Image.setPixmap(QPixmap.fromImage(image_profile))
         print(threading.current_thread())
-
+        print self.xLine.displayText()
+        self.xLine.setText("AAAAA" + str(3.553))
+        print self.xLine.displayText()
         self.signal_image_update = ImageSignal()
         self.signal_image_update.signaler.connect(self.new_image_set)
+
+        # init lines
+        self.xLine.setText("200")
+        self.yLine.setText("200")
+        self.zLine.setText("200")
+        self.fLine.setText("3.1415")
+        self.tLine.setText("10")
+        self.sqLine.setText("10")
 
 
     def initWhiteButton_callback(self):
@@ -250,6 +264,8 @@ class GUI(QMainWindow, Ui_MainWindow):
             p.data = [0, 0, 0, 0, self.flags['wait'], 0, 1]
             all_actions.append(copy.copy(p))
             for move in moves:
+                if len(move) < 1:
+                    break
                 a, b = map(int, move.split('x'))
                 a_xy = self.from_numbering_to_xy(a)
                 b_xy = self.from_numbering_to_xy(b)
@@ -319,7 +335,10 @@ class GUI(QMainWindow, Ui_MainWindow):
         pass
 
     def robot_state_msg_sub_callback(self, msg):
-        pass
+        alle = ""
+        for x in msg.data:
+            alle = alle + str(x) + "\n"
+        self.allInfo.setText(alle)
 
     def from_numbering_to_xy(self, num):
         if self.white:
@@ -330,6 +349,49 @@ class GUI(QMainWindow, Ui_MainWindow):
 
     def figure_h(self, num):
         return 50 - ((num-1) / 4) * 1.5
+
+
+    def gotoXYZButton_callback(self):
+        try:
+            x = float(self.xLine.displayText())
+            y = float(self.yLine.displayText())
+            z = float(self.zLine.displayText())
+            fi = float(self.fLine.displayText())
+            tm = float(self.tLine.displayText())
+            if z < 20:
+                raise "To low"
+            if tm < 3:
+                raise "To fast"
+            p = Float64MultiArray()
+            p.data = [x, y, z, fi, self.flags['to_point'], 0, tm]
+            self.robot_action_msg_pub.publish(p)
+        except:
+            print("Failed to do gotoXYZ")
+
+    def gotoSqButton_callback(self):
+        # try:
+        sq = int(self.sqLine.displayText())
+        if sq < 1 or sq > 32:
+            raise "Not a real square"
+        print sq
+        p = Float64MultiArray()
+        x_xy = self.from_numbering_to_xy(sq)
+        p.data = [x_xy[0], x_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 5]
+        self.robot_action_msg_pub.publish(copy.copy(p))
+        p.data = [x_xy[0], x_xy[1], self.figure_h(sq), PI, self.flags['to_point'], 0, 5]
+        self.robot_action_msg_pub.publish(copy.copy(p))
+        # except:
+        #     print("Failed to do gotoSq")
+
+    def gripperOpenButton_callback(self):
+        p = Float64MultiArray()
+        p.data = [0, 0, 0, 0, self.flags['gripper_open'], 0, 0]
+        self.robot_action_msg_pub.publish(p)
+
+    def gripperCloseButton_callback(self):
+        p = Float64MultiArray()
+        p.data = [0, 0, 0, 0, self.flags['gripper_close'], 0, 0]
+        self.robot_action_msg_pub.publish(p)
 
 
 class ImageSignal(QObject):

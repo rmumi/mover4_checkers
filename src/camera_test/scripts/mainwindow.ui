@@ -20,7 +20,7 @@
       <x>10</x>
       <y>10</y>
       <width>91</width>
-      <height>261</height>
+      <height>405</height>
      </rect>
     </property>
     <layout class="QFormLayout" name="formLayout">
@@ -48,14 +48,14 @@
      <item row="6" column="0">
       <widget class="QPushButton" name="enableMotorsButton">
        <property name="text">
-        <string>Motors En</string>
+        <string>Motor En</string>
        </property>
       </widget>
      </item>
      <item row="7" column="0">
       <widget class="QPushButton" name="disableMotorsButton">
        <property name="text">
-        <string>Motors Dis</string>
+        <string>Motor Dis</string>
        </property>
       </widget>
      </item>
@@ -87,6 +87,34 @@
        </property>
       </widget>
      </item>
+     <item row="10" column="0">
+      <widget class="QPushButton" name="gotoXYZButton">
+       <property name="text">
+        <string>Goto XYZ</string>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="0">
+      <widget class="QPushButton" name="gotoSqButton">
+       <property name="text">
+        <string>Goto Sq</string>
+       </property>
+      </widget>
+     </item>
+     <item row="12" column="0">
+      <widget class="QPushButton" name="gripperOpenButton">
+       <property name="text">
+        <string>GOpen</string>
+       </property>
+      </widget>
+     </item>
+     <item row="13" column="0">
+      <widget class="QPushButton" name="gripperCloseButton">
+       <property name="text">
+        <string>GClose</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
    <widget class="QGraphicsView" name="imageGraphics">
@@ -99,21 +127,11 @@
      </rect>
     </property>
    </widget>
-   <widget class="QListView" name="robotStateList">
-    <property name="geometry">
-     <rect>
-      <x>120</x>
-      <y>210</y>
-      <width>141</width>
-      <height>197</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QLineEdit" name="yLine">
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>150</y>
+      <y>90</y>
       <width>113</width>
       <height>22</height>
      </rect>
@@ -123,7 +141,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>180</y>
+      <y>120</y>
       <width>113</width>
       <height>22</height>
      </rect>
@@ -133,7 +151,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>120</y>
+      <y>60</y>
       <width>113</width>
       <height>22</height>
      </rect>
@@ -143,7 +161,7 @@
     <property name="geometry">
      <rect>
       <x>130</x>
-      <y>123</y>
+      <y>63</y>
       <width>16</width>
       <height>16</height>
      </rect>
@@ -156,7 +174,7 @@
     <property name="geometry">
      <rect>
       <x>130</x>
-      <y>154</y>
+      <y>94</y>
       <width>16</width>
       <height>16</height>
      </rect>
@@ -169,7 +187,7 @@
     <property name="geometry">
      <rect>
       <x>130</x>
-      <y>183</y>
+      <y>123</y>
       <width>16</width>
       <height>16</height>
      </rect>
@@ -178,14 +196,86 @@
      <string>Z:</string>
     </property>
    </widget>
-   <widget class="QPlainTextEdit" name="plainTextEdit">
+   <widget class="QLineEdit" name="sqLine">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>20</y>
+      <width>113</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>20</y>
+      <width>41</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Field:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>105</x>
+      <y>153</y>
+      <width>41</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Theta:Z:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="fLine">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>150</y>
+      <width>113</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="tLine">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>180</y>
+      <width>113</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>180</y>
+      <width>41</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Time:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="allInfo">
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>10</y>
+      <y>220</y>
       <width>141</width>
-      <height>101</height>
+      <height>181</height>
      </rect>
+    </property>
+    <property name="text">
+     <string>All Info</string>
     </property>
    </widget>
   </widget>
@@ -195,7 +285,7 @@
      <x>0</x>
      <y>0</y>
      <width>697</width>
-     <height>19</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

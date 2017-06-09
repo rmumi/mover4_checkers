@@ -350,7 +350,7 @@ if __name__ == "__main__":
         print (gif(13, 21))
         print (convert_to_full_board(current_board))
         for _ in range(77):
-            x, y = alpha_beta_search(current_board, white=yes, max_depth_s=9)
+            x, y = alpha_beta_search(current_board, white=yes, max_depth_s=3)
             if y == "WON":
                 print ("YAY!! ", ("WHITE" if yes else "BLACK") + " WON")
                 break
