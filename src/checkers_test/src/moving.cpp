@@ -106,7 +106,37 @@ void NextTrajectory() {
 }
 
 robotState ForKine(const robotState &rb) {
-
+    HTMatrix A (vector<vector<double>> (
+        {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}})
+    );
+    double th[] = { rb.j[0] + DH_par[0][0],
+                    rb.j[1] + DH_par[1][0],
+                    rb.j[2] + DH_par[2][0],
+                    rb.j[3] + DH_par[3][0]};
+    for(int i = 0; i < 4; i++) {
+        A *= HTMatrix ({{cos(th[i]), -sin(th[i]), 0, 0},
+                        {sin(th[i]), cos(th[i]), 0, 0},
+                        {0, 0, 1, DH_par[i][1]},
+                        {0, 0, 0, 1}});
+        A *= HTMatrix ({{1, 0, 0, DH_par[i][3]},
+                        {0, cos(DH_par[i][2]), -sin(DH_par[i][2]), 0},
+                        {0, sin(DH_par[i][2]), cos(DH_par[i][2]), 0},
+                        {0, 0, 0, 1}});
+    }
+    for(int i = 0; i < 4; i++) {
+        for(int j = 0; j < 4; j++) {
+            printf("%.2lf\t", A[i][j]);
+        }
+        printf("\n");
+    }
+    auto p (A.GetPosVec());
+    auto R (A.GetRot());
+    robotState z;
+    for(int i = 0; i < 3; i++) z.p[i] = p[i];
+    z.p[3] = atan2(R[1][2], R[0][2]);
+    z.p[4] = atan2(sqrt(R[0][2]*R[0][2] + R[1][2]*R[1][2]), R[2][2]);
+    z.p[5] = atan2(R[2][1], -R[2][0]);
+    return z;
 }
 
 // TODO check if the position is reachable
@@ -120,11 +150,14 @@ robotState InvKine(const robotState &rb, int way=0) {  // way = {0 - ellbow-up, 
     // xr = xr + d * cos(th_s + th0);
     // yr = yr + d * sin(th_s + th0);
     // th0 = atan2(yr, xr);
-    double d = sqrt(14*14 + 11*11);
-    double th_s = 0;atan2(11, 14);
-    xr = xr + d * cos(th_s + th0);
-    yr = yr + d * sin(th_s + th0);
-    th0 = atan2(yr, xr);// + 20./sqrt(xr*xr + yr*yr);
+
+    // double d = sqrt(14*14 + 11*11);
+    // double th_s = atan2(11, 14);
+    // xr = xr + d * cos(th_s + th0);
+    // yr = yr + d * sin(th_s + th0);
+    // th0 = atan2(yr, xr);// + 20./sqrt(xr*xr + yr*yr);
+
+
     double xm = zr - a0;
     double ym = ((way&2)?-1:1) * sqrt(xr*xr + yr*yr);
     if(way&2) {
@@ -347,7 +380,7 @@ int main(int argc, char** argv) {
     robotState requested, req_inter, req_inter2, dummy;
 
     requested.p[0] = 200;
-    requested.p[1] = 0;// -9.75
+    requested.p[1] = 100;// -9.75
     requested.p[2] = 100;
     requested.p[3] = PI;
 
@@ -361,9 +394,19 @@ int main(int argc, char** argv) {
     req_inter2.p[2] = 66;
     req_inter2.p[3] = PI;
 
+    robotState zp;
+    zp.j[0] = 2*deg2rad;
+    zp.j[1] = 90*deg2rad;
+    zp.j[2] = 2*deg2rad;
+    zp.j[3] = -2*deg2rad;
+    printf("Opa Gangam Style\n");
+    auto fl_d(ForKine(zp/*InvKine(requested)*/));
+    for(int i = 0; i < 6; i++) {
+        printf("%.3lf\n", (i<3)?fl_d.p[i]:(fl_d.p[i]*rad2deg));
+    }
+    printf("Op op op Opa\n");
 
-
-
+    return 0;
     requested = InvKine(requested, 0);
     for(int i = 0; i < 4; i++) requested.j[i] = 0;
     //     requested.j[0] = PI/2;
