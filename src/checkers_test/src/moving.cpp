@@ -151,11 +151,11 @@ robotState InvKine(const robotState &rb, int way=0) {  // way = {0 - ellbow-up, 
     // yr = yr + d * sin(th_s + th0);
     // th0 = atan2(yr, xr);
 
-    // double d = sqrt(14*14 + 11*11);
-    // double th_s = atan2(11, 14);
-    // xr = xr + d * cos(th_s + th0);
-    // yr = yr + d * sin(th_s + th0);
-    // th0 = atan2(yr, xr);// + 20./sqrt(xr*xr + yr*yr);
+    double d = sqrt(11*11);
+    double th_s = atan2(0, 11);
+    xr = xr + d * cos(th_s + th0);
+    yr = yr + d * sin(th_s + th0);
+    th0 = atan2(yr, xr);// + 20./sqrt(xr*xr + yr*yr);
 
 
     double xm = zr - a0;
@@ -394,19 +394,19 @@ int main(int argc, char** argv) {
     req_inter2.p[2] = 66;
     req_inter2.p[3] = PI;
 
-    robotState zp;
-    zp.j[0] = 2*deg2rad;
-    zp.j[1] = 90*deg2rad;
-    zp.j[2] = 2*deg2rad;
-    zp.j[3] = -2*deg2rad;
-    printf("Opa Gangam Style\n");
-    auto fl_d(ForKine(zp/*InvKine(requested)*/));
-    for(int i = 0; i < 6; i++) {
-        printf("%.3lf\n", (i<3)?fl_d.p[i]:(fl_d.p[i]*rad2deg));
-    }
-    printf("Op op op Opa\n");
+    // robotState zp;
+    // zp.j[0] = 2*deg2rad;
+    // zp.j[1] = 90*deg2rad;
+    // zp.j[2] = 2*deg2rad;
+    // zp.j[3] = -2*deg2rad;
+    // printf("Opa Gangam Style\n");
+    // auto fl_d(ForKine(zp/*InvKine(requested)*/));
+    // for(int i = 0; i < 6; i++) {
+    //     printf("%.3lf\n", (i<3)?fl_d.p[i]:(fl_d.p[i]*rad2deg));
+    // }
+    // printf("Op op op Opa\n");
 
-    return 0;
+    // return 0;
     requested = InvKine(requested, 0);
     for(int i = 0; i < 4; i++) requested.j[i] = 0;
     //     requested.j[0] = PI/2;
