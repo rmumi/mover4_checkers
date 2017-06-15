@@ -1,4 +1,4 @@
-from __future__ import print_function
+# from __future__ import print_function
 import rospy
 from std_msgs.msg import String
 import copy
@@ -7,8 +7,8 @@ import sys
 from time import sleep
 
 
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
+# def eprint(*args, **kwargs):
+#     print(*args, file=sys.stderr, **kwargs)
 
 pieces = {
     'white_b': 0,
@@ -360,7 +360,6 @@ if __name__ == "__main__":
             print ("Move:", _)
             print (convert_to_full_board(current_board))
 
-        eprint("DONE")
 
     rospy.init_node("checkers_ai")
 

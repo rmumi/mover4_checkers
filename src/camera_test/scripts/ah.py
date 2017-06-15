@@ -26,6 +26,14 @@ __version__ = '0.0.2'
 PI = 3.14159265359
 
 
+# takes 1 indexed, returns 1 indexed figure between the two
+def gif(z, jump):
+    if ((z-1)/4) % 2 == 0:
+        return int((z + jump + 1) / 2)
+    else:
+        return int((z + jump - 1) / 2)
+
+
 class GUI(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(GUI, self).__init__(parent)
@@ -64,6 +72,7 @@ class GUI(QMainWindow, Ui_MainWindow):
         self.count = 0
         self.moving = 0  # if the robot is moving
         self.white = 1  # if the board is turned to the robot like he is white
+        self.to_play_white = False
         self.flags = {
             "gripper_open": 1,
             "gripper_close": 2,
@@ -136,11 +145,13 @@ class GUI(QMainWindow, Ui_MainWindow):
         # todo move to init pos
 
     def startWhiteButton_callback(self):
-        self.ai_sig_pub.publish("AI_GO_WHITE")
+        self.to_play_white = True
+        self.camera_sig_pub.publish("CAMERA_GO")
         # todo start counter
 
     def startBlackButton_callback(self):
-        self.ai_sig_pub.publish("AI_GO_BLACK")
+        self.to_play_white = False
+        self.camera_sig_pub.publish("CAMERA_GO")
         # todo start counter
 
     def stopButton_callback(self):
@@ -163,8 +174,10 @@ class GUI(QMainWindow, Ui_MainWindow):
         if msg.data == "CAMERA_GO":
             pass
         elif msg.data == "CAMERA_FIN":
-            # todo approve ai call
-            pass
+            if self.to_play_white:
+                self.ai_sig_pub.publish("AI_GO_WHITE")
+            else:
+                self.ai_sig_pub.publish("AI_GO_BLACK")
         else:
             print "Ilegal CAMERA signal"
 
@@ -275,7 +288,7 @@ class GUI(QMainWindow, Ui_MainWindow):
                 p.data = [b_xy[0], b_xy[1], self.figure_h(b), PI, self.flags['to_point'], 0, 3]
                 all_actions.append(copy.copy(p))
                 # add grave action
-                x = int((a + b) / 2)  # todo this doesn't work
+                x = gif(a, b)
                 x_xy = self.from_numbering_to_xy(x)
                 p.data = [x_xy[0], x_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 5]
                 grave_actions.append(copy.copy(p))
@@ -336,8 +349,11 @@ class GUI(QMainWindow, Ui_MainWindow):
 
     def robot_state_msg_sub_callback(self, msg):
         alle = ""
-        for x in msg.data:
-            alle = alle + str(x) + "\n"
+        labels_all = ['Q0:\t', 'Q1:\t', 'Q2:\t', 'Q3:\t', 'X:\t', 'Y:\t', 'Z:\t', 'Fi:\t', 'Th:\t', 'Psi:\t']
+        for i in range(4 + 6):
+            if i == 4:
+                alle += '\n'
+            alle = alle + labels_all[i] + ('%.3f' % msg.data[i]) + '\n'
         self.allInfo.setText(alle)
 
     def from_numbering_to_xy(self, num):
@@ -349,7 +365,6 @@ class GUI(QMainWindow, Ui_MainWindow):
 
     def figure_h(self, num):
         return 50 - ((num-1) / 4) * 1.5
-
 
     def gotoXYZButton_callback(self):
         try:
@@ -369,19 +384,19 @@ class GUI(QMainWindow, Ui_MainWindow):
             print("Failed to do gotoXYZ")
 
     def gotoSqButton_callback(self):
-        # try:
-        sq = int(self.sqLine.displayText())
-        if sq < 1 or sq > 32:
-            raise "Not a real square"
-        print sq
-        p = Float64MultiArray()
-        x_xy = self.from_numbering_to_xy(sq)
-        p.data = [x_xy[0], x_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 5]
-        self.robot_action_msg_pub.publish(copy.copy(p))
-        p.data = [x_xy[0], x_xy[1], self.figure_h(sq), PI, self.flags['to_point'], 0, 5]
-        self.robot_action_msg_pub.publish(copy.copy(p))
-        # except:
-        #     print("Failed to do gotoSq")
+        try:
+            sq = int(self.sqLine.displayText())
+            if sq < 1 or sq > 32:
+                raise "Not a real square"
+            print sq
+            p = Float64MultiArray()
+            x_xy = self.from_numbering_to_xy(sq)
+            p.data = [x_xy[0], x_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 5]
+            self.robot_action_msg_pub.publish(copy.copy(p))
+            p.data = [x_xy[0], x_xy[1], self.figure_h(sq), PI, self.flags['to_point'], 0, 5]
+            self.robot_action_msg_pub.publish(copy.copy(p))
+        except:
+            print("Failed to do gotoSq")
 
     def gripperOpenButton_callback(self):
         p = Float64MultiArray()

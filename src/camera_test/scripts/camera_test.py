@@ -47,6 +47,7 @@ cam_connected = False
 cam = None
 pub_board = None
 pub_image = None
+pub_sig = None
 rot = 1  # camera is 0 ( 1 2 ..), 1 (-90 clockwise), 2 (+180), 3 (+90 clockwise)
 
 
@@ -92,19 +93,19 @@ def rectify(h):
     return np.roll(h_new, 2)
 
 
-def find_pieces(img):  # must be square image
+def find_pieces(img):  # must be a square image
     sz = img.shape[0]
     start_x = int((700/16.)/700*sz)
     stop_x = int(670./700*sz)
     start_y = int((700/16.)/700*sz)
     stop_y = int(670./700*sz)
-    move_x = int((700/8.)/700*sz)
-    move_y = int((700/8.)/700*sz)
+    move_x = int((700/8.)/700*sz) + 1
+    move_y = int((700/8.)/700*sz) + 1
     half_len = int(15./700*sz)
     move_mid = 0  # int(10./700*sz)
     aku_limit = 100
-    var_limit_w = 150
-    var_limit_b = 21
+    var_limit_w = 100
+    var_limit_b = 34
     new_board = Board()
     count = 0
 
@@ -119,14 +120,14 @@ def find_pieces(img):  # must be square image
             print var,
             b, g, r = aku
             if aku_gray > aku_limit:
-                if r/b < 1.2 and b/g < 1.2:
+                if r / b < 1.2 and b / g < 1.2:  # maybe do it in hsv
                     new_board.arr[count] = pieces['white_b']
                 elif var < var_limit_w:
                     new_board.arr[count] = pieces['white_k']
                 else:
                     new_board.arr[count] = pieces['white_m']
             else:
-                if r / b > 1.3 and r / g > 1.3:
+                if r / b > 1.3 and r / g > 1.3:  # maybe do it in hsv
                     new_board.arr[count] = pieces['black_b']
                 elif var < var_limit_b:
                     new_board.arr[count] = pieces['black_k']
@@ -144,10 +145,9 @@ def find_pieces(img):  # must be square image
                        pieces_color[new_board.arr[count]], -1)
             count += 1
 
-    cv2.imshow("Figures found", img)
+    # cv2.imshow("Figures found", img)
 
     return (new_board, img)
-        # {'board': new_board, 'image': img}
 
 
 def get_transform(image):
@@ -155,22 +155,21 @@ def get_transform(image):
     DRAW_CONTOURS = True
 
     image = cv2.GaussianBlur(image, (5, 5), 0)
-    cv2.imshow("Image to find board", image)
+    # cv2.imshow("Image to find board", image)
 
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     lower_blue = np.array([89, 65, 29])
     upper_blue = np.array([140, 255, 255])
     filtered_blue = cv2.inRange(hsv_image, lower_blue, upper_blue)
 
-    cv2.imshow("filtered blue 22", hsv_image)
-    cv2.imshow("filtered blue", filtered_blue)
+    # cv2.imshow("filtered blue 22", hsv_image)
+    # cv2.imshow("filtered blue", filtered_blue)
 
     kernel = np.ones((3, 3), np.uint8)
     expanded_fblue = cv2.morphologyEx(filtered_blue, cv2.MORPH_DILATE, kernel, iterations=3)
     expanded_fblue = cv2.morphologyEx(expanded_fblue, cv2.MORPH_ERODE, kernel, iterations=3)
-    # expanded_fblue = cv2.morphologyEx(expanded_fblue, cv2.MORPH_DILATE, kernel, iterations=2)
 
-    cv2.imshow("Cleaned blue", expanded_fblue)
+    # cv2.imshow("Cleaned blue", expanded_fblue)
 
     im2, contours, hierarchy = cv2.findContours(expanded_fblue, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -203,7 +202,7 @@ def get_transform(image):
     approx2 = cv2.approxPolyDP(c2, 0.05 * peri2, True)
     if DRAW_CONTOURS:
         cv2.drawContours(image, [approx2], -1, (0, 0, 255), 4)
-    cv2.imshow("Im32", image)
+    # cv2.imshow("Im32", image)
 
     # cv2.waitKey(0)  # & 0xFF
     #
@@ -216,7 +215,7 @@ def get_transform(image):
     print (approx)
     if len(approx) > 4:
         approx = approx[0:4]
-        print "PROBABLY A BAD PICTURE"
+        print "Probably a bad picture"
 
     print len(approx)
 
@@ -238,16 +237,26 @@ def get_image():
         image = cv2.resize(image, None, fx=0.7, fy=0.7, interpolation=cv2.INTER_CUBIC)
 
     if sys.argv[1] == 'cam':
-        ret, frame = cam.read()
-        cv2.imshow('Camera frame', frame)
+        # clear buffer
+        for _ in range(6):
+            ret, frame = cam.read()
+        # cv2.imshow('Camera frame', frame)
         image = frame
         image = cv2.resize(image, None, fx=0.7, fy=0.7, interpolation=cv2.INTER_CUBIC)
 
     return image
 
 
+def check_ok(x):
+    if x.count('.') != 32:
+        return False
+    return True
+
+
 def spinner():
-    global pub_board, pub_image, do_spin
+    e1 = cv2.getTickCount()
+
+    global pub_board, pub_image, do_spin, pub_sig
     rate = rospy.Rate(20)
 
     image = get_image()
@@ -260,47 +269,52 @@ def spinner():
 
     br = CvBridge()
 
-    while True:
-        image = get_image()
-        warp = cv2.warpPerspective(image, smaller, (700, 700))
+    # do the figure detection
+    image = get_image()
+    warp = cv2.warpPerspective(image, smaller, (700, 700))
 
-        frame_msg = br.cv2_to_imgmsg(warp, "bgr8")
+    frame_msg = br.cv2_to_imgmsg(warp, "bgr8")
 
 
-        # cv2.imshow("Nova", warp)
+    # cv2.imshow("Nova", warp)
 
-        # identify pieces
-        # z = find_pieces(warp)
-        # p = z['board']
-        # img = z['image']
-        p, img = find_pieces(warp)
-        pub_image.publish(br.cv2_to_imgmsg(img, "bgr8"))
-        p.print_board()
+    # identify pieces
+    # z = find_pieces(warp)
+    # p = z['board']
+    # img = z['image']
+    p, img = find_pieces(warp)
+    p.print_board()
+    if check_ok(str(p)):
         pub_board.publish(String(str(p)))
-        print p
-        if not do_spin:
-            break
-        # spin with 20 Hz
-        rate.sleep()
+        pub_image.publish(br.cv2_to_imgmsg(img, "bgr8"))
+        pub_sig.publish(String("CAMERA_FIN"))
+    else:
+        print("There was an error in the camera algorithm")
+        pub_sig.publish(String("CAMERA_GO"))
+
+    e2 = cv2.getTickCount()
+    time_past = (e2 - e1) / cv2.getTickFrequency()
+    print time_past
+    # spin with 20 Hz
+    rate.sleep()
 
 
 def camera_sig_callback(msg):
     if msg.data == "CAMERA_GO":
-        do_spin = True
+        spinner()
     elif msg.data == "CAMERA_STOP":
-        do_spin = False
+        pass
 
 
 def main():
-    global cam, cam_connected, pub_board, pub_image
+    global cam, cam_connected, pub_board, pub_image, pub_sig
 
     rospy.init_node('checkers_camera')
 
     rospy.Subscriber('/checkers/camera_sig', String, camera_sig_callback, queue_size=50)
     pub_board = rospy.Publisher('/checkers/board_msg', String, queue_size=50)
     pub_image = rospy.Publisher('/checkers/image_msg', Image, queue_size=50)
-
-    e1 = cv2.getTickCount()
+    pub_sig = rospy.Publisher('/checkers/camera_sig', String, queue_size=50)
 
     if sys.argv[1] == 'cam':
         cam_connected = True
@@ -312,20 +326,22 @@ def main():
 
     # t = threading.Thread(target=spinner)
     # t.start()
-    spinner()
+    # spinner()
 
     # check time elapsed
-    e2 = cv2.getTickCount()
-    time_past = (e2 - e1) / cv2.getTickFrequency()
-    print time_past
+
+
 
     # wait for key
-    cv2.waitKey(0)  # & 0xFF
+    # cv2.waitKey(0)  # & 0xFF
+    rospy.spin()
+
+    print "Exiting camera node"
 
     if cam_connected:
         cam.release()
 
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
     return
 
 if __name__ == "__main__":

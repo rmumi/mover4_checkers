@@ -155,7 +155,7 @@ robotState InvKine(const robotState &rb, int way=0) {  // way = {0 - ellbow-up, 
     double th_s = atan2(0, 11);
     xr = xr + d * cos(th_s + th0);
     yr = yr + d * sin(th_s + th0);
-    th0 = atan2(yr, xr);// + 20./sqrt(xr*xr + yr*yr);
+    th0 = atan2(yr, xr);
 
 
     double xm = zr - a0;
@@ -328,7 +328,7 @@ void AddActions() {
     // a.j[3] = 23 * deg2rad;
     // actions.emplace_back(4, a, 0, 1);
 
-    actions.emplace_back(16, dummy, 0, 1);
+    // actions.emplace_back(16, dummy, 0, 1);
     // actions.emplace_back(1, dummy, 0, 1);
     // ovo
     // a.j[0] = -20 * deg2rad;
@@ -446,20 +446,31 @@ int main(int argc, char** argv) {
         printf("%lf\t", requested.j[i]);
     printf("\n");
 
+    robotState to_work_with;
+    std_msgs::Float64MultiArray info;
+
     while(ros::ok()) {
 
         ros::spinOnce();  // process callbacks, so it's not late
 
-        sensor_msgs::JointState pub_vel;
+        // publish the current state and position
+        info.data.resize(4 + 6);
+        for(int i = 0; i < 4; i++) info.data[i] = robot_current.j[i] * rad2deg;
+        to_work_with = ForKine(robot_current);
+        for(int i = 0; i < 6; i++) info.data[i+4] = to_work_with.p[i];
+        robot_state_msg_pub.publish(info);
+
+
+        sensor_msgs::JointState pub_pos;
         // std::cout << "Uglovi:\t" << requested.j[0] * rad2deg << "\t" << requested.j[1] * rad2deg << "\t" << requested.j[2] * rad2deg<< "\t" << requested.j[3]* rad2deg << std::endl;
         // std::cout << "Trenut:\t" << robot_current.j[0] * rad2deg << "\t" << robot_current.j[1] * rad2deg << "\t" << robot_current.j[2] * rad2deg<< "\t" << robot_current.j[3] * rad2deg<< std::endl;
-        pub_vel.header.stamp = ros::Time::now();
-        pub_vel.position.resize(4);
-        pub_vel.name.resize(4);
+        pub_pos.header.stamp = ros::Time::now();
+        pub_pos.position.resize(4);
+        pub_pos.name.resize(4);
         if(current_trajectory.IsFinished()) NextTrajectory();
         auto q = current_trajectory.GetPos(robot_current);
-        for(int i = 0; i < 4; i++) pub_vel.position[i] = q[i];
-        cpr_pos_pub.publish(pub_vel);
+        for(int i = 0; i < 4; i++) pub_pos.position[i] = q[i];
+        cpr_pos_pub.publish(pub_pos);
 
 
         loop_rate.sleep();
