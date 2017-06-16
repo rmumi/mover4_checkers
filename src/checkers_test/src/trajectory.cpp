@@ -132,9 +132,9 @@ vector<double> Trajectory::GetPos(const robotState &robot_current, int tick) {
         ret[i] = 0;
         for(int j = 0; j < num_coef; j++, pt *= t)
             ret[i] += coef[i][j] * pt;  // get trajectory angle
-        if(t >= 0.999 && (1./update_f * tick)/duration < 1.2) {
-            printf("Ugao #%d razlika: curr: %lf new: %lf diff: %lf%%\n", i, robot_current.j[i] * rad2deg, ret[i] * rad2deg, (ret[i] - robot_current.j[i])*rad2deg);
-        }
+        // if(t >= 0.999 && (1./update_f * tick)/duration < 1.2) {
+        //     printf("Ugao #%d razlika: curr: %lf new: %lf diff: %lf%%\n", i, robot_current.j[i] * rad2deg, ret[i] * rad2deg, (ret[i] - robot_current.j[i])*rad2deg);
+        // }
     }
     return ret;
 }

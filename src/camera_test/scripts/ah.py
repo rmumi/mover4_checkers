@@ -85,16 +85,16 @@ class GUI(QMainWindow, Ui_MainWindow):
         # self.wait_p2mid = 3
         # self.wait_mid2p = 3  # how long
         self.init_pos = (0, 300, 150)  # initial position after every move
-        self.grave_pos = (30, 300, 150)  # position to drop dead men
+        self.grave_pos = (30, 300, 130)  # position to drop dead men
         # self.figure_h = 50  # just about the figure's height
         self.above_fig_h = 70  # high above figure
         self.above_fig_mh = 80  # medium high above figure
         self.above_fig_vh = 100  # very high above figure
-        self.time_scale = 0.9  # scale speed, lower than 1 is faster
+        self.time_scale = 0.7  # scale speed, lower than 1 is faster
 
         # self.board_h = 50.
         # self.board_w = 195.
-        self.board_x_dr = 126+208.
+        self.board_x_dr = 126+209.
         self.board_y_dr = 104.
         self.board_x_ul = 126.
         self.board_y_ul = -104.
@@ -107,6 +107,46 @@ class GUI(QMainWindow, Ui_MainWindow):
                          for y, x in np.ndindex((8, 8))]
         print self.board_xy
 
+        self.correction = [
+            (3, 4),  # 1
+            (0, -1),  # 2
+            (2, -2),  # 3
+            (1, -2),  # 4
+            (0, 4),  # 5
+            (-3, 3),  # 6
+            (-3, 4),  # 7
+            (0, 4),  # 8
+            (-3, -3),  # 9
+            (-3, -1),  # 10
+            (0, -3),  # 11
+            (0, -3),  # 12
+            (-4, 2),  # 13
+            (-5, 2),  # 14
+            (-7, 4),  # 15
+            (0, 4),  # 16
+            (-5, 0),  # 17
+            (0, 0),  # 18
+            (0, 0),  # 19
+            (-5, 4),  # 20
+            (-5, 0),  # 21
+            (-5, 0),  # 22
+            (-5, -5),  # 23
+            (-5, -2),  # 24
+            (-5, -4),  # 25
+            (-5, -4),  # 26
+            (-5, 0),  # 27
+            (-5, 0),  # 28
+            (-10, 0),  # 29
+            (-10, -5),  # 30
+            (-10, 0),  # 31
+            (-10, 0),  # 32
+        ]
+
+        for i in range(1, 33):
+            self.board_xy[self.from_nubmering_to_index(i)] = (self.board_xy[self.from_nubmering_to_index(i)][0] + self.correction[i - 1][0],
+                                self.board_xy[self.from_nubmering_to_index(i)][1] + self.correction[i - 1][1])
+
+        print self.board_xy
 
         # print self.from_numbering_to_xy(1), self.from_numbering_to_xy(5)
         # self.moves_msg_sub_callback(String("1x10;10x19"))
@@ -230,7 +270,7 @@ class GUI(QMainWindow, Ui_MainWindow):
             # go to figure, from init pos
             p.data = [a_xy[0], a_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 7]  # could be mid_point
             all_actions.append(copy.copy(p))
-            p.data = [a_xy[0], a_xy[1], self.figure_h(a), PI, self.flags['to_point'], 0, 5]
+            p.data = [a_xy[0], a_xy[1], self.figure_h(a), PI, self.flags['to_point'], 0, 3]
             all_actions.append(copy.copy(p))
             # close gripper
             p.data = [0, 0, 0, 0, self.flags['gripper_close'], 0, 0]
@@ -248,7 +288,7 @@ class GUI(QMainWindow, Ui_MainWindow):
             p.data = [0, 0, 0, 0, self.flags['wait'], 0, 1]
             all_actions.append(copy.copy(p))
             # back to init pos
-            p.data = [b_xy[0], b_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 5]
+            p.data = [b_xy[0], b_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 3]
             all_actions.append(copy.copy(p))
             p.data = [self.init_pos[0], self.init_pos[1], self.init_pos[2], PI, self.flags['to_point'], 0, 7]
             all_actions.append(copy.copy(p))
@@ -269,7 +309,7 @@ class GUI(QMainWindow, Ui_MainWindow):
             # go to figure, from init pos
             p.data = [a_xy[0], a_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 7]  # could be mid_point
             all_actions.append(copy.copy(p))
-            p.data = [a_xy[0], a_xy[1], self.figure_h(a), PI, self.flags['to_point'], 0, 5]
+            p.data = [a_xy[0], a_xy[1], self.figure_h(a), PI, self.flags['to_point'], 0, 3]
             all_actions.append(copy.copy(p))
             # close gripper
             p.data = [0, 0, 0, 0, self.flags['gripper_close'], 0, 0]
@@ -292,7 +332,7 @@ class GUI(QMainWindow, Ui_MainWindow):
                 x_xy = self.from_numbering_to_xy(x)
                 p.data = [x_xy[0], x_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 5]
                 grave_actions.append(copy.copy(p))
-                p.data = [x_xy[0], x_xy[1], self.figure_h(x), PI, self.flags['to_point'], 0, 5]
+                p.data = [x_xy[0], x_xy[1], self.figure_h(x), PI, self.flags['to_point'], 0, 3]
                 grave_actions.append(copy.copy(p))
                 # close gripper
                 p.data = [0, 0, 0, 0, self.flags['gripper_close'], 0, 0]
@@ -300,7 +340,7 @@ class GUI(QMainWindow, Ui_MainWindow):
                 p.data = [0, 0, 0, 0, self.flags['wait'], 0, 1]
                 grave_actions.append(copy.copy(p))
                 # go to grave
-                p.data = [x_xy[0], x_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 5]
+                p.data = [x_xy[0], x_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 3]
                 grave_actions.append(copy.copy(p))
                 p.data = [self.grave_pos[0], self.grave_pos[1], self.grave_pos[2], PI, self.flags['to_point'], 0, 5]
                 grave_actions.append(copy.copy(p))
@@ -363,8 +403,16 @@ class GUI(QMainWindow, Ui_MainWindow):
             return self.board_xy[63 - (num * 2 - (1 if ((num-1) / 4) % 2 == 0 else 2))]
         pass
 
+
+    def from_nubmering_to_index(self, num):
+        if self.white:
+            return num * 2 - (1 if ((num-1) / 4) % 2 == 0 else 2)
+        else:
+            return 63 - (num * 2 - (1 if ((num-1) / 4) % 2 == 0 else 2))
+        pass
+
     def figure_h(self, num):
-        return 50 - ((num-1) / 4) * 1.5
+        return 45 - ((num-1) / 4) * 1.5
 
     def gotoXYZButton_callback(self):
         try:
@@ -393,7 +441,7 @@ class GUI(QMainWindow, Ui_MainWindow):
             x_xy = self.from_numbering_to_xy(sq)
             p.data = [x_xy[0], x_xy[1], self.above_fig_vh, PI, self.flags['to_point'], 0, 5]
             self.robot_action_msg_pub.publish(copy.copy(p))
-            p.data = [x_xy[0], x_xy[1], self.figure_h(sq), PI, self.flags['to_point'], 0, 5]
+            p.data = [x_xy[0], x_xy[1], self.figure_h(sq), PI, self.flags['to_point'], 0, 3]
             self.robot_action_msg_pub.publish(copy.copy(p))
         except:
             print("Failed to do gotoSq")

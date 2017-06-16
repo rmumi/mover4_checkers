@@ -9,11 +9,8 @@ ros::Publisher cpr_commands_pub, robot_state_msg_pub, robot_sig_pub;
 bool has_actions;
 
 void joint_states_callback(const sensor_msgs::JointState &msg) {
-     for(int i = 0; i < 4; i++) {
+     for(int i = 0; i < 4; i++)
          robot_current.j[i] = msg.position[i];
-        //  std::cout << msg.position[i] << "\t";
-     }
-    //  std::cout << std::endl;
 }
 
 void robot_sig_callback(const std_msgs::String &a) {
@@ -79,7 +76,7 @@ void NextTrajectory() {
         actions.pop_front();
     } else if(actions.front().to_point) {
         current_trajectory = Trajectory(robot_current,
-            actions.front()._q, (double)actions.front().wait/update_f);
+            actions.front()._q, static_cast<double>(actions.front().wait)/update_f);
         actions.pop_front();
     } else if(actions.front().mid_point) {
         if(actions.size() > 1) {
@@ -92,8 +89,8 @@ void NextTrajectory() {
             // current_trajectory = Trajectory(robot_current, fin._q, mid._q,
             //                                 (double)fin.wait/update_f);
             current_trajectory = Trajectory(robot_current, fin._q, mid._q,
-                                        (double)(fin.wait+mid.wait)/update_f,
-                                        (double)mid.wait/update_f);
+                                        static_cast<double>(fin.wait+mid.wait)/update_f,
+                                        static_cast<double>(mid.wait)/update_f);
         } else {
             ROS_INFO("TOO SLOW OR FALSE QUEUE!");
             // TODO a false queue could make an inf loop
@@ -123,12 +120,12 @@ robotState ForKine(const robotState &rb) {
                         {0, sin(DH_par[i][2]), cos(DH_par[i][2]), 0},
                         {0, 0, 0, 1}});
     }
-    for(int i = 0; i < 4; i++) {
-        for(int j = 0; j < 4; j++) {
-            printf("%.2lf\t", A[i][j]);
-        }
-        printf("\n");
-    }
+    // for(int i = 0; i < 4; i++) {
+    //     for(int j = 0; j < 4; j++) {
+    //         printf("%.2lf\t", A[i][j]);
+    //     }
+    //     printf("\n");
+    // }
     auto p (A.GetPosVec());
     auto R (A.GetRot());
     robotState z;
@@ -151,8 +148,8 @@ robotState InvKine(const robotState &rb, int way=0) {  // way = {0 - ellbow-up, 
     // yr = yr + d * sin(th_s + th0);
     // th0 = atan2(yr, xr);
 
-    double d = sqrt(11*11);
-    double th_s = atan2(0, 11);
+    double d = sqrt(11*11 + 15*15);
+    double th_s = atan2(11, 15);
     xr = xr + d * cos(th_s + th0);
     yr = yr + d * sin(th_s + th0);
     th0 = atan2(yr, xr);
@@ -180,169 +177,6 @@ robotState InvKine(const robotState &rb, int way=0) {  // way = {0 - ellbow-up, 
         std::cout<<"AAAA\n";
     }
     return ret;
-}
-
-void AddActions() {
-    robotState a, dummy;
-    // actions.emplace_back(1, dummy, 0, 1);
-
-    // a.p[0] = 200;
-    // a.p[1] = 0;// -9.75
-    // a.p[2] = 150;
-    // a.p[3] = PI;
-    // a = InvKine(a);
-    // actions.emplace_back(4, a, 0, 7);
-
-    // a.p[0] = 125;
-    // a.p[1] = -105;// -9.75
-    // a.p[2] = 70;
-    // a.p[3] = PI;
-    // a = InvKine(a);
-    // actions.emplace_back(4, a, 0, 5);
-    // // 125.0, -105.0
-    // // 335.0, 105.0
-
-    // a.p[0] = 125;//335;
-    // a.p[1] = 105;// -9.75
-    // a.p[2] = 70;
-    // a.p[3] = PI;
-    // a = InvKine(a);
-    // actions.emplace_back(4, a, 0, 5);
-    // actions.emplace_back(16, dummy, 0, 2);
-
-    // a.p[0] = 350;
-    // a.p[1] = -120;// -9.75
-    // a.p[2] = 50;
-    // a.p[3] = PI;
-    // a = InvKine(a);
-    // actions.emplace_back(4, a, 0, 7);
-
-    // a.j[0] = 0 * deg2rad;
-    // a.j[1] = 0 * deg2rad;
-    // a.j[2] = 0 * deg2rad;
-    // a.j[3] = 0 * deg2rad;
-    // actions.emplace_back(4, a, 0, 10);
-
-    // a.j[0] = -20 * deg2rad;
-    // a.j[1] = 30 * deg2rad;
-    // a.j[2] = 120 * deg2rad;
-    // a.j[3] = 23 * deg2rad;
-    // actions.emplace_back(4, a, 0, 10);
-
-    // a.j[0] = -20 * deg2rad;
-    // a.j[1] = 32 * deg2rad;
-    // a.j[2] = 125 * deg2rad;
-    // a.j[3] = 23 * deg2rad;
-    // actions.emplace_back(4, a, 0, 1);
-
-    // actions.emplace_back(16, dummy, 0, 1);
-    // actions.emplace_back(2, dummy, 0, 1);
-
-    // actions.emplace_back(4, a, 0, 1);
-    // a.j[0] = -20 * deg2rad;
-    // a.j[1] = 30 * deg2rad;
-    // a.j[2] = 120 * deg2rad;
-    // a.j[3] = 23 * deg2rad;
-
-    // a.p[0] = 200;
-    // a.p[1] = 0;// -9.75
-    // a.p[2] = 100;
-    // a.p[3] = PI;
-    // a = InvKine(a);
-    // actions.emplace_back(4, a, 0, 5);
-
-    // a.j[0] = 15 * deg2rad;
-    // a.j[1] = 45 * deg2rad;
-    // a.j[2] = 89 * deg2rad;
-    // a.j[3] = 39 * deg2rad;
-    // actions.emplace_back(4, a, 0, 5);
-
-    // a.j[0] = 15 * deg2rad;
-    // a.j[1] = 47 * deg2rad;
-    // a.j[2] = 93 * deg2rad;
-    // a.j[3] = 39 * deg2rad;
-    // actions.emplace_back(4, a, 0, 1);
-    // actions.emplace_back(16, dummy, 0, 1);
-
-    // a.j[0] = 15 * deg2rad;
-    // a.j[1] = 45 * deg2rad;
-    // a.j[2] = 89 * deg2rad;
-    // a.j[3] = 39 * deg2rad;
-    // actions.emplace_back(4, a, 0, 1);
-
-    // a.p[0] = 200;
-    // a.p[1] = 0;// -9.75
-    // a.p[2] = 100;
-    // a.p[3] = PI;
-    // a = InvKine(a);
-    // actions.emplace_back(4, a, 0, 5);
-
-    // a.j[0] = 27 * deg2rad;
-    // a.j[1] = 29 * deg2rad;
-    // a.j[2] = 124 * deg2rad;
-    // a.j[3] = 24 * deg2rad;
-    // actions.emplace_back(4, a, 0, 5);
-
-    // a.j[0] = 19 * deg2rad;
-    // a.j[1] = 54 * deg2rad;
-    // a.j[2] = 78 * deg2rad;
-    // a.j[3] = 47 * deg2rad;
-    // actions.emplace_back(4, a, 0, 5);
-    // actions.emplace_back(16, dummy, 0, 1);
-
-    // a.j[0] = 12 * deg2rad;
-    // a.j[1] = 57 * deg2rad;
-    // a.j[2] = 71 * deg2rad;
-    // a.j[3] = 48 * deg2rad;
-    // actions.emplace_back(4, a, 0, 5);
-
-    // a.j[0] = 27 * deg2rad;
-    // a.j[1] = 30 * deg2rad;
-    // a.j[2] = 90 * deg2rad;
-    // a.j[3] = 24 * deg2rad;
-    // actions.emplace_back(4, a, 0, 5);
-
-    // ovo
-    // a.j[0] = 27 * deg2rad;
-    // a.j[1] = 20 * deg2rad;
-    // a.j[2] = 100 * deg2rad;
-    // a.j[3] = 90 * deg2rad;
-    // actions.emplace_back(4, a, 0, 5);
-
-    // a.p[0] = 200;
-    // a.p[1] = 0;// -9.75
-    // a.p[2] = 100;
-    // a.p[3] = PI;
-    // a = InvKine(a);
-    // actions.emplace_back(4, a, 0, 5);
-
-    // a.j[0] = -20 * deg2rad;
-    // a.j[1] = 30 * deg2rad;
-    // a.j[2] = 120 * deg2rad;
-    // a.j[3] = 23 * deg2rad;
-    // actions.emplace_back(4, a, 0, 5);
-
-    // a.j[0] = -20 * deg2rad;
-    // a.j[1] = 32 * deg2rad;
-    // a.j[2] = 125 * deg2rad;
-    // a.j[3] = 23 * deg2rad;
-    // actions.emplace_back(4, a, 0, 1);
-
-    // actions.emplace_back(16, dummy, 0, 1);
-    // actions.emplace_back(1, dummy, 0, 1);
-    // ovo
-    // a.j[0] = -20 * deg2rad;
-    // a.j[1] = 30 * deg2rad;
-    // a.j[2] = 120 * deg2rad;
-    // a.j[3] = 23 * deg2rad;
-    // actions.emplace_back(4, a, 0, 5);
-
-    // a.p[0] = 200;
-    // a.p[1] = 0;// -9.75
-    // a.p[2] = 100;
-    // a.p[3] = PI;
-    // a = InvKine(a);
-    // actions.emplace_back(4, a, 0, 5);
 }
 
 int main(int argc, char** argv) {
@@ -419,7 +253,7 @@ int main(int argc, char** argv) {
         printf("%lf\t", robot_current.j[i]);
     printf("\n");
 
-    AddActions();
+    // AddActions();
     // actions.emplace_back(1, dummy, 0, 4);
   //  actions.emplace_back(4, requested, 0, 7);
     // actions.emplace_back(4, requested, 0, 7);
@@ -461,9 +295,10 @@ int main(int argc, char** argv) {
         robot_state_msg_pub.publish(info);
 
 
+
         sensor_msgs::JointState pub_pos;
         // std::cout << "Uglovi:\t" << requested.j[0] * rad2deg << "\t" << requested.j[1] * rad2deg << "\t" << requested.j[2] * rad2deg<< "\t" << requested.j[3]* rad2deg << std::endl;
-        // std::cout << "Trenut:\t" << robot_current.j[0] * rad2deg << "\t" << robot_current.j[1] * rad2deg << "\t" << robot_current.j[2] * rad2deg<< "\t" << robot_current.j[3] * rad2deg<< std::endl;
+        
         pub_pos.header.stamp = ros::Time::now();
         pub_pos.position.resize(4);
         pub_pos.name.resize(4);
@@ -471,7 +306,9 @@ int main(int argc, char** argv) {
         auto q = current_trajectory.GetPos(robot_current);
         for(int i = 0; i < 4; i++) pub_pos.position[i] = q[i];
         cpr_pos_pub.publish(pub_pos);
-
+        std::cout << "Trenut:\t" << robot_current.j[0] * rad2deg << "\t" << robot_current.j[1] * rad2deg << "\t" << robot_current.j[2] * rad2deg<< "\t" << robot_current.j[3] * rad2deg<< std::endl;
+        std::cout << "Zahtje:\t" << pub_pos.position[0] * rad2deg << "\t" << pub_pos.position[0] * rad2deg << "\t" << pub_pos.position[0] * rad2deg<< "\t" << pub_pos.position[0] * rad2deg<< std::endl;
+        std::cout << "Greska:\t" << (pub_pos.position[0] - robot_current.j[0]) * rad2deg << "\t" << (pub_pos.position[1] - robot_current.j[1]) * rad2deg << "\t" << (pub_pos.position[2] - robot_current.j[2]) * rad2deg<< "\t" << (pub_pos.position[3] - robot_current.j[3]) * rad2deg<< std::endl;
 
         loop_rate.sleep();
     }

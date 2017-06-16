@@ -34,7 +34,7 @@ pub_moves = None
 pub_sig = None
 init_board = "bbbbbbbbbbbb________wwwwwwwwwwww"
 last_board = init_board
-current_board = init_board
+current_board = "_________bW__bWw__B___B_________"  # init_board
 
 b_moves = {}
 w_moves = {}
@@ -165,6 +165,9 @@ def next_state(s_state, white=0):
         state, prev_moves = kju.popleft()
         moved = 0
         for i in range(32):
+            if len(prev_moves):
+                if int((prev_moves.split(';')[-2]).split('x')[1]) != i + 1:
+                    continue
             if not white and (state[i] == 'b' or state[i] == 'B'):
                 if i + 1 in b_jumps:
                     for jump in b_jumps[i+1]:
@@ -350,7 +353,7 @@ if __name__ == "__main__":
         print (gif(13, 21))
         print (convert_to_full_board(current_board))
         for _ in range(77):
-            x, y = alpha_beta_search(current_board, white=yes, max_depth_s=3)
+            x, y = alpha_beta_search(current_board, white=yes, max_depth_s=8)
             if y == "WON":
                 print ("YAY!! ", ("WHITE" if yes else "BLACK") + " WON")
                 break
@@ -370,5 +373,9 @@ if __name__ == "__main__":
     rospy.Subscriber("/checkers/ai_sig", String, signal_callback, queue_size=50)
 
     rospy.Subscriber("/checkers/board_msg", String, board_callback, queue_size=50)
+
+    sleep(0.4)
+
+    # pub_sig.publish("AI_GO_BLACK")
 
     rospy.spin()

@@ -49,6 +49,7 @@ pub_board = None
 pub_image = None
 pub_sig = None
 rot = 1  # camera is 0 ( 1 2 ..), 1 (-90 clockwise), 2 (+180), 3 (+90 clockwise)
+entered = 0  # how many times did it try to find figures
 
 
 class Board:
@@ -108,26 +109,31 @@ def find_pieces(img):  # must be a square image
     var_limit_b = 34
     new_board = Board()
     count = 0
-
+    img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    # cv2.imshow("OPA", img_hsv)
     for i in range(start_x, stop_x, move_x):
         for j in range(start_y, stop_y, move_y):
-            z = img[i-half_len:i+half_len,
+            z_hsv = img_hsv[i-half_len:i+half_len,
                     j + (move_mid, 0)[j < stop_y / 2] - half_len:j + (move_mid, 0)[j < stop_y / 2] + half_len]
-            aku = np.mean(z, axis=(0, 1))
-            aku_gray = aku[0] * 0.0722 + aku[1] * 0.7152 + aku[2] * 0.2126
-            var = np.var(z, axis=(0, 1))
+            z_bgr = img[i-half_len:i+half_len,
+                    j + (move_mid, 0)[j < stop_y / 2] - half_len:j + (move_mid, 0)[j < stop_y / 2] + half_len]
+            aku_hsv = np.median(z_hsv, axis=(0, 1))
+            print "THIS AKU: ", i/move_x, " ",  j/move_y, " ", aku_hsv
+            aku_bgr = np.mean(z_bgr, axis=(0, 1))
+            aku_gray = aku_bgr[0] * 0.0722 + aku_bgr[1] * 0.7152 + aku_bgr[2] * 0.2126
+            var = np.var(z_bgr, axis=(0, 1))
             var = sum(var)
             print var,
-            b, g, r = aku
+            h, s, v = aku_hsv
             if aku_gray > aku_limit:
-                if r / b < 1.2 and b / g < 1.2:  # maybe do it in hsv
+                if h > 70 and h < 115:  # maybe do it in hsv
                     new_board.arr[count] = pieces['white_b']
                 elif var < var_limit_w:
                     new_board.arr[count] = pieces['white_k']
                 else:
                     new_board.arr[count] = pieces['white_m']
             else:
-                if r / b > 1.3 and r / g > 1.3:  # maybe do it in hsv
+                if s > 80:  # maybe do it in hsv
                     new_board.arr[count] = pieces['black_b']
                 elif var < var_limit_b:
                     new_board.arr[count] = pieces['black_k']
@@ -256,7 +262,7 @@ def check_ok(x):
 def spinner():
     e1 = cv2.getTickCount()
 
-    global pub_board, pub_image, do_spin, pub_sig
+    global pub_board, pub_image, do_spin, pub_sig, entered
     rate = rospy.Rate(20)
 
     image = get_image()
@@ -286,11 +292,16 @@ def spinner():
     p.print_board()
     if check_ok(str(p)):
         pub_board.publish(String(str(p)))
+        print str(p)
         pub_image.publish(br.cv2_to_imgmsg(img, "bgr8"))
         pub_sig.publish(String("CAMERA_FIN"))
     else:
+        if entered > 30:
+            print "Failed to take the picture"
+
         print("There was an error in the camera algorithm")
         pub_sig.publish(String("CAMERA_GO"))
+        entered += 1
 
     e2 = cv2.getTickCount()
     time_past = (e2 - e1) / cv2.getTickFrequency()
@@ -300,7 +311,9 @@ def spinner():
 
 
 def camera_sig_callback(msg):
+    global entered
     if msg.data == "CAMERA_GO":
+        entered = 0
         spinner()
     elif msg.data == "CAMERA_STOP":
         pass
@@ -326,7 +339,7 @@ def main():
 
     # t = threading.Thread(target=spinner)
     # t.start()
-    # spinner()
+    spinner()
 
     # check time elapsed
 
