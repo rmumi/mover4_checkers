@@ -90,28 +90,23 @@ Trajectory::Trajectory(robotState a, robotState b, double tf) {
     num_coef = 6;
 }
 
-vector<double> Trajectory::GetVel(const robotState &robot_current, int tick) {
-    if(tick == -1)
-        tick = current_iter++;
-    double t = (1./update_f * tick) / duration, pt = 1;
-    vector<double> ret(4, 0.0);
-    if(finished) return ret;
-    if(t > 1) {
-        t = 1;
-        std::cout << "This shouldn't happen twice" << std::endl;
-        finished = 1;
+// third order polynomial, a - start, b - end, tf - duration
+Trajectory::Trajectory(robotState a, robotState b, double tf, bool third) {
+    coef.resize(4, vector<double>(4));
+    double th_s, th_f;
+    for(int i = 0; i < 4; i++) {
+        th_s = a.j[i];
+        th_f = b.j[i];
+        if(fabs(th_s - th_f) < 1e-3) th_s = th_f;
+        coef[i][0] = th_s;
+        coef[i][1] = 0;
+        coef[i][2] = 3 * (th_f - th_s);
+        coef[i][3] = -2 * (th_f - th_s);
     }
-    double alpha = 200;
-    for(int i = 0; i < 4; i++, pt = 1) {
-        ret[i] = 0;
-        for(int j = 0; j < num_coef; j++, pt *= t)
-            ret[i] += coef[i][j] * pt;  // get trajectory angle
-        // make angle to velocity
-        printf("Ugao #%d razlika: curr: %lf new: %lf diff: %lf%%\n", i, robot_current.j[i], ret[i], (ret[i] - robot_current.j[i]) * 100);
-        ret[i] = alpha * (ret[i] - robot_current.j[i]) / (1./update_f);
-
-    }
-    return ret;
+    duration = tf;
+    current_iter = 0;
+    finished = 0;
+    num_coef = 4;
 }
 
 vector<double> Trajectory::GetPos(const robotState &robot_current, int tick) {

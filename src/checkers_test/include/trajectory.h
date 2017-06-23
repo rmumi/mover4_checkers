@@ -10,16 +10,17 @@ namespace ch {
 
 class Trajectory {
 public:
+  // horrible choice of ways to do multiple polynomials, but works
     Trajectory(robotState a, robotState b, double tf);
     Trajectory(robotState a, robotState b, robotState v, double tf);
     Trajectory(robotState a, robotState b, robotState v, double tf, double tv);
+    Trajectory(robotState a, robotState b, double tf,  bool third);
     vector<double> GetPos(const robotState &robot_current, int tick=-1);
     bool IsFinished() const;
     void Finish();
 private:
     Trajectory();
     vector<vector<double> > coef;
-    vector<double> GetVel(const robotState &robot_current, int tick=-1);  //deprecated
     int current_iter;
     int num_coef;
     double duration;  // time is normalised
