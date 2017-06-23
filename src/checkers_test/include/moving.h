@@ -86,9 +86,10 @@ public:
         to_point = flags&4;
         mid_point = flags&8;
         waiting = flags&16;
+        third = flags&32;
         this->wait = wait*update_f;
     }
-    bool gripper_open, gripper_close, to_point, mid_point, waiting;
+    bool gripper_open, gripper_close, to_point, mid_point, waiting, third;
     int wait;
     robotState _q;
 };

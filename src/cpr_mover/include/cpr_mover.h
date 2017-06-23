@@ -89,6 +89,7 @@ private:
 	ros::Subscriber subCommands;
 	std_msgs::String msgErrorStates;
 	ros::Publisher pubErrorStates;			/**< publishes the modules error codes  */
+	ros::Publisher pubMessage;
 
 
 	// void jointVelCallback(const sensor_msgs::JointState::ConstPtr& msg);

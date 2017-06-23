@@ -34,7 +34,7 @@ public:
 	bool GetConnectionStatus();
 
 	void SetJoints(float * j);
-	void GetJoints(float * j);
+	void GetJoints(float * j, unsigned char * tr = NULL);
 	void GetPID();
 	void SetPID(int*, int*, int*);
 	std::string GetErrorMsg();

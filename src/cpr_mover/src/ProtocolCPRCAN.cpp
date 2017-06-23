@@ -142,7 +142,7 @@ void ProtocolCPRCAN::SetJoints(float * j){
 }
 
 //*****************************************************
-void ProtocolCPRCAN::GetJoints(float * j) {
+void ProtocolCPRCAN::GetJoints(float * j, unsigned char * tr) {
 
 	int l = 0;
 	unsigned char data[8];
@@ -150,6 +150,10 @@ void ProtocolCPRCAN::GetJoints(float * j) {
 	for(int i=0; i<nrOfJoints; i++){
 		itf.GetLastMessage( jointIDs[i]+1, &l, data );
 		j[i] =  ((((float)((256*((unsigned int)data[2]))+((unsigned int)data[3]))) - ticsZero[i]) / ticsPerDegree[i]);
+		if(tr != NULL) {
+			for(int z = 0; z < 8; z++)
+				tr[i*8+z] = data[z];
+		}
 	}
 }
 

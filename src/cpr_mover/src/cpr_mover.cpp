@@ -167,6 +167,8 @@ void cpr_mover::init(){
 	msgErrorStates.data = "error 0x04";
 	pubErrorStates = n.advertise<std_msgs::String>("/CPRMoverErrorCodes", 1);
 
+	pubMessage = n.advertise<std_msgs::String>("/checkers_moment", 1);
+
 	subCommands = n.subscribe<std_msgs::String>("/CPRMoverCommands", 1, &cpr_mover::commandsCallback, this);
 }
 
@@ -209,9 +211,18 @@ void cpr_mover::commandsCallback(const std_msgs::String::ConstPtr& msg){
 			// 2 joint overcur ~10000
 			// 3 joint > 15000 ZN
 			// 4 joint 2800 ZN
-			int P[4] = {	2000,	3000,  3000,    1000};
-			int I[4] = {	 500,    500,	750,    750};
-			int D[4] = {	 200,      300,   300,     500};
+			// int P[4] = {	2000,	3000,  3000,    1000};
+			// int I[4] = {	 500,    500,	750,    750};
+			// int D[4] = {	 200,      300,   300,     500};
+			int P[4] = {	2000,	2000,  2000,    500};
+			int I[4] = {	 500,    500,	750,    200};
+			int D[4] = {	 200,      300,   300,     200};
+			// int P[4] = {	700,	700,  700,    300};
+			// int I[4] = {	 0,    0,	0,    0};
+			// int D[4] = {	 0,      0,   0,     0};
+			// int P[4] = {	700,	700,  700,    300};
+			// int I[4] = {	 200,    200,	200,    200};
+			// int D[4] = {	 0,      0,   0,     0};
 			itf.SetPID(P, I, D);
 			itf.GetPID();
 		}
@@ -261,7 +272,7 @@ void cpr_mover::jointPosCallback(const sensor_msgs::JointState::ConstPtr& msg){
 		setPointState.j[i] = tmp * rad2deg;
 	}
 }
-
+char s[5000];
 //***************************************************************
 // Forward the new setpoints to the hardware
 void cpr_mover::CommunicationHW(){
@@ -271,8 +282,23 @@ void cpr_mover::CommunicationHW(){
 
 	static bool first = true;
 	float ju[6];
+	unsigned char *all;
+	all = (unsigned char*)calloc(8*4, 1);
 
-	itf.GetJoints( ju );
+
+	itf.GetJoints( ju, all );
+
+	int u = 0;
+	for(int i = 0; i < 8*4; i++) {
+		if (i != 0 && i%8 == 0) u += sprintf(s+u, ":");
+		u += sprintf(s+u, "%d;", all[i]);
+	}
+	free(all);
+
+	u += sprintf(s+u, "/");
+	for(int i = 0; i < 4; i++)
+		u += sprintf(s+u, "%lf;", ju[i]);
+	
 	for(int i = 0; i < 4; i++) currentState.j[i] = ju[i];
 	if(first) for(int i = 0; i < 4; i++) setPointState.j[0] = currentState.j[0];
 
@@ -280,24 +306,17 @@ void cpr_mover::CommunicationHW(){
 
 	for(int i = 0; i < 4; i++) if(setPointState.j[i] != setPointState.j[i]) {printf("NaN");return;}
 	if(kin.CheckJointMinMax( setPointState.j )) {printf("Over");return;}
-	// setPointState.j[0] = 0;
-	// setPointState.j[1] = 13;
-	// setPointState.j[2] = 153;
-	// setPointState.j[3] = 8;
-	// itf.GetPID();
 
 	for(int i=0; i<nrOfJoints; i++) {
 		itf.SetJoints( setPointState.j );
 	}
-    // static count_br = 0;
-	// if(count_br++ % 32 == 0) {
-	// 	float ju[6];
-	// 	itf.GetJoints( ju );
-	// 	for(int i = 0; i < 4; i++) setPointState.j[i] = ju[i];
-	
-	// }
 
-	// for(int i=0; i<4;i++) setPointState.j[i] = ju[i];
+	u += sprintf(s+u, "/");
+	for(int i = 0; i < 4; i++)
+		u += sprintf(s+u, "%lf;", setPointState.j[i]);
+	s[u] = 0;
+
+	// printf("%s\n", s);
 
 }
 
@@ -319,6 +338,10 @@ void cpr_mover::CommunicationROS(){
 	msgErrorStates.data = itf.GetErrorMsg();
 
 	pubErrorStates.publish(msgErrorStates);
+
+	std_msgs::String msg_a1;
+	msg_a1.data = std::string(s);
+	pubMessage.publish(msg_a1);
 }
 
 }

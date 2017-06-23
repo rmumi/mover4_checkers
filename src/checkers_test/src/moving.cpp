@@ -13,6 +13,118 @@ void joint_states_callback(const sensor_msgs::JointState &msg) {
          robot_current.j[i] = msg.position[i];
 }
 
+// TODO check if the position is reachable
+robotState InvKine(const robotState &rb, int way=0) {  // way = {0 - ellbow-up, 1 - ellbow-down, 2 - turned ellbow-down, 3 - turned ellbow-up}
+    double phi = rb.p[3];
+    double xr = rb.p[0], yr = rb.p[1], zr = rb.p[2];
+    double th0 = atan2(yr, xr);
+    // compensate the gripper offsets, suppose the angle is the almost the same
+    // double d = sqrt(15*15 + 12*12);
+    // double th_s = atan2(15, 12);
+    // xr = xr + d * cos(th_s + th0);
+    // yr = yr + d * sin(th_s + th0);
+    // th0 = atan2(yr, xr);
+
+    // double d = sqrt(11*11 + 15*15);
+    // double th_s = atan2(11, 15);
+    // xr = xr + d * cos(th_s + th0);
+    // yr = yr + d * sin(th_s + th0);
+    // th0 = atan2(yr, xr);
+
+
+    double xm = zr - a0;
+    double ym = ((way&2)?-1:1) * sqrt(xr*xr + yr*yr);
+    if(way&2) {
+        th0 = PI + th0;
+        if(th0 > 2*PI - EPS) th0 -= 2*PI;
+    }
+    double xw = xm - a3 * cos(phi);
+    double yw = ym - a3 * sin(phi);
+    double c2 = (xw*xw + yw*yw - a1*a1 - a2*a2) / (2*a1*a2);
+    double s2 = ((way&1)?-1:1) * sqrt(1 - c2*c2);
+    double th2 = atan2(s2, c2);
+    double th1 = atan2((a1 + a2*c2)*yw - a2*s2*xw,
+                       (a1 + a2*c2)*xw + a2*s2*yw);
+    double th3 = phi - th1 - th2;
+    robotState ret(rb);
+    ret.j[0] = th0; ret.j[1] = th1;
+    ret.j[2] = th2; ret.j[3] = th3;
+    if(ret.j[0] != ret.j[0] || ret.j[1] != ret.j[1] || ret.j[2] != ret.j[2] || ret.j[3] != ret.j[3]) {
+        for(int i = 0; i < 4; i++) printf("%.3lf\t \n", rb.p[i]);
+        std::cout<<"AAAA\n";
+    }
+    return ret;
+}
+
+robotState ForKine(const robotState &rb) {
+    HTMatrix A (vector<vector<double>> (
+        {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}})
+    );
+    double th[] = { rb.j[0] + DH_par[0][0],
+                    rb.j[1] + DH_par[1][0],
+                    rb.j[2] + DH_par[2][0],
+                    rb.j[3] + DH_par[3][0]};
+    for(int i = 0; i < 4; i++) {
+        A *= HTMatrix ({{cos(th[i]), -sin(th[i]), 0, 0},
+                        {sin(th[i]), cos(th[i]), 0, 0},
+                        {0, 0, 1, DH_par[i][1]},
+                        {0, 0, 0, 1}});
+        A *= HTMatrix ({{1, 0, 0, DH_par[i][3]},
+                        {0, cos(DH_par[i][2]), -sin(DH_par[i][2]), 0},
+                        {0, sin(DH_par[i][2]), cos(DH_par[i][2]), 0},
+                        {0, 0, 0, 1}});
+    }
+    // for(int i = 0; i < 4; i++) {
+    //     for(int j = 0; j < 4; j++) {
+    //         printf("%.2lf\t", A[i][j]);
+    //     }
+    //     printf("\n");
+    // }
+    auto p (A.GetPosVec());
+    auto R (A.GetRot());
+    robotState z;
+    for(int i = 0; i < 3; i++) z.p[i] = p[i];
+    z.p[3] = atan2(R[1][2], R[0][2]);
+    z.p[4] = atan2(sqrt(R[0][2]*R[0][2] + R[1][2]*R[1][2]), R[2][2]);
+    z.p[5] = atan2(R[2][1], -R[2][0]);
+    return z;
+}
+
+void AddActions(int num) {
+    robotState st1, st2, st3;
+    st1.p[0] = 300; st1.p[1] = -200; st1.p[2] = 200; st1.p[3] = PI;
+    st2.p[0] = 300; st2.p[1] = 0; st2.p[2] = 150; st2.p[3] = 2;
+    st3.p[0] = 300; st3.p[1] = 300; st3.p[2] = 300; st3.p[3] = PI/3;
+    st1 = InvKine(st1);
+    st2 = InvKine(st2);
+    st3 = InvKine(st3);
+
+    float time_s = 6;
+
+    switch(num) {
+    case 0:
+        actions.emplace_back(32, st1, 0, time_s);
+        actions.emplace_back(32, st2, 0, time_s);
+        actions.emplace_back(32, st3, 0, time_s);
+        break;
+    case 1:
+        actions.emplace_back(4, st1, 0, time_s);
+        actions.emplace_back(4, st2, 0, time_s);
+        actions.emplace_back(4, st3, 0, time_s);
+        break;
+    case 2:
+        actions.emplace_back(4, st1, 0, time_s);
+        actions.emplace_back(8, st2, 0, time_s);
+        actions.emplace_back(4, st3, 0, time_s);
+        break;
+    case 3:
+        actions.emplace_back(4, st1, 0, time_s);
+        actions.emplace_back(8, st2, 0, time_s-1);
+        actions.emplace_back(4, st3, 0, time_s+1);
+        break;
+    }
+}
+
 void robot_sig_callback(const std_msgs::String &a) {
     if(a.data == "ROBOT_STOP") {
         current_trajectory.Finish();
@@ -33,6 +145,14 @@ void robot_sig_callback(const std_msgs::String &a) {
         std_msgs::String _z;
         _z.data = std::string("Connect");
         cpr_commands_pub.publish(_z);
+    } else if(a.data == "ROBOT_GO0") {
+        AddActions(0);
+    } else if(a.data == "ROBOT_GO1") {
+        AddActions(1);
+    } else if(a.data == "ROBOT_GO2") {
+        AddActions(2);
+    } else if(a.data == "ROBOT_GO3") {
+        AddActions(3);
     }
 }
 
@@ -78,6 +198,10 @@ void NextTrajectory() {
         current_trajectory = Trajectory(robot_current,
             actions.front()._q, static_cast<double>(actions.front().wait)/update_f);
         actions.pop_front();
+    } else if(actions.front().third) {
+        current_trajectory = Trajectory(robot_current,
+            actions.front()._q, static_cast<double>(actions.front().wait)/update_f, true);
+        actions.pop_front();
     } else if(actions.front().mid_point) {
         if(actions.size() > 1) {
             RobotAction mid = actions.front();
@@ -100,83 +224,6 @@ void NextTrajectory() {
         std::cout << "INVALID ACTION";
         actions.pop_front();
     }
-}
-
-robotState ForKine(const robotState &rb) {
-    HTMatrix A (vector<vector<double>> (
-        {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}})
-    );
-    double th[] = { rb.j[0] + DH_par[0][0],
-                    rb.j[1] + DH_par[1][0],
-                    rb.j[2] + DH_par[2][0],
-                    rb.j[3] + DH_par[3][0]};
-    for(int i = 0; i < 4; i++) {
-        A *= HTMatrix ({{cos(th[i]), -sin(th[i]), 0, 0},
-                        {sin(th[i]), cos(th[i]), 0, 0},
-                        {0, 0, 1, DH_par[i][1]},
-                        {0, 0, 0, 1}});
-        A *= HTMatrix ({{1, 0, 0, DH_par[i][3]},
-                        {0, cos(DH_par[i][2]), -sin(DH_par[i][2]), 0},
-                        {0, sin(DH_par[i][2]), cos(DH_par[i][2]), 0},
-                        {0, 0, 0, 1}});
-    }
-    // for(int i = 0; i < 4; i++) {
-    //     for(int j = 0; j < 4; j++) {
-    //         printf("%.2lf\t", A[i][j]);
-    //     }
-    //     printf("\n");
-    // }
-    auto p (A.GetPosVec());
-    auto R (A.GetRot());
-    robotState z;
-    for(int i = 0; i < 3; i++) z.p[i] = p[i];
-    z.p[3] = atan2(R[1][2], R[0][2]);
-    z.p[4] = atan2(sqrt(R[0][2]*R[0][2] + R[1][2]*R[1][2]), R[2][2]);
-    z.p[5] = atan2(R[2][1], -R[2][0]);
-    return z;
-}
-
-// TODO check if the position is reachable
-robotState InvKine(const robotState &rb, int way=0) {  // way = {0 - ellbow-up, 1 - ellbow-down, 2 - turned ellbow-down, 3 - turned ellbow-up}
-    double phi = rb.p[3];
-    double xr = rb.p[0], yr = rb.p[1], zr = rb.p[2];
-    double th0 = atan2(yr, xr);
-    // compensate the gripper offsets, suppose the angle is the almost the same
-    // double d = sqrt(15*15 + 12*12);
-    // double th_s = atan2(15, 12);
-    // xr = xr + d * cos(th_s + th0);
-    // yr = yr + d * sin(th_s + th0);
-    // th0 = atan2(yr, xr);
-
-    double d = sqrt(11*11 + 15*15);
-    double th_s = atan2(11, 15);
-    xr = xr + d * cos(th_s + th0);
-    yr = yr + d * sin(th_s + th0);
-    th0 = atan2(yr, xr);
-
-
-    double xm = zr - a0;
-    double ym = ((way&2)?-1:1) * sqrt(xr*xr + yr*yr);
-    if(way&2) {
-        th0 = PI + th0;
-        if(th0 > 2*PI - EPS) th0 -= 2*PI;
-    }
-    double xw = xm - a3 * cos(phi);
-    double yw = ym - a3 * sin(phi);
-    double c2 = (xw*xw + yw*yw - a1*a1 - a2*a2) / (2*a1*a2);
-    double s2 = ((way&1)?-1:1) * sqrt(1 - c2*c2);
-    double th2 = atan2(s2, c2);
-    double th1 = atan2((a1 + a2*c2)*yw - a2*s2*xw,
-                       (a1 + a2*c2)*xw + a2*s2*yw);
-    double th3 = phi - th1 - th2;
-    robotState ret(rb);
-    ret.j[0] = th0; ret.j[1] = th1;
-    ret.j[2] = th2; ret.j[3] = th3;
-    if(ret.j[0] != ret.j[0] || ret.j[1] != ret.j[1] || ret.j[2] != ret.j[2] || ret.j[3] != ret.j[3]) {
-        for(int i = 0; i < 4; i++) printf("%.3lf\t \n", rb.p[i]);
-        std::cout<<"AAAA\n";
-    }
-    return ret;
 }
 
 int main(int argc, char** argv) {
@@ -213,34 +260,6 @@ int main(int argc, char** argv) {
 
     robotState requested, req_inter, req_inter2, dummy;
 
-    requested.p[0] = 200;
-    requested.p[1] = 100;// -9.75
-    requested.p[2] = 100;
-    requested.p[3] = PI;
-
-    req_inter.p[0] = 120+250;
-    req_inter.p[1] = -60;
-    req_inter.p[2] = 100;
-    req_inter.p[3] = PI;
-
-    req_inter2.p[0] = 360;
-    req_inter2.p[1] = 0;
-    req_inter2.p[2] = 66;
-    req_inter2.p[3] = PI;
-
-    // robotState zp;
-    // zp.j[0] = 2*deg2rad;
-    // zp.j[1] = 90*deg2rad;
-    // zp.j[2] = 2*deg2rad;
-    // zp.j[3] = -2*deg2rad;
-    // printf("Opa Gangam Style\n");
-    // auto fl_d(ForKine(zp/*InvKine(requested)*/));
-    // for(int i = 0; i < 6; i++) {
-    //     printf("%.3lf\n", (i<3)?fl_d.p[i]:(fl_d.p[i]*rad2deg));
-    // }
-    // printf("Op op op Opa\n");
-
-    // return 0;
     requested = InvKine(requested, 0);
     for(int i = 0; i < 4; i++) requested.j[i] = 0;
     //     requested.j[0] = PI/2;
@@ -253,7 +272,8 @@ int main(int argc, char** argv) {
         printf("%lf\t", robot_current.j[i]);
     printf("\n");
 
-    // AddActions();
+     // AddActions(3);
+
     // actions.emplace_back(1, dummy, 0, 4);
   //  actions.emplace_back(4, requested, 0, 7);
     // actions.emplace_back(4, requested, 0, 7);
@@ -266,14 +286,8 @@ int main(int argc, char** argv) {
 //    // actions.emplace_back(1, dummy, 0, 4);
 //     actions.emplace_back(4, req_inter2, 0, 7);
 
-
-    // Trajectory6 z(robot_current, requested, req_inter, 7);
     current_trajectory = Trajectory(robot_current, robot_current, 5);
     current_trajectory.Finish();
-    // Matrix matr(4);
-    // matr.Transpose();
-    // HTMatrix matr_2(matr);
-    // matr_2.Inverse();
 
     printf("Req:\t");
     for(int i = 0; i < 4; i++)
@@ -307,7 +321,7 @@ int main(int argc, char** argv) {
         for(int i = 0; i < 4; i++) pub_pos.position[i] = q[i];
         cpr_pos_pub.publish(pub_pos);
         std::cout << "Trenut:\t" << robot_current.j[0] * rad2deg << "\t" << robot_current.j[1] * rad2deg << "\t" << robot_current.j[2] * rad2deg<< "\t" << robot_current.j[3] * rad2deg<< std::endl;
-        std::cout << "Zahtje:\t" << pub_pos.position[0] * rad2deg << "\t" << pub_pos.position[0] * rad2deg << "\t" << pub_pos.position[0] * rad2deg<< "\t" << pub_pos.position[0] * rad2deg<< std::endl;
+        std::cout << "Zahtje:\t" << pub_pos.position[0] * rad2deg << "\t" << pub_pos.position[1] * rad2deg << "\t" << pub_pos.position[2] * rad2deg<< "\t" << pub_pos.position[3] * rad2deg<< std::endl;
         std::cout << "Greska:\t" << (pub_pos.position[0] - robot_current.j[0]) * rad2deg << "\t" << (pub_pos.position[1] - robot_current.j[1]) * rad2deg << "\t" << (pub_pos.position[2] - robot_current.j[2]) * rad2deg<< "\t" << (pub_pos.position[3] - robot_current.j[3]) * rad2deg<< std::endl;
 
         loop_rate.sleep();
