@@ -110,7 +110,7 @@ def find_pieces(img):  # must be a square image
     new_board = Board()
     count = 0
     img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    # cv2.imshow("OPA", img_hsv)
+    cv2.imshow("OPA", img_hsv)
     for i in range(start_x, stop_x, move_x):
         for j in range(start_y, stop_y, move_y):
             z_hsv = img_hsv[i-half_len:i+half_len,
@@ -124,16 +124,17 @@ def find_pieces(img):  # must be a square image
             var = np.var(z_bgr, axis=(0, 1))
             var = sum(var)
             print var,
+            print "HSV AKU:", aku_hsv
             h, s, v = aku_hsv
             if aku_gray > aku_limit:
-                if h > 70 and h < 115:  # maybe do it in hsv
+                if s < 40:
                     new_board.arr[count] = pieces['white_b']
                 elif var < var_limit_w:
                     new_board.arr[count] = pieces['white_k']
                 else:
                     new_board.arr[count] = pieces['white_m']
             else:
-                if s > 80:  # maybe do it in hsv
+                if v > 50:
                     new_board.arr[count] = pieces['black_b']
                 elif var < var_limit_b:
                     new_board.arr[count] = pieces['black_k']
@@ -151,7 +152,7 @@ def find_pieces(img):  # must be a square image
                        pieces_color[new_board.arr[count]], -1)
             count += 1
 
-    # cv2.imshow("Figures found", img)
+    cv2.imshow("Figures found", img)
 
     return (new_board, img)
 
@@ -168,14 +169,15 @@ def get_transform(image):
     upper_blue = np.array([140, 255, 255])
     filtered_blue = cv2.inRange(hsv_image, lower_blue, upper_blue)
 
-    # cv2.imshow("filtered blue 22", hsv_image)
-    # cv2.imshow("filtered blue", filtered_blue)
+    cv2.imshow("filtered blue 22", hsv_image)
+    cv2.imshow("filtered blue", filtered_blue)
 
     kernel = np.ones((3, 3), np.uint8)
     expanded_fblue = cv2.morphologyEx(filtered_blue, cv2.MORPH_DILATE, kernel, iterations=3)
-    expanded_fblue = cv2.morphologyEx(expanded_fblue, cv2.MORPH_ERODE, kernel, iterations=3)
+    expanded_fblue = cv2.morphologyEx(expanded_fblue, cv2.MORPH_ERODE, kernel, iterations=4)
+    expanded_fblue = cv2.morphologyEx(expanded_fblue, cv2.MORPH_DILATE, kernel, iterations=1)
 
-    # cv2.imshow("Cleaned blue", expanded_fblue)
+    cv2.imshow("Cleaned blue", expanded_fblue)
 
     im2, contours, hierarchy = cv2.findContours(expanded_fblue, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -208,7 +210,7 @@ def get_transform(image):
     approx2 = cv2.approxPolyDP(c2, 0.05 * peri2, True)
     if DRAW_CONTOURS:
         cv2.drawContours(image, [approx2], -1, (0, 0, 255), 4)
-    # cv2.imshow("Im32", image)
+    cv2.imshow("Im32", image)
 
     # cv2.waitKey(0)  # & 0xFF
     #
@@ -231,6 +233,49 @@ def get_transform(image):
     retval = cv2.getPerspectiveTransform(approx, h)
     retval2 = cv2.getPerspectiveTransform(approx2, h)
     return (retval, retval2)
+
+
+def get_transform_canny(image):
+    cv2.imshow("Image", image)
+
+    kernel_sharpen_2 = np.array([[1, 1, 1], [1, -7, 1], [1, 1, 1]])
+    output_2 = cv2.bilateralFilter(image, 9, 75, 75)
+
+    edges = cv2.Canny(output_2, 42, 150)
+    cv2.imshow("Im2221", edges)
+    kernel = np.ones((5, 5), np.uint8)
+    # edgesD = cv2.erode(edges, kernel, iterations=1)
+    edgesD = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel, iterations=2)
+    cv2.imshow("Im2242", edgesD)
+
+    cv2.imshow("Im222", edges)
+    cv2.imshow("Im2223", edgesD)
+
+    edges = edgesD
+    im2, contours, hierarchy = cv2.findContours(edges, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+
+    # print(len(contours))
+    # for c in contours:
+    #     peri = cv2.arcLength(c, True)
+    #     approx = cv2.approxPolyDP(c, 0.05 * peri, True)
+    #     cv2.drawContours(image, [approx], -1, (0, 255, 0), 4)
+
+    c = max(contours, key=cv2.contourArea)
+    peri = cv2.arcLength(c, True)
+    approx = cv2.approxPolyDP(c, 0.05 * peri, True)
+    cv2.drawContours(image, [approx], -1, (0, 0, 255), 4)
+    cv2.imshow("Im2", image)
+
+    # go crazy
+    if len(approx) > 4:
+        approx = approx[0:4]
+
+    print len(approx)
+
+    approx = rectify(approx)
+    h = np.array([[0, 0], [699, 0], [699, 699], [0, 699]], np.float32)
+    retval = cv2.getPerspectiveTransform(approx, h)
+    return (retval, retval)
 
 
 def get_image():
@@ -282,7 +327,7 @@ def spinner():
     frame_msg = br.cv2_to_imgmsg(warp, "bgr8")
 
 
-    # cv2.imshow("Nova", warp)
+    cv2.imshow("Nova", warp)
 
     # identify pieces
     # z = find_pieces(warp)
@@ -300,7 +345,7 @@ def spinner():
             print "Failed to take the picture"
 
         print("There was an error in the camera algorithm")
-        pub_sig.publish(String("CAMERA_GO"))
+        # pub_sig.publish(String("CAMERA_GO"))
         entered += 1
 
     e2 = cv2.getTickCount()
@@ -346,15 +391,15 @@ def main():
 
 
     # wait for key
-    # cv2.waitKey(0)  # & 0xFF
-    rospy.spin()
+    cv2.waitKey(0)  # & 0xFF
+    # rospy.spin()
 
     print "Exiting camera node"
 
     if cam_connected:
         cam.release()
 
-    # cv2.destroyAllWindows()
+    cv2.destroyAllWindows()
     return
 
 if __name__ == "__main__":

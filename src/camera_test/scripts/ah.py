@@ -143,8 +143,8 @@ class GUI(QMainWindow, Ui_MainWindow):
         ]
 
         for i in range(1, 33):
-            self.board_xy[self.from_nubmering_to_index(i)] = (self.board_xy[self.from_nubmering_to_index(i)][0] + self.correction[i - 1][0],
-                                self.board_xy[self.from_nubmering_to_index(i)][1] + self.correction[i - 1][1])
+            self.board_xy[self.from_numbering_to_index(i)] = (self.board_xy[self.from_numbering_to_index(i)][0] + self.correction[i - 1][0],
+                                                              self.board_xy[self.from_numbering_to_index(i)][1] + self.correction[i - 1][1])
 
         print self.board_xy
 
@@ -404,7 +404,7 @@ class GUI(QMainWindow, Ui_MainWindow):
         pass
 
 
-    def from_nubmering_to_index(self, num):
+    def from_numbering_to_index(self, num):
         if self.white:
             return num * 2 - (1 if ((num-1) / 4) % 2 == 0 else 2)
         else:
