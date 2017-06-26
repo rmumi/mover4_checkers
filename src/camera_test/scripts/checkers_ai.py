@@ -354,7 +354,7 @@ if __name__ == "__main__":
     global pub_moves, pub_sig, current_board
     calculate_all_moves()
 
-    PLAY_SELF = True
+    PLAY_SELF = False
 
     if PLAY_SELF:
         yes = False
@@ -375,20 +375,20 @@ if __name__ == "__main__":
             yes = not yes
             print ("Move:", _)
             print (convert_to_full_board(current_board))
-    #
-    #
-    # rospy.init_node("checkers_ai")
-    #
-    # pub_moves = rospy.Publisher("/checkers/moves_msg", String, queue_size=50)
-    #
-    # pub_sig = rospy.Publisher("/checkers/ai_sig", String, queue_size=50)
-    #
-    # rospy.Subscriber("/checkers/ai_sig", String, signal_callback, queue_size=50)
-    #
-    # rospy.Subscriber("/checkers/board_msg", String, board_callback, queue_size=50)
-    #
-    # sleep(0.4)
+
+
+    rospy.init_node("checkers_ai")
+
+    pub_moves = rospy.Publisher("/checkers/moves_msg", String, queue_size=50)
+
+    pub_sig = rospy.Publisher("/checkers/ai_sig", String, queue_size=50)
+
+    rospy.Subscriber("/checkers/ai_sig", String, signal_callback, queue_size=50)
+
+    rospy.Subscriber("/checkers/board_msg", String, board_callback, queue_size=50)
+
+    sleep(0.4)
 
     # pub_sig.publish("AI_GO_BLACK")
 
-    # rospy.spin()
+    rospy.spin()

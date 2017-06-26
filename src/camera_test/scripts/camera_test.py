@@ -110,7 +110,7 @@ def find_pieces(img):  # must be a square image
     new_board = Board()
     count = 0
     img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    cv2.imshow("OPA", img_hsv)
+    # cv2.imshow("OPA", img_hsv)
     for i in range(start_x, stop_x, move_x):
         for j in range(start_y, stop_y, move_y):
             z_hsv = img_hsv[i-half_len:i+half_len,
@@ -152,7 +152,7 @@ def find_pieces(img):  # must be a square image
                        pieces_color[new_board.arr[count]], -1)
             count += 1
 
-    cv2.imshow("Figures found", img)
+    # cv2.imshow("Figures found", img)
 
     return (new_board, img)
 
@@ -169,15 +169,15 @@ def get_transform(image):
     upper_blue = np.array([140, 255, 255])
     filtered_blue = cv2.inRange(hsv_image, lower_blue, upper_blue)
 
-    cv2.imshow("filtered blue 22", hsv_image)
-    cv2.imshow("filtered blue", filtered_blue)
+    # cv2.imshow("filtered blue 22", hsv_image)
+    # cv2.imshow("filtered blue", filtered_blue)
 
     kernel = np.ones((3, 3), np.uint8)
     expanded_fblue = cv2.morphologyEx(filtered_blue, cv2.MORPH_DILATE, kernel, iterations=3)
     expanded_fblue = cv2.morphologyEx(expanded_fblue, cv2.MORPH_ERODE, kernel, iterations=4)
     expanded_fblue = cv2.morphologyEx(expanded_fblue, cv2.MORPH_DILATE, kernel, iterations=1)
 
-    cv2.imshow("Cleaned blue", expanded_fblue)
+    # cv2.imshow("Cleaned blue", expanded_fblue)
 
     im2, contours, hierarchy = cv2.findContours(expanded_fblue, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -210,7 +210,7 @@ def get_transform(image):
     approx2 = cv2.approxPolyDP(c2, 0.05 * peri2, True)
     if DRAW_CONTOURS:
         cv2.drawContours(image, [approx2], -1, (0, 0, 255), 4)
-    cv2.imshow("Im32", image)
+    # cv2.imshow("Im32", image)
 
     # cv2.waitKey(0)  # & 0xFF
     #
@@ -236,20 +236,20 @@ def get_transform(image):
 
 
 def get_transform_canny(image):
-    cv2.imshow("Image", image)
+    # cv2.imshow("Image", image)
 
     kernel_sharpen_2 = np.array([[1, 1, 1], [1, -7, 1], [1, 1, 1]])
     output_2 = cv2.bilateralFilter(image, 9, 75, 75)
 
     edges = cv2.Canny(output_2, 42, 150)
-    cv2.imshow("Im2221", edges)
+    # cv2.imshow("Im2221", edges)
     kernel = np.ones((5, 5), np.uint8)
     # edgesD = cv2.erode(edges, kernel, iterations=1)
     edgesD = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel, iterations=2)
-    cv2.imshow("Im2242", edgesD)
+    # cv2.imshow("Im2242", edgesD)
 
-    cv2.imshow("Im222", edges)
-    cv2.imshow("Im2223", edgesD)
+    # cv2.imshow("Im222", edges)
+    # cv2.imshow("Im2223", edgesD)
 
     edges = edgesD
     im2, contours, hierarchy = cv2.findContours(edges, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
@@ -264,7 +264,7 @@ def get_transform_canny(image):
     peri = cv2.arcLength(c, True)
     approx = cv2.approxPolyDP(c, 0.05 * peri, True)
     cv2.drawContours(image, [approx], -1, (0, 0, 255), 4)
-    cv2.imshow("Im2", image)
+    # cv2.imshow("Im2", image)
 
     # go crazy
     if len(approx) > 4:
@@ -286,6 +286,7 @@ def get_image():
     else:
         image = cv2.imread("../examples/Boards/" + sys.argv[1])
         image = cv2.resize(image, None, fx=0.7, fy=0.7, interpolation=cv2.INTER_CUBIC)
+        print "WHY?"
 
     if sys.argv[1] == 'cam':
         # clear buffer
@@ -327,7 +328,7 @@ def spinner():
     frame_msg = br.cv2_to_imgmsg(warp, "bgr8")
 
 
-    cv2.imshow("Nova", warp)
+    # cv2.imshow("Nova", warp)
 
     # identify pieces
     # z = find_pieces(warp)
@@ -336,6 +337,7 @@ def spinner():
     p, img = find_pieces(warp)
     p.print_board()
     if check_ok(str(p)):
+        entered = 0
         pub_board.publish(String(str(p)))
         print str(p)
         pub_image.publish(br.cv2_to_imgmsg(img, "bgr8"))
@@ -345,7 +347,7 @@ def spinner():
             print "Failed to take the picture"
 
         print("There was an error in the camera algorithm")
-        # pub_sig.publish(String("CAMERA_GO"))
+        pub_sig.publish(String("CAMERA_GO"))
         entered += 1
 
     e2 = cv2.getTickCount()
@@ -391,15 +393,15 @@ def main():
 
 
     # wait for key
-    cv2.waitKey(0)  # & 0xFF
-    # rospy.spin()
+    # cv2.waitKey(0)  # & 0xFF
+    rospy.spin()
 
     print "Exiting camera node"
 
     if cam_connected:
         cam.release()
 
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
     return
 
 if __name__ == "__main__":

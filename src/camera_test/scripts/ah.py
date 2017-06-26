@@ -466,7 +466,7 @@ class ImageSignal(QObject):
 
 if __name__ == '__main__':
     # Initialize the node
-    rospy.init_node('checkers_main')
+    rospy.init_node('checkers_main_gui')
     time.sleep(0.2)  # to start node for publishing
 
     # Initialize Qt

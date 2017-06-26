@@ -181,7 +181,7 @@ robotState InvKine(const robotState &rb, int way=0) {  // way = {0 - ellbow-up, 
 
 int main(int argc, char** argv) {
 
-    ros::init(argc, argv, "moving");
+    ros::init(argc, argv, "checkers_trajectory_planning");
 
     ros::NodeHandle n;
 
@@ -213,67 +213,13 @@ int main(int argc, char** argv) {
 
     robotState requested, req_inter, req_inter2, dummy;
 
-    requested.p[0] = 200;
-    requested.p[1] = 100;// -9.75
-    requested.p[2] = 100;
-    requested.p[3] = PI;
-
-    req_inter.p[0] = 120+250;
-    req_inter.p[1] = -60;
-    req_inter.p[2] = 100;
-    req_inter.p[3] = PI;
-
-    req_inter2.p[0] = 360;
-    req_inter2.p[1] = 0;
-    req_inter2.p[2] = 66;
-    req_inter2.p[3] = PI;
-
-    // robotState zp;
-    // zp.j[0] = 2*deg2rad;
-    // zp.j[1] = 90*deg2rad;
-    // zp.j[2] = 2*deg2rad;
-    // zp.j[3] = -2*deg2rad;
-    // printf("Opa Gangam Style\n");
-    // auto fl_d(ForKine(zp/*InvKine(requested)*/));
-    // for(int i = 0; i < 6; i++) {
-    //     printf("%.3lf\n", (i<3)?fl_d.p[i]:(fl_d.p[i]*rad2deg));
-    // }
-    // printf("Op op op Opa\n");
-
-    // return 0;
-    requested = InvKine(requested, 0);
-    for(int i = 0; i < 4; i++) requested.j[i] = 0;
-    //     requested.j[0] = PI/2;
-    req_inter = InvKine(req_inter, 0);
-    req_inter2 = InvKine(req_inter2, 0);
-    std::cout << "Uglovi:" << requested.j[0] << requested.j[1] << requested.j[2] << requested.j[3] << std::endl;
-
     printf("Trn:\t");
     for(int i = 0; i < 4; i++)
         printf("%lf\t", robot_current.j[i]);
     printf("\n");
 
-    // AddActions();
-    // actions.emplace_back(1, dummy, 0, 4);
-  //  actions.emplace_back(4, requested, 0, 7);
-    // actions.emplace_back(4, requested, 0, 7);
-
-//     actions.emplace_back(2, dummy, 0, 4);
-//     actions.emplace_back(16, dummy, 0, 2);
-
-//     actions.emplace_back(4, req_inter, 0, 5);
-//    // actions.emplace_back(16, dummy, 0, 5);
-//    // actions.emplace_back(1, dummy, 0, 4);
-//     actions.emplace_back(4, req_inter2, 0, 7);
-
-
-    // Trajectory6 z(robot_current, requested, req_inter, 7);
     current_trajectory = Trajectory(robot_current, robot_current, 5);
     current_trajectory.Finish();
-    // Matrix matr(4);
-    // matr.Transpose();
-    // HTMatrix matr_2(matr);
-    // matr_2.Inverse();
 
     printf("Req:\t");
     for(int i = 0; i < 4; i++)
@@ -294,11 +240,7 @@ int main(int argc, char** argv) {
         for(int i = 0; i < 6; i++) info.data[i+4] = to_work_with.p[i];
         robot_state_msg_pub.publish(info);
 
-
-
         sensor_msgs::JointState pub_pos;
-        // std::cout << "Uglovi:\t" << requested.j[0] * rad2deg << "\t" << requested.j[1] * rad2deg << "\t" << requested.j[2] * rad2deg<< "\t" << requested.j[3]* rad2deg << std::endl;
-        
         pub_pos.header.stamp = ros::Time::now();
         pub_pos.position.resize(4);
         pub_pos.name.resize(4);
@@ -306,9 +248,9 @@ int main(int argc, char** argv) {
         auto q = current_trajectory.GetPos(robot_current);
         for(int i = 0; i < 4; i++) pub_pos.position[i] = q[i];
         cpr_pos_pub.publish(pub_pos);
-        std::cout << "Trenut:\t" << robot_current.j[0] * rad2deg << "\t" << robot_current.j[1] * rad2deg << "\t" << robot_current.j[2] * rad2deg<< "\t" << robot_current.j[3] * rad2deg<< std::endl;
-        std::cout << "Zahtje:\t" << pub_pos.position[0] * rad2deg << "\t" << pub_pos.position[0] * rad2deg << "\t" << pub_pos.position[0] * rad2deg<< "\t" << pub_pos.position[0] * rad2deg<< std::endl;
-        std::cout << "Greska:\t" << (pub_pos.position[0] - robot_current.j[0]) * rad2deg << "\t" << (pub_pos.position[1] - robot_current.j[1]) * rad2deg << "\t" << (pub_pos.position[2] - robot_current.j[2]) * rad2deg<< "\t" << (pub_pos.position[3] - robot_current.j[3]) * rad2deg<< std::endl;
+        // std::cout << "Trenut:\t" << robot_current.j[0] * rad2deg << "\t" << robot_current.j[1] * rad2deg << "\t" << robot_current.j[2] * rad2deg<< "\t" << robot_current.j[3] * rad2deg<< std::endl;
+        // std::cout << "Zahtje:\t" << pub_pos.position[0] * rad2deg << "\t" << pub_pos.position[0] * rad2deg << "\t" << pub_pos.position[0] * rad2deg<< "\t" << pub_pos.position[0] * rad2deg<< std::endl;
+        // std::cout << "Greska:\t" << (pub_pos.position[0] - robot_current.j[0]) * rad2deg << "\t" << (pub_pos.position[1] - robot_current.j[1]) * rad2deg << "\t" << (pub_pos.position[2] - robot_current.j[2]) * rad2deg<< "\t" << (pub_pos.position[3] - robot_current.j[3]) * rad2deg<< std::endl;
 
         loop_rate.sleep();
     }
