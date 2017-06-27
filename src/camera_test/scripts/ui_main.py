@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Fri Jun  9 16:29:14 2017
+# Created: Tue Jun 27 02:46:58 2017
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PySide import QtCore, QtGui
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(697, 475)
+        MainWindow.resize(703, 478)
         self.centralWidget = QtGui.QWidget(MainWindow)
         self.centralWidget.setObjectName("centralWidget")
         self.formLayoutWidget = QtGui.QWidget(self.centralWidget)
@@ -64,22 +64,22 @@ class Ui_MainWindow(object):
         self.imageGraphics.setGeometry(QtCore.QRect(280, 10, 400, 400))
         self.imageGraphics.setObjectName("imageGraphics")
         self.yLine = QtGui.QLineEdit(self.centralWidget)
-        self.yLine.setGeometry(QtCore.QRect(150, 90, 113, 22))
+        self.yLine.setGeometry(QtCore.QRect(150, 80, 113, 22))
         self.yLine.setObjectName("yLine")
         self.zLine = QtGui.QLineEdit(self.centralWidget)
-        self.zLine.setGeometry(QtCore.QRect(150, 120, 113, 22))
+        self.zLine.setGeometry(QtCore.QRect(150, 110, 113, 22))
         self.zLine.setObjectName("zLine")
         self.xLine = QtGui.QLineEdit(self.centralWidget)
-        self.xLine.setGeometry(QtCore.QRect(150, 60, 113, 22))
+        self.xLine.setGeometry(QtCore.QRect(150, 50, 113, 22))
         self.xLine.setObjectName("xLine")
         self.label = QtGui.QLabel(self.centralWidget)
-        self.label.setGeometry(QtCore.QRect(130, 63, 16, 16))
+        self.label.setGeometry(QtCore.QRect(130, 50, 16, 16))
         self.label.setObjectName("label")
         self.label_2 = QtGui.QLabel(self.centralWidget)
-        self.label_2.setGeometry(QtCore.QRect(130, 94, 16, 16))
+        self.label_2.setGeometry(QtCore.QRect(130, 84, 16, 16))
         self.label_2.setObjectName("label_2")
         self.label_3 = QtGui.QLabel(self.centralWidget)
-        self.label_3.setGeometry(QtCore.QRect(130, 123, 16, 16))
+        self.label_3.setGeometry(QtCore.QRect(130, 113, 16, 16))
         self.label_3.setObjectName("label_3")
         self.sqLine = QtGui.QLineEdit(self.centralWidget)
         self.sqLine.setGeometry(QtCore.QRect(150, 20, 113, 22))
@@ -88,23 +88,23 @@ class Ui_MainWindow(object):
         self.label_4.setGeometry(QtCore.QRect(110, 20, 41, 16))
         self.label_4.setObjectName("label_4")
         self.label_5 = QtGui.QLabel(self.centralWidget)
-        self.label_5.setGeometry(QtCore.QRect(105, 153, 41, 20))
+        self.label_5.setGeometry(QtCore.QRect(105, 143, 41, 20))
         self.label_5.setObjectName("label_5")
         self.fLine = QtGui.QLineEdit(self.centralWidget)
-        self.fLine.setGeometry(QtCore.QRect(150, 150, 113, 22))
+        self.fLine.setGeometry(QtCore.QRect(150, 140, 113, 22))
         self.fLine.setObjectName("fLine")
         self.tLine = QtGui.QLineEdit(self.centralWidget)
-        self.tLine.setGeometry(QtCore.QRect(150, 180, 113, 22))
+        self.tLine.setGeometry(QtCore.QRect(150, 170, 113, 22))
         self.tLine.setObjectName("tLine")
         self.label_6 = QtGui.QLabel(self.centralWidget)
-        self.label_6.setGeometry(QtCore.QRect(110, 180, 41, 20))
+        self.label_6.setGeometry(QtCore.QRect(110, 170, 41, 20))
         self.label_6.setObjectName("label_6")
         self.allInfo = QtGui.QLabel(self.centralWidget)
-        self.allInfo.setGeometry(QtCore.QRect(120, 220, 141, 181))
+        self.allInfo.setGeometry(QtCore.QRect(120, 200, 141, 211))
         self.allInfo.setObjectName("allInfo")
         MainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QtGui.QMenuBar(MainWindow)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 697, 22))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 703, 19))
         self.menuBar.setObjectName("menuBar")
         MainWindow.setMenuBar(self.menuBar)
         self.mainToolBar = QtGui.QToolBar(MainWindow)
@@ -118,7 +118,7 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "MainWindow", None, QtGui.QApplication.UnicodeUTF8))
+        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Checkers Playing Robot", None, QtGui.QApplication.UnicodeUTF8))
         self.stopButton.setText(QtGui.QApplication.translate("MainWindow", "Stop", None, QtGui.QApplication.UnicodeUTF8))
         self.connectButton.setText(QtGui.QApplication.translate("MainWindow", "Connect", None, QtGui.QApplication.UnicodeUTF8))
         self.resetButton.setText(QtGui.QApplication.translate("MainWindow", "Reset", None, QtGui.QApplication.UnicodeUTF8))

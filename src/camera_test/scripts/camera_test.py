@@ -118,13 +118,13 @@ def find_pieces(img):  # must be a square image
             z_bgr = img[i-half_len:i+half_len,
                     j + (move_mid, 0)[j < stop_y / 2] - half_len:j + (move_mid, 0)[j < stop_y / 2] + half_len]
             aku_hsv = np.median(z_hsv, axis=(0, 1))
-            print "THIS AKU: ", i/move_x, " ",  j/move_y, " ", aku_hsv
+            # print "THIS AKU: ", i/move_x, " ",  j/move_y, " ", aku_hsv
             aku_bgr = np.mean(z_bgr, axis=(0, 1))
             aku_gray = aku_bgr[0] * 0.0722 + aku_bgr[1] * 0.7152 + aku_bgr[2] * 0.2126
             var = np.var(z_bgr, axis=(0, 1))
             var = sum(var)
             print var,
-            print "HSV AKU:", aku_hsv
+            # print "HSV AKU:", aku_hsv
             h, s, v = aku_hsv
             if aku_gray > aku_limit:
                 if s < 40:
@@ -326,9 +326,6 @@ def spinner():
     warp = cv2.warpPerspective(image, smaller, (700, 700))
 
     frame_msg = br.cv2_to_imgmsg(warp, "bgr8")
-
-
-    # cv2.imshow("Nova", warp)
 
     # identify pieces
     # z = find_pieces(warp)

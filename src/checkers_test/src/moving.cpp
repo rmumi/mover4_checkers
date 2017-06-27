@@ -221,10 +221,17 @@ int main(int argc, char** argv) {
     current_trajectory = Trajectory(robot_current, robot_current, 5);
     current_trajectory.Finish();
 
-    printf("Req:\t");
-    for(int i = 0; i < 4; i++)
-        printf("%lf\t", requested.j[i]);
-    printf("\n");
+    // for(int i = 0; i < 4; i++) {
+    //   requested.p[0] = 200;
+    //   requested.p[1] = 300;
+    //   requested.p[2] = 100;
+    //   requested.p[3] = PI;
+    //   requested = InvKine(requested, i);
+    //   printf("Req:\t");
+    //   for(int i = 0; i < 4; i++)
+    //       printf("%lf\t", requested.j[i]*rad2deg);
+    //   printf("\n");
+    // }
 
     robotState to_work_with;
     std_msgs::Float64MultiArray info;

@@ -389,10 +389,10 @@ class GUI(QMainWindow, Ui_MainWindow):
 
     def robot_state_msg_sub_callback(self, msg):
         alle = ""
-        labels_all = ['Q0:\t', 'Q1:\t', 'Q2:\t', 'Q3:\t', 'X:\t', 'Y:\t', 'Z:\t', 'Fi:\t', 'Th:\t', 'Psi:\t']
+        labels_all = ['\nQ0:\t', 'Q1:\t', 'Q2:\t', 'Q3:\t', 'X:\t', 'Y:\t', 'Z:\t', 'Fi:\t', 'Th:\t', 'Psi:\t']
         for i in range(4 + 6):
-            if i == 4:
-                alle += '\n'
+            # if i == 4:
+            #     alle += '\n'
             alle = alle + labels_all[i] + ('%.3f' % msg.data[i]) + '\n'
         self.allInfo.setText(alle)
 

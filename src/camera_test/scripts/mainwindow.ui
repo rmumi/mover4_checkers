@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>697</width>
-    <height>475</height>
+    <width>703</width>
+    <height>478</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Checkers Playing Robot</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QWidget" name="formLayoutWidget">
@@ -131,7 +131,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>90</y>
+      <y>80</y>
       <width>113</width>
       <height>22</height>
      </rect>
@@ -141,7 +141,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>120</y>
+      <y>110</y>
       <width>113</width>
       <height>22</height>
      </rect>
@@ -151,7 +151,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>60</y>
+      <y>50</y>
       <width>113</width>
       <height>22</height>
      </rect>
@@ -161,7 +161,7 @@
     <property name="geometry">
      <rect>
       <x>130</x>
-      <y>63</y>
+      <y>50</y>
       <width>16</width>
       <height>16</height>
      </rect>
@@ -174,7 +174,7 @@
     <property name="geometry">
      <rect>
       <x>130</x>
-      <y>94</y>
+      <y>84</y>
       <width>16</width>
       <height>16</height>
      </rect>
@@ -187,7 +187,7 @@
     <property name="geometry">
      <rect>
       <x>130</x>
-      <y>123</y>
+      <y>113</y>
       <width>16</width>
       <height>16</height>
      </rect>
@@ -223,7 +223,7 @@
     <property name="geometry">
      <rect>
       <x>105</x>
-      <y>153</y>
+      <y>143</y>
       <width>41</width>
       <height>20</height>
      </rect>
@@ -236,7 +236,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>150</y>
+      <y>140</y>
       <width>113</width>
       <height>22</height>
      </rect>
@@ -246,7 +246,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>180</y>
+      <y>170</y>
       <width>113</width>
       <height>22</height>
      </rect>
@@ -256,7 +256,7 @@
     <property name="geometry">
      <rect>
       <x>110</x>
-      <y>180</y>
+      <y>170</y>
       <width>41</width>
       <height>20</height>
      </rect>
@@ -269,9 +269,9 @@
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>220</y>
+      <y>200</y>
       <width>141</width>
-      <height>181</height>
+      <height>211</height>
      </rect>
     </property>
     <property name="text">
@@ -284,8 +284,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>697</width>
-     <height>22</height>
+     <width>703</width>
+     <height>19</height>
     </rect>
    </property>
   </widget>
